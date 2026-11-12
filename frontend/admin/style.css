@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Brandname Marketplace Admin Portal - Custom Styles
+   Based on Figma UI Kit: Ecommerce Templates (Community)
+   ========================================================================== */
+
+:root {
+    --primary-50: #F0F7FF;
+    --primary-100: #E0EDFF;
+    --primary-200: #CCE0FF;
+    --primary-500: #0D6EFD;
+    --primary-600: #162DF3;
+    --primary-700: #1C2EB0;
+
+    --neutral-0: #FFFFFF;
+    --neutral-50: #F6F7F9;
+    --neutral-100: #EDF0F2;
+    --neutral-200: #DCE0E5;
+    --neutral-300: #CBD3DB;
+    --neutral-400: #B6C1CA;
+    --neutral-500: #929EAA;
+    --neutral-600: #6F7C8E;
+    --neutral-700: #525E6F;
+    --neutral-800: #323C49;
+    --neutral-900: #14181F;
+
+    --success-50: #E8F8EE;
+    --success-500: #00B517;
+
+    --warning-50: #FFF0DE;
+    --warning-500: #FF9017;
+
+    --danger-50: #FFE5E5;
+    --danger-500: #FA3434;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--neutral-50);
+    color: var(--neutral-900);
+}
+
+/* Active Sidebar Navigation Item */
+.nav-item.active {
+    background-color: var(--primary-50);
+    color: var(--primary-500);
+    font-weight: 600;
+}
+
+.nav-item.active svg {
+    color: var(--primary-500) !important;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Tab & Modal animations */
+.tab-view:not(.hidden) {
+    animation: fadeIn 0.18s ease-out;
+}
+
+#shopDetailModal:not(.hidden),
+#orderDetailModal:not(.hidden),
+#campaignModal:not(.hidden) {
+    animation: fadeIn 0.15s ease-out;
+}
+
+#shopDetailModal:not(.hidden) > div,
+#orderDetailModal:not(.hidden) > div,
+#campaignModal:not(.hidden) > div {
+    animation: scaleUp 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
