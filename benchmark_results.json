@@ -1,0 +1,137 @@
+{
+  "test_queries": [
+    {
+      "id": "TC01",
+      "name": "Lọc theo Danh mục và Khoảng giá (Sắp xếp theo giá tăng dần)",
+      "description": "Tìm tất cả sản phẩm công nghệ (category = 'tech') có giá từ 2.000.000đ đến 15.000.000đ, sắp xếp tăng dần.",
+      "sql": "\n            SELECT id, title, category, brand, price, rating, sold \n            FROM products \n            WHERE category = 'tech' \n              AND price BETWEEN 2000000 AND 15000000 \n            ORDER BY price ASC\n        "
+    },
+    {
+      "id": "TC02",
+      "name": "Lọc theo Thương hiệu và Khoảng giá (Sắp xếp theo giá giảm dần)",
+      "description": "Lọc các sản phẩm thương hiệu Apple (brand = 'Apple') có giá từ 5.000.000đ trở lên, sắp xếp giảm dần.",
+      "sql": "\n            SELECT id, title, category, brand, price, rating, sold \n            FROM products \n            WHERE brand = 'Apple' \n              AND price >= 5000000 \n            ORDER BY price DESC\n        "
+    },
+    {
+      "id": "TC03",
+      "name": "Lọc đa tiêu chí: Danh mục + Thương hiệu + Khoảng giá (Sắp xếp giá)",
+      "description": "Lọc sản phẩm thời trang (category = 'fashion') của Aristino có giá từ 500.000đ đến 3.500.000đ.",
+      "sql": "\n            SELECT id, title, category, brand, price, rating, sold \n            FROM products \n            WHERE category = 'fashion' \n              AND brand = 'Aristino' \n              AND price BETWEEN 500000 AND 3500000 \n            ORDER BY price ASC\n        "
+    },
+    {
+      "id": "TC04",
+      "name": "Tìm kiếm từ khóa kết hợp Bộ lọc Danh mục, Thương hiệu và Giá",
+      "description": "Tìm từ khóa 'Pro' trong sản phẩm công nghệ Apple có giá từ 5.000.000đ đến 40.000.000đ.",
+      "sql": "\n            SELECT id, title, category, brand, price, rating, sold \n            FROM products \n            WHERE title LIKE '%Pro%' \n              AND category = 'tech' \n              AND brand = 'Apple' \n              AND price BETWEEN 5000000 AND 40000000\n        "
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_products_cat_brand_price",
+      "sql": "CREATE INDEX idx_products_cat_brand_price ON products (category, brand, price);",
+      "purpose": "Composite Index tối ưu cho lọc đồng thời Danh mục (equality), Thương hiệu (equality) và Khoảng giá (range scan), loại bỏ filesort."
+    },
+    {
+      "name": "idx_products_brand_price",
+      "sql": "CREATE INDEX idx_products_brand_price ON products (brand, price);",
+      "purpose": "Composite Index tối ưu cho trường hợp người dùng chỉ lọc Thương hiệu và Khoảng giá mà không chọn Danh mục."
+    },
+    {
+      "name": "idx_products_title",
+      "sql": "CREATE INDEX idx_products_title ON products (title(50));",
+      "purpose": "Prefix Index trên cột title hỗ trợ tăng tốc tra cứu từ khóa theo tiền tố và hỗ trợ bộ nhớ đệm index."
+    }
+  ],
+  "before": {
+    "TC01": {
+      "type": "ALL",
+      "possible_keys": null,
+      "key": null,
+      "key_len": null,
+      "rows": 321,
+      "filtered": 1.11,
+      "extra": "Using where; Using filesort",
+      "cost": "40.42",
+      "avg_time_ms": 0.765
+    },
+    "TC02": {
+      "type": "ALL",
+      "possible_keys": null,
+      "key": null,
+      "key_len": null,
+      "rows": 321,
+      "filtered": 3.33,
+      "extra": "Using where; Using filesort",
+      "cost": "47.55",
+      "avg_time_ms": 1.102
+    },
+    "TC03": {
+      "type": "ALL",
+      "possible_keys": null,
+      "key": null,
+      "key_len": null,
+      "rows": 321,
+      "filtered": 0.31,
+      "extra": "Using where; Using filesort",
+      "cost": "37.85",
+      "avg_time_ms": 0.792
+    },
+    "TC04": {
+      "type": "ALL",
+      "possible_keys": null,
+      "key": null,
+      "key_len": null,
+      "rows": 321,
+      "filtered": 0.31,
+      "extra": "Using where",
+      "cost": "36.85",
+      "avg_time_ms": 0.348
+    }
+  },
+  "after": {
+    "TC01": {
+      "type": "ref",
+      "possible_keys": "idx_products_cat_brand_price",
+      "key": "idx_products_cat_brand_price",
+      "key_len": "402",
+      "rows": 69,
+      "filtered": 11.11,
+      "extra": "Using index condition; Using filesort",
+      "cost": "14.92",
+      "avg_time_ms": 0.498
+    },
+    "TC02": {
+      "type": "range",
+      "possible_keys": "idx_products_brand_price",
+      "key": "idx_products_brand_price",
+      "key_len": "411",
+      "rows": 34,
+      "filtered": 100.0,
+      "extra": "Using index condition; Backward index scan",
+      "cost": "15.56",
+      "avg_time_ms": 0.454
+    },
+    "TC03": {
+      "type": "range",
+      "possible_keys": "idx_products_cat_brand_price,idx_products_brand_price",
+      "key": "idx_products_cat_brand_price",
+      "key_len": "813",
+      "rows": 2,
+      "filtered": 100.0,
+      "extra": "Using index condition",
+      "cost": "1.16",
+      "avg_time_ms": 0.302
+    },
+    "TC04": {
+      "type": "range",
+      "possible_keys": "idx_products_cat_brand_price,idx_products_brand_price",
+      "key": "idx_products_cat_brand_price",
+      "key_len": "813",
+      "rows": 8,
+      "filtered": 11.11,
+      "extra": "Using index condition; Using where",
+      "cost": "3.86",
+      "avg_time_ms": 0.331
+    }
+  }
+}
