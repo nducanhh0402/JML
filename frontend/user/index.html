@@ -2954,6 +2954,11 @@
             }
             renderFlashSaleProducts();
             renderRecommendProducts("all");
+            // Tự động làm mới trang chi tiết khi API trả về dữ liệu mới nhất
+            if (window.location.hash.startsWith("#product/")) {
+              const hashId = window.location.hash.replace("#product/", "");
+              if (hashId) openProductDetail(hashId);
+            }
           }
         } catch (err) {
           // Chạy ở chế độ Local nếu chưa bật server FastAPI
@@ -2973,55 +2978,1333 @@
 
       // Dữ liệu mô tả chi tiết & thông số kỹ thuật bổ sung cho trang chi tiết
       const PRODUCT_EXTRA_INFO = {
-        101: {
-          brand: "Sony",
-          origin: "Nhật Bản / Lắp ráp Malaysia",
-          warranty: "12 tháng chính hãng Sony Việt Nam",
-          desc: "Tai nghe chống ồn không dây Sony WH-1000XM5 sở hữu công nghệ dẫn đầu ngành với hai bộ xử lý chuyên dụng V1 và HD QN1, kiểm soát 8 micro để triệt tiêu tiếng ồn một cách triệt để nhất. Thiết kế driver 30mm sử dụng màng vòm sợi carbon siêu cứng cho chất âm tinh tế, truyền tải chuẩn xác từng nốt nhạc Hi-Res Audio Wireless LDAC.",
-          specs: [
-            { key: "Thương hiệu", val: "Sony" },
-            { key: "Dòng sản phẩm", val: "WH-1000XM5 Flagship Series" },
-            { key: "Bộ xử lý chống ồn", val: "Dual Processor V1 & HD Noise Cancelling QN1" },
-            { key: "Thời lượng pin", val: "30 giờ (bật ANC), 40 giờ (tắt ANC)" },
-            { key: "Cổng sạc", val: "USB Type-C hỗ trợ chuẩn Power Delivery" },
-            { key: "Trọng lượng", val: "250g (thiết kế siêu nhẹ đệm da mềm)" },
-            { key: "Tính năng thông minh", val: "Speak-to-Chat, Quick Attention, Auto NC Optimizer" }
-          ],
-          colors: ["Đen Black Edition", "Bạc Silver White", "Xanh Midnight Blue"]
-        },
-        102: {
-          brand: "Tissot 1853",
-          origin: "Thụy Sĩ (Swiss Made)",
-          warranty: "24 tháng quốc tế chính hãng",
-          desc: "Tissot Le Locle Powermatic 80 là dòng đồng hồ cơ tự động kinh điển tôn vinh thị trấn Le Locle - cái nôi đồng hồ Thụy Sĩ. Mặt số được chạm trổ hoa văn Guilloche Clous de Paris tinh xảo, cọc số La Mã mang đậm phong thái quý tộc cổ điển. Trái tim là cỗ máy cơ Powermatic 80 trữ cót lên đến 80 giờ hoạt động bền bỉ.",
-          specs: [
-            { key: "Thương hiệu", val: "Tissot 1853" },
-            { key: "Xuất xứ", val: "Thụy Sĩ (Swiss Made)" },
-            { key: "Bộ máy cơ", val: "Automatic Powermatic 80.111 (23 chân kính)" },
-            { key: "Thời gian trữ cót", val: "80 giờ bền bỉ" },
-            { key: "Đường kính mặt", val: "39.3 mm • Độ dày 9.8 mm" },
-            { key: "Kính bảo vệ", val: "Sapphire nguyên khối chống trầy xước tuyệt đối" },
-            { key: "Chất liệu vỏ & dây", val: "Thép không gỉ 316L mạ công nghệ PVD cao cấp" }
-          ],
-          colors: ["Bạc Mặt Trắng Cổ Điển", "Vàng Demi Hoàng Gia", "Mặt Đen Lịch Lãm"]
-        },
-        201: {
-          brand: "Apple Inc.",
-          origin: "Hoa Kỳ / Lắp ráp chính hãng",
-          warranty: "12 tháng Apple Care toàn quốc",
-          desc: "iPad Pro M4 11-inch hoàn toàn mới là bước nhảy vọt công nghệ với độ mỏng khó tin chỉ 5.1mm, tích hợp vi xử lý Apple M4 thế hệ tiếp theo mang lại hiệu năng đồ họa và trí tuệ nhân tạo vượt trội. Màn hình Ultra Retina XDR sử dụng công nghệ Tandem OLED đột phá với độ sáng tối đa 1600 nits.",
-          specs: [
-            { key: "Thương hiệu", val: "Apple" },
-            { key: "Vi xử lý", val: "Apple M4 Chip (10-core CPU, 10-core GPU, 16-core NPU)" },
-            { key: "Màn hình", val: "11 inch Ultra Retina XDR Tandem OLED 120Hz ProMotion" },
-            { key: "Độ sáng tối đa", val: "1600 nits (HDR content), 1000 nits tiêu chuẩn" },
-            { key: "Bộ nhớ", val: "256GB / 512GB / 1TB / 2TB Ultra Fast SSD" },
-            { key: "Độ mỏng", val: "5.1 mm (Chiếc iPad mỏng nhất lịch sử Apple)" },
-            { key: "Hỗ trợ phụ kiện", val: "Apple Pencil Pro, Magic Keyboard M4" }
-          ],
-          colors: ["Đen Không Gian (Space Black)", "Bạc Ánh Kim (Silver)"]
-        }
-      };
+      "18": {
+            "brand": "Aristino Sartoriale",
+            "origin": "Ý / Gia công thủ công tại Việt Nam",
+            "warranty": "Trọn đời đường may, cúc sừng và phụ kiện",
+            "desc": "Áo Blazer dạ nam cao cấp được may đo thủ công tinh xảo theo phom dáng slimfit chuẩn phong cách quý ông Ý (Milanese Sartorial). Sử dụng chất liệu vải dạ cừu 100% nhập khẩu từ vùng Biella (Ý), giữ ấm hoàn hảo mà vẫn đảm bảo độ rủ tự nhiên, tôn dáng vẻ lịch lãm và quý phái của quý ông hiện đại.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Aristino Sartoriale"
+                  },
+                  {
+                        "key": "Chất liệu chính",
+                        "val": "Dạ cừu thượng hạng 100% Wool Blend"
+                  },
+                  {
+                        "key": "Phom dáng",
+                        "val": "Slimfit phong cách Milanese tôn dáng chuẩn"
+                  },
+                  {
+                        "key": "Lớp lót trong",
+                        "val": "Lụa Bemberg thoáng khí, chống tích điện cao cấp"
+                  },
+                  {
+                        "key": "Khuy áo",
+                        "val": "Cúc sừng trâu tự nhiên chạm khắc vân độc bản"
+                  },
+                  {
+                        "key": "Ve áo",
+                        "val": "Notch Lapel ve xếch may thủ công viền chỉ nổi"
+                  }
+            ],
+            "versionTitle": "Chọn Kích Cỡ (Size):",
+            "versions": [
+                  "Size S (52 - 60kg)",
+                  "Size M (61 - 70kg)",
+                  "Size L (71 - 80kg)",
+                  "Size XL (81 - 90kg)"
+            ],
+            "colors": [
+                  {
+                        "name": "Xanh Caro Ý Lịch Lãm",
+                        "hex": "#1e3a8a",
+                        "image": "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xám Tro Classic",
+                        "hex": "#4b5563",
+                        "image": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Đen Quyền Lực Navy",
+                        "hex": "#111827",
+                        "image": "https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Nâu Đất Thượng Lưu",
+                        "hex": "#78350f",
+                        "image": "https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Toàn thân",
+                  "Cận ve áo",
+                  "Khuy sừng",
+                  "Dáng áo chuẩn Ý"
+            ]
+      },
+      "10": {
+            "brand": "Apple Inc.",
+            "origin": "Designed by Apple in California",
+            "warranty": "12 tháng chính hãng Apple Care toàn quốc",
+            "desc": "AirPods Max định nghĩa lại tai nghe over-ear cao cấp với driver dynamic do chính Apple thiết kế, mang lại âm thanh độ trung thực cao. Mọi chi tiết từ vòm đầu lưới thoáng khí đến đệm tai bọc vải dệt tinh xảo đều được tối ưu cho sự vừa vặn và thoải mái đỉnh cao trong từng nốt nhạc.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Apple"
+                  },
+                  {
+                        "key": "Vi xử lý âm thanh",
+                        "val": "Apple H1 Chip trên mỗi bên chụp tai"
+                  },
+                  {
+                        "key": "Công nghệ chống ồn",
+                        "val": "Active Noise Cancellation (ANC) & Chế độ Xuyên Âm"
+                  },
+                  {
+                        "key": "Âm thanh vòm",
+                        "val": "Spatial Audio theo dõi cử động đầu linh hoạt"
+                  },
+                  {
+                        "key": "Thời lượng pin",
+                        "val": "20 giờ nghe liên tục khi bật ANC"
+                  },
+                  {
+                        "key": "Cổng sạc",
+                        "val": "USB Type-C hỗ trợ sạc nhanh 5 phút dùng 1.5 giờ"
+                  }
+            ],
+            "versionTitle": "Cổng Kết Nối:",
+            "versions": [
+                  "Bản USB-C (Thế hệ mới 2024)",
+                  "Bản Lightning Fullbox"
+            ],
+            "colors": [
+                  {
+                        "name": "Xám Không Gian (Space Gray)",
+                        "hex": "#374151",
+                        "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Ánh Kim (Silver White)",
+                        "hex": "#e2e8f0",
+                        "image": "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xanh Da Trời (Sky Blue)",
+                        "hex": "#38bdf8",
+                        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Hồng Pastel (Pink)",
+                        "hex": "#f472b6",
+                        "image": "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Chính diện",
+                  "Đệm tai êm ái",
+                  "Vòm đầu thoáng khí",
+                  "Trải nghiệm đeo thực tế"
+            ]
+      },
+      "11": {
+            "brand": "Marshall",
+            "origin": "Vương quốc Anh (UK)",
+            "warranty": "12 tháng chính hãng ASH phân phối độc quyền",
+            "desc": "Marshall Emberton II là dòng loa di động mang chất âm mạnh mẽ và sống động biểu tượng của Marshall. Trang bị công nghệ âm thanh đa hướng True Stereophonic 360 độ độc quyền, khả năng chống nước bụi chuẩn IP67 cùng thời lượng pin bền bỉ hơn 30 giờ.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Marshall"
+                  },
+                  {
+                        "key": "Công suất đầu ra",
+                        "val": "2 x 10W Class D Amplifier"
+                  },
+                  {
+                        "key": "Chuẩn chống nước",
+                        "val": "IP67 kháng nước và chống bụi tuyệt đối"
+                  },
+                  {
+                        "key": "Thời lượng pin",
+                        "val": "Hơn 30 giờ phát nhạc liên tục"
+                  },
+                  {
+                        "key": "Kết nối",
+                        "val": "Bluetooth 5.1 đa điểm, Stack Mode ghép đôi"
+                  }
+            ],
+            "versionTitle": "Gói Phụ Kiện Kèm Theo:",
+            "versions": [
+                  "Bản Tiêu Chuẩn (Fullbox)",
+                  "Bản Kèm Túi Da Chống Sốc Marshall"
+            ],
+            "colors": [
+                  {
+                        "name": "Black & Brass (Đen Viền Đồng)",
+                        "hex": "#b45309",
+                        "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Cream (Kem Cổ Điển)",
+                        "hex": "#fef3c7",
+                        "image": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Black & Steel (Đen Thép)",
+                        "hex": "#475569",
+                        "image": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1558089687-f282ffcbc126?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt trước lưới thép",
+                  "Núm đồng điều khiển",
+                  "Cầm tay di động",
+                  "Không gian ngoài trời"
+            ]
+      },
+      "12": {
+            "brand": "Sony",
+            "origin": "Nhật Bản / Lắp ráp Malaysia",
+            "warranty": "12 tháng chính hãng Sony Việt Nam",
+            "desc": "Tai nghe chống ồn không dây Sony WH-1000XM5 sở hữu công nghệ dẫn đầu ngành với hai bộ xử lý chuyên dụng V1 và HD QN1, kiểm soát 8 micro để triệt tiêu tiếng ồn một cách triệt để nhất. Thiết kế driver 30mm sử dụng màng vòm sợi carbon siêu cứng cho chất âm tinh tế, truyền tải chuẩn xác từng nốt nhạc Hi-Res Audio Wireless LDAC.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Sony"
+                  },
+                  {
+                        "key": "Dòng sản phẩm",
+                        "val": "WH-1000XM5 Flagship Series"
+                  },
+                  {
+                        "key": "Bộ xử lý chống ồn",
+                        "val": "Dual Processor V1 & HD Noise Cancelling QN1"
+                  },
+                  {
+                        "key": "Thời lượng pin",
+                        "val": "30 giờ (bật ANC), 40 giờ (tắt ANC)"
+                  },
+                  {
+                        "key": "Cổng sạc",
+                        "val": "USB Type-C hỗ trợ sạc nhanh PD 3 phút nghe 3 giờ"
+                  },
+                  {
+                        "key": "Trọng lượng",
+                        "val": "250g (thiết kế siêu nhẹ đệm da mềm)"
+                  }
+            ],
+            "versionTitle": "Gói Phụ Kiện Kèm:",
+            "versions": [
+                  "Bản Tiêu Chuẩn (Fullbox Kèm Bao Da)",
+                  "Bản Kèm Chân Đế Nhôm CNC Treo Tai Nghe"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Huyền Bí (Black Edition)",
+                        "hex": "#111827",
+                        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Bạch Kim (Silver White)",
+                        "hex": "#cbd5e1",
+                        "image": "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xanh Midnight Blue Độc Quyền",
+                        "hex": "#1e293b",
+                        "image": "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Chính diện earcup",
+                  "Góc nghiêng thanh mảnh",
+                  "Đệm da tổng hợp",
+                  "Gập gọn du lịch"
+            ]
+      },
+      "13": {
+            "brand": "Marshall",
+            "origin": "Vương quốc Anh (UK)",
+            "warranty": "12 tháng chính hãng ASH",
+            "desc": "Loa Bluetooth để bàn huyền thoại Marshall Stanmore III lấp đầy không gian phòng khách bằng trường âm thanh rộng lớn, âm trầm uy lực và dải cao trong trẻo. Thiết kế vintage kinh điển với khung bọc da cao cấp, mặt lưới đan đồng thau và cụm núm vặn analog tinh xảo.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Marshall"
+                  },
+                  {
+                        "key": "Công suất tổng",
+                        "val": "80W (1 loa Woofer 50W + 2 loa Tweeter 15W)"
+                  },
+                  {
+                        "key": "Kết nối",
+                        "val": "Bluetooth 5.2, Cổng 3.5mm AUX, Cổng RCA hoa sen"
+                  },
+                  {
+                        "key": "Kích thước & Trọng lượng",
+                        "val": "350 x 203 x 188 mm • 4.25 kg"
+                  }
+            ],
+            "versionTitle": "Phiên Bản:",
+            "versions": [
+                  "Bản Tiêu Chuẩn Phân Phối Chính Hãng",
+                  "Bản Kèm Dây Tín Hiệu Mạ Vàng Monster RCA"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Nguyên Bản Cổ Điển",
+                        "hex": "#171717",
+                        "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Trắng Kem Quý Phái (Cream)",
+                        "hex": "#fef3c7",
+                        "image": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Nâu Gỗ Vintage Brown",
+                        "hex": "#78350f",
+                        "image": "https://images.unsplash.com/photo-1558089687-f282ffcbc126?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1558089687-f282ffcbc126?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt trước cổ điển",
+                  "Cụm núm xoay Analog",
+                  "Vân da bọc thùng loa",
+                  "Không gian nội thất"
+            ]
+      },
+      "14": {
+            "brand": "Apple",
+            "origin": "Hoa Kỳ / Lắp ráp chính hãng",
+            "warranty": "12 tháng Apple Care toàn quốc",
+            "desc": "Apple Watch Ultra 2 là đỉnh cao đồng hồ thể thao và dã ngoại mạo hiểm, chế tác từ khung Titanium 49mm chuẩn hàng không vũ trụ. Màn hình Retina sáng nhất từ trước tới nay đạt 3000 nits, chip S9 SiP tiên tiến hỗ trợ thao tác Double Tap ma thuật.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Apple"
+                  },
+                  {
+                        "key": "Kích thước & Chất liệu",
+                        "val": "49mm Vỏ Titanium nguyên khối"
+                  },
+                  {
+                        "key": "Độ sáng màn hình",
+                        "val": "3000 nits đỉnh cao dưới nắng gắt"
+                  },
+                  {
+                        "key": "Chống nước & Lặn biển",
+                        "val": "Độ sâu 100m, lặn biển thể thao 40m EN13319"
+                  },
+                  {
+                        "key": "Thời lượng pin",
+                        "val": "36 giờ sử dụng tiêu chuẩn, 72 giờ tiết kiệm pin"
+                  }
+            ],
+            "versionTitle": "Dây Đeo Thể Thao:",
+            "versions": [
+                  "Dây Vải Alpine Loop (Leo núi)",
+                  "Dây Cao Su Ocean Band (Lặn biển)",
+                  "Dây Dệt Trail Loop (Chạy bộ)"
+            ],
+            "colors": [
+                  {
+                        "name": "Titan Tự Nhiên Dây Cam",
+                        "hex": "#ea580c",
+                        "image": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Titan Tự Nhiên Dây Trắng",
+                        "hex": "#f8fafc",
+                        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Titan Đen Dây Xanh Rêu",
+                        "hex": "#15803d",
+                        "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt kính Sapphire 49mm",
+                  "Khung viền Titan & Nút Cam",
+                  "Dây Alpine Loop",
+                  "Đeo trên tay thám hiểm"
+            ]
+      },
+      "15": {
+            "brand": "Tissot 1853",
+            "origin": "Thụy Sĩ (Swiss Made)",
+            "warranty": "24 tháng quốc tế chính hãng",
+            "desc": "Tissot Le Locle Powermatic 80 là dòng đồng hồ cơ tự động kinh điển tôn vinh cái nôi đồng hồ Thụy Sĩ. Mặt số được chạm trổ hoa văn Guilloche Clous de Paris tinh xảo, cọc số La Mã mang đậm phong thái quý tộc cổ điển. Trái tim là cỗ máy cơ Powermatic 80 trữ cót lên đến 80 giờ hoạt động bền bỉ.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Tissot 1853"
+                  },
+                  {
+                        "key": "Xuất xứ",
+                        "val": "Thụy Sĩ (Swiss Made)"
+                  },
+                  {
+                        "key": "Bộ máy cơ",
+                        "val": "Automatic Powermatic 80.111 (23 chân kính)"
+                  },
+                  {
+                        "key": "Thời gian trữ cót",
+                        "val": "80 giờ bền bỉ"
+                  },
+                  {
+                        "key": "Kính bảo vệ",
+                        "val": "Sapphire nguyên khối chống trầy xước tuyệt đối"
+                  }
+            ],
+            "versionTitle": "Chất Liệu Dây:",
+            "versions": [
+                  "Dây Da Bò Dập Vân Cá Sấu",
+                  "Dây Thép Đúc 316L Cao Cấp"
+            ],
+            "colors": [
+                  {
+                        "name": "Mặt Trắng Dây Da Nâu",
+                        "hex": "#78350f",
+                        "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Mặt Đen Dây Thép Bạc",
+                        "hex": "#94a3b8",
+                        "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Vàng Demi Hoàng Gia",
+                        "hex": "#d97706",
+                        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt số Guilloche Clous",
+                  "Cọc số La Mã cổ điển",
+                  "Khóa bướm dây da",
+                  "Nắp lưng cơ lộ máy"
+            ]
+      },
+      "16": {
+            "brand": "Citizen",
+            "origin": "Nhật Bản (Made in Japan)",
+            "warranty": "24 tháng chính hãng toàn quốc",
+            "desc": "Đồng hồ nữ Citizen Eco-Drive ứng dụng công nghệ chuyển hóa năng lượng từ mọi nguồn ánh sáng, bảo vệ môi trường và không cần thay pin. Mặt số khảm xà cừ tự nhiên lấp lánh phản quang 7 sắc cầu vồng, viền ngoài đính kim cương nhân tạo kiêu sa.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Citizen"
+                  },
+                  {
+                        "key": "Bộ máy",
+                        "val": "Eco-Drive chạy bằng năng lượng ánh sáng"
+                  },
+                  {
+                        "key": "Mặt số",
+                        "val": "Khảm xà cừ tự nhiên đính đá cao cấp"
+                  },
+                  {
+                        "key": "Chất liệu vỏ",
+                        "val": "Thép không gỉ 316L mạ Rose Gold PVD"
+                  },
+                  {
+                        "key": "Chống nước",
+                        "val": "50m (Sinh hoạt, đi mưa, tắm)"
+                  }
+            ],
+            "versionTitle": "Phiên Bản Tặng Kèm:",
+            "versions": [
+                  "Hộp Đồng Hồ Tiêu Chuẩn Fullbox",
+                  "Set Quà Tặng Kèm Lắc Tay Bạc S925"
+            ],
+            "colors": [
+                  {
+                        "name": "Mặt Xà Cừ Rose Gold",
+                        "hex": "#f43f5e",
+                        "image": "https://images.unsplash.com/photo-1508615039623-a25605d2b022?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Bạch Kim Thanh Khiết",
+                        "hex": "#cbd5e1",
+                        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Vàng Kim Champagne",
+                        "hex": "#fbbf24",
+                        "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt xà cừ óng ánh",
+                  "Đính đá Swarovski",
+                  "Dây Demi vàng hồng",
+                  "Cổ tay nữ quý phái"
+            ]
+      },
+      "17": {
+            "brand": "Seiko",
+            "origin": "Nhật Bản",
+            "warranty": "24 tháng chính hãng Seiko",
+            "desc": "Đồng hồ thể thao nam Seiko 5 Sports Automatic mang phong cách mạnh mẽ, vành bezel xoay đặc trưng của dòng diver cùng bộ máy cơ in-house 4R36 bền bỉ. Khả năng chống nước 100M thích hợp cho mọi hoạt động bơi lội và thể thao mạo hiểm.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Seiko"
+                  },
+                  {
+                        "key": "Bộ máy",
+                        "val": "Automatic Caliber 4R36 (24 chân kính)"
+                  },
+                  {
+                        "key": "Thời gian trữ cót",
+                        "val": "41 giờ trữ cót"
+                  },
+                  {
+                        "key": "Dạ quang",
+                        "val": "LumiBrite phát sáng rực rỡ trong đêm"
+                  },
+                  {
+                        "key": "Chống nước",
+                        "val": "100M (10 Bar) lặn nông thoải mái"
+                  }
+            ],
+            "versionTitle": "Chất Liệu Dây:",
+            "versions": [
+                  "Dây Kim Loại Thép 316L Đúc Đặc",
+                  "Dây Vải Nato Quân Đội Siêu Bền"
+            ],
+            "colors": [
+                  {
+                        "name": "Vành Pepsi (Xanh Đỏ Thể Thao)",
+                        "hex": "#dc2626",
+                        "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Đen Nhám Blackout",
+                        "hex": "#18181b",
+                        "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xanh Biển Sâu Sunray",
+                        "hex": "#1d4ed8",
+                        "image": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt số xanh viền xoay",
+                  "Kim dạ quang phát sáng",
+                  "Dây thép đúc đặc 316L",
+                  "Khóa bấm thể thao"
+            ]
+      },
+      "19": {
+            "brand": "Atelier Parisien",
+            "origin": "Pháp / Thuộc da cao cấp",
+            "warranty": "Bảo hành da thật 10 năm",
+            "desc": "Ví cầm tay Clutch nam chế tác thủ công từ da bò Epsom nhập khẩu Pháp. Vân da sắc sảo, chống trầy xước và giữ phom hoàn hảo, trang bị khóa mạ Palladium bóng bẩy tôn vinh phong thái doanh nhân hiện đại.",
+            "specs": [
+                  {
+                        "key": "Chất liệu",
+                        "val": "Da bò thật 100% dòng vân Epsom cao cấp"
+                  },
+                  {
+                        "key": "Kỹ thuật",
+                        "val": "May tay thủ công từng đường kim mũi chỉ"
+                  },
+                  {
+                        "key": "Sức chứa",
+                        "val": "12 ngăn thẻ ATM, vừa điện thoại iPhone Pro Max và tiền mặt"
+                  }
+            ],
+            "versionTitle": "Kích Thước:",
+            "versions": [
+                  "Bản Standard (22 x 13 cm)",
+                  "Bản Doanh Nhân Có Quai Cổ Tay"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Epsom Lịch Lãm",
+                        "hex": "#111827",
+                        "image": "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Nâu Bò Cổ Điển (Cognac)",
+                        "hex": "#92400e",
+                        "image": "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xanh Navy Thượng Lưu",
+                        "hex": "#1e3a8a",
+                        "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt trước vân Epsom",
+                  "Khóa kéo mạ bóng",
+                  "Ngăn chứa thẻ đa năng",
+                  "Cầm tay lịch lãm"
+            ]
+      },
+      "20": {
+            "brand": "Chloé & Grace",
+            "origin": "Ý (Made in Italy)",
+            "warranty": "Bảo hành 24 tháng da và phụ kiện mạ vàng",
+            "desc": "Túi xách nữ da thật tone Beige trang nhã, thiết kế hình thang thanh lịch phối phụ kiện khóa xoay mạ vàng 24K sang trọng. Phù hợp cho nàng mang đi làm công sở hay dự tiệc quý phái.",
+            "specs": [
+                  {
+                        "key": "Chất liệu",
+                        "val": "Da bê mịn Calfskin cao cấp nhập khẩu Ý"
+                  },
+                  {
+                        "key": "Phụ kiện khóa",
+                        "val": "Hợp kim mạ vàng 24K chống xỉn màu"
+                  },
+                  {
+                        "key": "Dây đeo",
+                        "val": "Kèm quai xách tay bọc da và dây đeo chéo tháo rời"
+                  }
+            ],
+            "versionTitle": "Kích Thước Túi:",
+            "versions": [
+                  "Size Mini 20cm (Dạo phố)",
+                  "Size Medium 26cm (Công sở)"
+            ],
+            "colors": [
+                  {
+                        "name": "Beige Sữa Quý Phái",
+                        "hex": "#d6d3d1",
+                        "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Đen Noir Khóa Vàng",
+                        "hex": "#18181b",
+                        "image": "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Đỏ Rượu Burgundy",
+                        "hex": "#881337",
+                        "image": "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Dáng túi thanh lịch",
+                  "Quai xách tay bọc da",
+                  "Khóa xoay mạ vàng 18K",
+                  "Phối đồ dạo phố"
+            ]
+      },
+      "21": {
+            "brand": "Ray-Ban",
+            "origin": "Ý (Made in Italy)",
+            "warranty": "24 tháng chính hãng Luxottica",
+            "desc": "Kính mát phi công huyền thoại Ray-Ban Aviator với gọng mạ vàng thanh mảnh, tròng thủy tinh G-15 phân cực Polarized chống lóa 100% và chặn tia UV400 bảo vệ mắt tuyệt đối dưới ánh nắng gay gắt.",
+            "specs": [
+                  {
+                        "key": "Gọng kính",
+                        "val": "Kim loại mạ vàng cao cấp siêu nhẹ"
+                  },
+                  {
+                        "key": "Tròng kính",
+                        "val": "Phân cực Polarized G-15 Crystal Green chống lóa"
+                  },
+                  {
+                        "key": "Chống UV",
+                        "val": "Chuẩn UV400 bảo vệ mắt 100%"
+                  }
+            ],
+            "versionTitle": "Kích Thước Khung:",
+            "versions": [
+                  "Size 58mm (Tiêu chuẩn vừa mặt)",
+                  "Size 62mm (Khuôn mặt to)"
+            ],
+            "colors": [
+                  {
+                        "name": "Khung Vàng Tròng G-15 Xanh Rêu",
+                        "hex": "#15803d",
+                        "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Khung Đen Tròng Đen Khói",
+                        "hex": "#1f2937",
+                        "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Khung Bạc Tròng Tráng Gương Biển",
+                        "hex": "#0284c7",
+                        "image": "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1508296695146-257a814070b4?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Góc chính diện gọng vàng",
+                  "Tròng kính Polarized",
+                  "Càng kính khắc laser",
+                  "Hộp da chính hãng"
+            ]
+      },
+      "22": {
+            "brand": "Apple",
+            "origin": "Hoa Kỳ / Lắp ráp chính hãng",
+            "warranty": "12 tháng Apple Care toàn quốc",
+            "desc": "iPad Pro M4 hoàn toàn mới mang độ mỏng kỷ lục 5.1mm, tích hợp vi xử lý Apple M4 thế hệ tiếp theo mang lại hiệu năng đồ họa và trí tuệ nhân tạo vượt trội. Màn hình Ultra Retina XDR Tandem OLED đột phá với độ sáng tối đa 1600 nits.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Apple"
+                  },
+                  {
+                        "key": "Vi xử lý",
+                        "val": "Apple M4 Chip (10-core CPU, 10-core GPU, 16-core NPU)"
+                  },
+                  {
+                        "key": "Màn hình",
+                        "val": "11 inch Ultra Retina XDR Tandem OLED 120Hz ProMotion"
+                  },
+                  {
+                        "key": "Độ mỏng",
+                        "val": "5.1 mm (Chiếc iPad mỏng nhất lịch sử Apple)"
+                  }
+            ],
+            "versionTitle": "Dung Lượng / Kết Nối:",
+            "versions": [
+                  "256GB WiFi",
+                  "512GB WiFi + 5G Cellular",
+                  "1TB WiFi Max Option"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Không Gian (Space Black)",
+                        "hex": "#18181b",
+                        "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Ánh Kim (Silver)",
+                        "hex": "#e2e8f0",
+                        "image": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Màn hình Tandem OLED",
+                  "Cạnh siêu mỏng 5.1mm",
+                  "Mặt sau camera & LiDAR",
+                  "Gắn Magic Keyboard M4"
+            ]
+      },
+      "23": {
+            "brand": "NuPhy",
+            "origin": "Chính hãng NuPhy Studio",
+            "warranty": "12 tháng đổi mới",
+            "desc": "Bàn phím cơ không dây NuPhy Air75 V2 Low-Profile siêu mỏng với keycap PBT cao cấp, switch Gateron Low-profile thế hệ 2 bôi trơn sẵn mượt mà, hỗ trợ 3 chế độ kết nối (2.4GHz 1000Hz, Bluetooth 5.1, Type-C) tương thích hoàn hảo Mac & Windows.",
+            "specs": [
+                  {
+                        "key": "Layout",
+                        "val": "75% nhỏ gọn (84 phím)"
+                  },
+                  {
+                        "key": "Switch",
+                        "val": "Gateron Low-profile 2.0 bôi trơn sẵn"
+                  },
+                  {
+                        "key": "Polling Rate",
+                        "val": "1000Hz kết nối không dây 2.4GHz"
+                  }
+            ],
+            "versionTitle": "Loại Switch Cơ:",
+            "versions": [
+                  "Linear Cowberry (Gõ êm)",
+                  "Tactile Moss (Khấc nảy rõ)",
+                  "Clicky Daisy (Âm giòn)"
+            ],
+            "colors": [
+                  {
+                        "name": "Lunar Gray (Xám Không Gian)",
+                        "hex": "#475569",
+                        "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Ionic White (Trắng Tinh Khôi)",
+                        "hex": "#f1f5f9",
+                        "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Basalt Black (Đen Thạch Anh)",
+                        "hex": "#0f172a",
+                        "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Layout 75% siêu mỏng",
+                  "Keycap PBT Coast phối màu",
+                  "Switch Low-profile",
+                  "Đèn LED viền RGB"
+            ]
+      },
+      "24": {
+            "brand": "Logitech",
+            "origin": "Thụy Sĩ / Lắp ráp chính hãng",
+            "warranty": "12 tháng chính hãng Logitech VN",
+            "desc": "Chuột công thái học hàng đầu thế giới Logitech MX Master 3S trang bị cảm biến Darkfield 8.000 DPI lướt êm trên mặt kính, con lăn điện từ MagSpeed cuộn 1.000 dòng/giây cùng công nghệ click giảm 90% tiếng ồn.",
+            "specs": [
+                  {
+                        "key": "Cảm biến",
+                        "val": "Darkfield 8000 DPI theo dõi trên mặt kính"
+                  },
+                  {
+                        "key": "Con lăn",
+                        "val": "Thép cơ học MagSpeed cuộn siêu tốc"
+                  },
+                  {
+                        "key": "Thời lượng pin",
+                        "val": "70 ngày một lần sạc đầy qua USB-C"
+                  }
+            ],
+            "versionTitle": "Phiên Bản Tương Thích:",
+            "versions": [
+                  "Bản Đa Năng Universal (Kèm Logi Bolt)",
+                  "Bản Chuyên Biệt Cho macOS"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Graphite Nhám",
+                        "hex": "#1e293b",
+                        "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xám Nhạt Pale Gray",
+                        "hex": "#cbd5e1",
+                        "image": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Form công thái học",
+                  "Con lăn MagSpeed siêu tốc",
+                  "Cụm nút ngón cái tiện lợi",
+                  "Cảm biến 8K Darkfield"
+            ]
+      },
+      "25": {
+            "brand": "Fujifilm",
+            "origin": "Nhật Bản (Made in Japan)",
+            "warranty": "24 tháng chính hãng Fujifilm VN",
+            "desc": "Máy ảnh số mirrorless mang linh hồn máy phim cổ điển Fujifilm X-T5, trang bị cảm biến 40.2MP X-Trans CMOS 5 HR, hệ thống chống rung 5 trục IBIS 7.0 stops và 19 chế độ giả lập màu phim Film Simulation trứ danh.",
+            "specs": [
+                  {
+                        "key": "Cảm biến",
+                        "val": "40.2MP X-Trans CMOS 5 HR"
+                  },
+                  {
+                        "key": "Chống rung",
+                        "val": "IBIS 5 trục 7.0 stops tích hợp"
+                  },
+                  {
+                        "key": "Quay video",
+                        "val": "6.2K 30p 4:2:2 10-bit chất lượng điện ảnh"
+                  }
+            ],
+            "versionTitle": "Cấu Hình Ống Kính:",
+            "versions": [
+                  "Body + Lens Kit XF 18-55mm F2.8-4",
+                  "Chỉ Body (Chưa kèm Lens)",
+                  "Body + Lens Prime XF 33mm F1.4"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen All-Black Chuyên Nghiệp",
+                        "hex": "#09090b",
+                        "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Silver Hoài Cổ",
+                        "hex": "#cbd5e1",
+                        "image": "https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1512790182412-b19e6d62bc39?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Thân máy Retro cổ điển",
+                  "Bánh răng xoay cơ khí",
+                  "Màn hình lật 3 hướng",
+                  "Trải nghiệm chụp đường phố"
+            ]
+      },
+      "3": {
+            "brand": "ASUS ROG",
+            "origin": "Đài Loan",
+            "warranty": "36 tháng chính hãng ASUS Việt Nam",
+            "desc": "Card màn hình ASUS ROG Strix GeForce RTX 5090 OC sở hữu sức mạnh xử lý đồ họa Blackwell thế hệ mới, bộ nhớ 32GB GDDR7 siêu tốc độ, hệ thống tản nhiệt buồng hơi kết hợp 3 quạt Axial-tech làm mát đỉnh cao.",
+            "specs": [
+                  {
+                        "key": "Kiến trúc",
+                        "val": "NVIDIA Blackwell tiến trình TSMC 4N tùy chỉnh"
+                  },
+                  {
+                        "key": "VRAM",
+                        "val": "32GB GDDR7 512-bit"
+                  },
+                  {
+                        "key": "Tản nhiệt",
+                        "val": "3 Quạt Axial-tech buồng hơi Vapor Chamber"
+                  }
+            ],
+            "versionTitle": "Phiên Bản Ép Xung:",
+            "versions": [
+                  "Bản ROG Strix OC Edition",
+                  "Bản Gaming Tiêu Chuẩn"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Huyền Khối Titan",
+                        "hex": "#18181b",
+                        "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Trắng Tuyết White OC",
+                        "hex": "#f8fafc",
+                        "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt trước 3 quạt Axial-tech",
+                  "Backplate tản nhiệt kim loại",
+                  "Khung viền đúc nguyên khối",
+                  "Hiệu ứng LED ARGB rực rỡ"
+            ]
+      },
+      "4": {
+            "brand": "ASUS ROG",
+            "origin": "Đài Loan",
+            "warranty": "36 tháng đổi mới chính hãng",
+            "desc": "Màn hình thể thao điện tử chuyên nghiệp ASUS ROG Swift 27 inch 2K QHD tần số quét siêu mượt 240Hz, tấm nền Fast IPS 1ms GTG, hỗ trợ chuẩn đồng bộ G-Sync Compatible và DisplayHDR 400 sắc nét.",
+            "specs": [
+                  {
+                        "key": "Màn hình",
+                        "val": "27 inch 2K QHD (2560x1440) Fast IPS"
+                  },
+                  {
+                        "key": "Tần số quét",
+                        "val": "240Hz mượt mà đỉnh cao"
+                  },
+                  {
+                        "key": "Độ trễ",
+                        "val": "1ms GTG chống bóng mờ tuyệt đối"
+                  }
+            ],
+            "versionTitle": "Phụ Kiện Kèm:",
+            "versions": [
+                  "Bản Chân Đế Tiêu Chuẩn ROG",
+                  "Bản Kèm Tay Đỡ Màn Hình Arm ROG Desk Mount"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen ROG Eclipse",
+                        "hex": "#09090b",
+                        "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Trắng Moonlight White",
+                        "hex": "#f1f5f9",
+                        "image": "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Mặt trước viền siêu mỏng",
+                  "Logo ROG Aura Sync mặt sau",
+                  "Chân đế điều chỉnh linh hoạt",
+                  "Góc nhìn rộng 178 độ"
+            ]
+      },
+      "7": {
+            "brand": "Aula",
+            "origin": "Chính hãng Aula Gaming",
+            "warranty": "12 tháng đổi mới",
+            "desc": "Bàn phím cơ quốc dân Aula F75 cấu trúc Gasket Mount 5 lớp tiêu âm cực êm, switch LEOBOG Reaper gõ nổ tock giòn tan, núm xoay kim loại đa năng điều chỉnh âm lượng và kết nối không dây 3 chế độ.",
+            "specs": [
+                  {
+                        "key": "Cấu trúc",
+                        "val": "Gasket Mount 5 lớp đệm mút PORON"
+                  },
+                  {
+                        "key": "Switch",
+                        "val": "LEOBOG Reaper Linear bôi trơn sẵn cực êm"
+                  },
+                  {
+                        "key": "Kết nối",
+                        "val": "Type-C, 2.4GHz không dây, Bluetooth 5.0"
+                  }
+            ],
+            "versionTitle": "Loại Switch Cơ:",
+            "versions": [
+                  "LEOBOG Reaper Switch (Linear)",
+                  "Crescent Switch (Tock giòn)"
+            ],
+            "colors": [
+                  {
+                        "name": "Tím Khói Glacier",
+                        "hex": "#818cf8",
+                        "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Trắng Retro Vintage",
+                        "hex": "#fef08a",
+                        "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Đen Samurai Xuyên LED",
+                        "hex": "#1e293b",
+                        "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Toàn cảnh 75% phím",
+                  "Cụm núm xoay đa năng",
+                  "Switch Linear bôi trơn sẵn",
+                  "Đèn LED RGB từng phím"
+            ]
+      },
+      "8": {
+            "brand": "Logitech G",
+            "origin": "Thụy Sĩ",
+            "warranty": "24 tháng chính hãng",
+            "desc": "Chuột gaming không dây siêu nhẹ Logitech G Pro X Superlight dưới 63 gram, mắt đọc HERO 25K chuẩn xác đến từng micromet, switch quang học hybrid LIGHTFORCE phản hồi tốc độ ánh sáng.",
+            "specs": [
+                  {
+                        "key": "Trọng lượng",
+                        "val": "< 63g siêu nhẹ thi đấu eSports"
+                  },
+                  {
+                        "key": "Cảm biến",
+                        "val": "HERO 25K chính xác tối đa"
+                  },
+                  {
+                        "key": "Kết nối",
+                        "val": "LIGHTSPEED không dây độ trễ 1ms"
+                  }
+            ],
+            "versionTitle": "Phụ Kiện Kèm:",
+            "versions": [
+                  "Kèm Bộ Miếng Dán Chống Trượt Grip Tape",
+                  "Bản Tiêu Chuẩn"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Nhám Matte Black",
+                        "hex": "#1e293b",
+                        "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Trắng Tuyết Arctic White",
+                        "hex": "#f8fafc",
+                        "image": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Hồng Magenta Sành Điệu",
+                        "hex": "#ec4899",
+                        "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Chính diện form cầm",
+                  "Con lăn nhạy bén",
+                  "Cạnh bên chống trượt",
+                  "Dây bọc dù cao cấp"
+            ]
+      },
+      "9": {
+            "brand": "Đặc Sản Xứ Thanh",
+            "origin": "Thanh Hóa, Việt Nam",
+            "warranty": "Cam kết 100% thịt tươi mới, đổi trả ngay nếu không vừa ý",
+            "desc": "Nem chua Thanh Hóa gia truyền nức tiếng, chế biến từ thịt lợn mông tươi dẻo quánh giã nhuyễn phối cùng bì lợn cạo sạch thái chỉ, tỏi, ớt hiểm và lá đinh lăng tươi, lên men tự nhiên vị chua thanh giòn sần sật đậm đà.",
+            "specs": [
+                  {
+                        "key": "Thành phần",
+                        "val": "Thịt lợn nạc sạch 70%, bì heo giòn 25%, tỏi ớt đinh lăng"
+                  },
+                  {
+                        "key": "Đóng gói",
+                        "val": "Bọc lá chuối tươi truyền thống 10 chiếc/bó"
+                  },
+                  {
+                        "key": "Bảo quản",
+                        "val": "Ngăn mát tủ lạnh 7-10 ngày"
+                  }
+            ],
+            "versionTitle": "Quy Cách Đóng Gói:",
+            "versions": [
+                  "Túi 50 Chiếc Ăn Gia Đình",
+                  "Hộp Quà Biếu Sang Trọng 100 Chiếc"
+            ],
+            "colors": [
+                  {
+                        "name": "Gói Lá Chuối Xanh Truyền Thống",
+                        "hex": "#16a34a",
+                        "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Hộp Quà Biếu Tết Sum Vầy Đỏ",
+                        "hex": "#dc2626",
+                        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80"
+                  }
+            ],
+            "images": [
+                  "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+                  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
+            ],
+            "angles": [
+                  "Gói lá chuối truyền thống",
+                  "Thịt nem hồng hào kèm tỏi ớt",
+                  "Đĩa nem chua bày tiệc",
+                  "Chấm tương ớt đậm đà"
+            ]
+      },
+      "101": {
+            "brand": "Sony",
+            "origin": "Nhật Bản / Lắp ráp Malaysia",
+            "warranty": "12 tháng chính hãng Sony Việt Nam",
+            "desc": "Tai nghe chống ồn không dây Sony WH-1000XM5 sở hữu công nghệ dẫn đầu ngành với hai bộ xử lý chuyên dụng V1 và HD QN1.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Sony"
+                  },
+                  {
+                        "key": "Bộ xử lý",
+                        "val": "Dual Processor V1 & HD Noise Cancelling QN1"
+                  },
+                  {
+                        "key": "Thời lượng pin",
+                        "val": "30 giờ (bật ANC), 40 giờ (tắt ANC)"
+                  }
+            ],
+            "versionTitle": "Phiên Bản:",
+            "versions": [
+                  "Bản Tiêu Chuẩn Fullbox",
+                  "Bản Kèm Chân Đế Nhôm"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Black Edition",
+                        "hex": "#111827",
+                        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Silver White",
+                        "hex": "#cbd5e1",
+                        "image": "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Xanh Midnight Blue",
+                        "hex": "#1e293b",
+                        "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
+                  }
+            ]
+      },
+      "102": {
+            "brand": "Tissot 1853",
+            "origin": "Thụy Sĩ (Swiss Made)",
+            "warranty": "24 tháng quốc tế chính hãng",
+            "desc": "Tissot Le Locle Powermatic 80 là dòng đồng hồ cơ tự động kinh điển tôn vinh thị trấn Le Locle - cái nôi đồng hồ Thụy Sĩ.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Tissot 1853"
+                  },
+                  {
+                        "key": "Xuất xứ",
+                        "val": "Thụy Sĩ (Swiss Made)"
+                  },
+                  {
+                        "key": "Thời gian trữ cót",
+                        "val": "80 giờ bền bỉ"
+                  }
+            ],
+            "versionTitle": "Chất Liệu Dây:",
+            "versions": [
+                  "Dây Da Bò Thật",
+                  "Dây Thép 316L"
+            ],
+            "colors": [
+                  {
+                        "name": "Mặt Trắng Dây Da Nâu",
+                        "hex": "#78350f",
+                        "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Mặt Đen Dây Thép Bạc",
+                        "hex": "#94a3b8",
+                        "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Vàng Demi Hoàng Gia",
+                        "hex": "#d97706",
+                        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80"
+                  }
+            ]
+      },
+      "201": {
+            "brand": "Apple Inc.",
+            "origin": "Hoa Kỳ / Lắp ráp chính hãng",
+            "warranty": "12 tháng Apple Care toàn quốc",
+            "desc": "iPad Pro M4 11-inch hoàn toàn mới là bước nhảy vọt công nghệ với độ mỏng khó tin chỉ 5.1mm, tích hợp vi xử lý Apple M4 thế hệ tiếp theo.",
+            "specs": [
+                  {
+                        "key": "Thương hiệu",
+                        "val": "Apple"
+                  },
+                  {
+                        "key": "Vi xử lý",
+                        "val": "Apple M4 Chip (10-core CPU, 10-core GPU)"
+                  },
+                  {
+                        "key": "Màn hình",
+                        "val": "11 inch Ultra Retina XDR Tandem OLED 120Hz"
+                  }
+            ],
+            "versionTitle": "Dung Lượng:",
+            "versions": [
+                  "256GB WiFi",
+                  "512GB WiFi + 5G",
+                  "1TB WiFi"
+            ],
+            "colors": [
+                  {
+                        "name": "Đen Không Gian (Space Black)",
+                        "hex": "#18181b",
+                        "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=800&q=80"
+                  },
+                  {
+                        "name": "Bạc Ánh Kim (Silver)",
+                        "hex": "#e2e8f0",
+                        "image": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=800&q=80"
+                  }
+            ]
+      }
+};
 
       // Trạng thái Giỏ hàng (Cart state)
       let cartItems = [];
@@ -3276,8 +4559,8 @@
         currentDetailProduct = product;
         currentDetailQty = 1;
 
-        // Lấy thông tin mở rộng hoặc tạo thông số mặc định phù hợp
-        const extra = PRODUCT_EXTRA_INFO[product.id] || {
+        // Lấy thông tin mở rộng từ API hoặc từ từ điển dữ liệu chuẩn
+        const extra = product.extra_info || PRODUCT_EXTRA_INFO[product.id] || {
           brand: "Thương Hiệu Cao Cấp",
           origin: "Nhập khẩu chính hãng",
           warranty: "24 tháng chính hãng JML Store",
@@ -3289,13 +4572,21 @@
             { key: "Tình trạng", val: "Mới 100% nguyên hộp kèm thẻ bảo hành" },
             { key: "Bảo hành", val: "24 tháng đổi mới trong 30 ngày nếu lỗi" }
           ],
-          colors: ["Màu Tiêu Chuẩn (Mặc định)", "Phiên Bản Giới Hạn"]
+          colors: [
+            { name: "Màu Tiêu Chuẩn (Mặc định)", hex: "#111827", image: (product.images && product.images[0]) ? product.images[0] : product.image },
+            { name: "Phiên Bản Giới Hạn", hex: "#4b5563", image: (product.images && product.images[1]) ? product.images[1] : product.image }
+          ]
         };
 
-        const images = product.images || [product.image];
-        const angles = product.angles || ["Chính diện", "Góc nghiêng", "Cận cảnh", "Thực tế"];
-        currentSelectedColor = extra.colors[0];
-        currentSelectedVersion = "Bản Tiêu Chuẩn";
+        // Ưu tiên danh sách ảnh và góc chụp đa dạng chuẩn
+        const images = (product.images && product.images.length > 1 && product.images[0] !== product.images[1]) 
+                       ? product.images 
+                       : (extra.images || product.images || [product.image]);
+        const angles = (product.angles && product.angles.length > 0) 
+                       ? product.angles 
+                       : (extra.angles || ["Chính diện", "Góc nghiêng", "Cận cảnh", "Thực tế"]);
+        currentSelectedColor = typeof extra.colors[0] === 'object' ? extra.colors[0].name : extra.colors[0];
+        currentSelectedVersion = (extra.versions && extra.versions.length > 0) ? extra.versions[0] : "Bản Tiêu Chuẩn";
 
         const detailContainer = document.getElementById("view-product-detail");
         const homeContainer = document.getElementById("view-home");
@@ -3438,31 +4729,35 @@
                 <div class="variant-section">
                   <div class="variant-title">
                     <span>Chọn Màu Sắc:</span>
-                    <strong id="selectedColorLabel">${extra.colors[0]}</strong>
+                    <strong id="selectedColorLabel">${typeof extra.colors[0] === 'object' ? extra.colors[0].name : extra.colors[0]}</strong>
                   </div>
                   <div class="variant-options">
-                    ${extra.colors.map((c, i) => `
-                      <button class="variant-btn ${i === 0 ? "active" : ""}" onclick="selectVariant(this, 'selectedColorLabel', '${c}')">
-                        <span class="color-dot" style="background: ${i === 0 ? "#111827" : (i === 1 ? "#94a3b8" : "#cbd5e1")};"></span>
-                        ${c}
-                      </button>
-                    `).join("")}
+                    ${extra.colors.map((c, i) => {
+                      const colorName = typeof c === 'object' ? c.name : c;
+                      const colorHex = typeof c === 'object' ? c.hex : (i === 0 ? "#111827" : (i === 1 ? "#94a3b8" : "#cbd5e1"));
+                      const colorImg = (typeof c === 'object' && c.image) ? c.image : (images[i] || images[0]);
+                      return `
+                        <button class="variant-btn ${i === 0 ? "active" : ""}" onclick="selectProductColor(this, '${colorName.replace(/'/g, "\\'")}', '${colorImg.replace(/'/g, "\\'")}')">
+                          <span class="color-dot" style="background: ${colorHex};"></span>
+                          ${colorName}
+                        </button>
+                      `;
+                    }).join("")}
                   </div>
                 </div>
 
                 <!-- Variant: Phiên Bản -->
                 <div class="variant-section">
                   <div class="variant-title">
-                    <span>Phiên Bản / Dung Lượng:</span>
-                    <strong id="selectedVersionLabel">Bản Tiêu Chuẩn (Fullbox)</strong>
+                    <span>${extra.versionTitle || 'Phiên Bản / Dung Lượng:'}</span>
+                    <strong id="selectedVersionLabel">${(extra.versions && extra.versions.length > 0) ? extra.versions[0] : 'Bản Tiêu Chuẩn (Fullbox)'}</strong>
                   </div>
                   <div class="variant-options">
-                    <button class="variant-btn active" onclick="selectVariant(this, 'selectedVersionLabel', 'Bản Tiêu Chuẩn (Fullbox)')">
-                      Bản Tiêu Chuẩn (Fullbox)
-                    </button>
-                    <button class="variant-btn" onclick="selectVariant(this, 'selectedVersionLabel', 'Bản Nâng Cấp Kèm Quà Tặng')">
-                      Bản Nâng Cấp Kèm Quà Tặng
-                    </button>
+                    ${((extra.versions && extra.versions.length > 0) ? extra.versions : ['Bản Tiêu Chuẩn (Fullbox)', 'Bản Nâng Cấp Kèm Quà Tặng']).map((v, i) => `
+                      <button class="variant-btn ${i === 0 ? "active" : ""}" onclick="selectVariant(this, 'selectedVersionLabel', '${v.replace(/'/g, "\\'")}')">
+                        ${v}
+                      </button>
+                    `).join("")}
                   </div>
                 </div>
 
@@ -3631,6 +4926,26 @@
         document.querySelectorAll(".gallery-thumb-item").forEach((thumb, idx) => {
           thumb.classList.toggle("active", idx === index);
         });
+      }
+
+      function selectProductColor(button, colorName, colorImg) {
+        const label = document.getElementById("selectedColorLabel");
+        if (label) label.textContent = colorName;
+        const parent = button.parentElement;
+        if (parent) {
+          parent.querySelectorAll(".variant-btn").forEach((btn) => btn.classList.remove("active"));
+          button.classList.add("active");
+        }
+        currentSelectedColor = colorName;
+        if (colorImg) {
+          const mainImg = document.getElementById("detailMainImg");
+          if (mainImg) mainImg.src = colorImg;
+          const badge = document.getElementById("detailAngleBadge");
+          if (badge) badge.textContent = colorName;
+          document.querySelectorAll(".gallery-thumb-item").forEach((thumb) => {
+            thumb.classList.remove("active");
+          });
+        }
       }
 
       function selectVariant(button, labelId, value) {
