@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-[#F6F7F9]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JML Store Marketplace Admin - Quản Trị Sàn TMĐT</title>
+    <link rel="icon" type="image/svg+xml" href="jml-store-icon.svg">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#F0F7FF',
+                            100: '#E0EDFF',
+                            200: '#CCE0FF',
+                            500: '#0D6EFD',
+                            600: '#162DF3',
+                            700: '#1C2EB0',
+                        },
+                        neutral: {
+                            50: '#F6F7F9',
+                            100: '#EDF0F2',
+                            200: '#DCE0E5',
+                            300: '#CBD3DB',
+                            500: '#929EAA',
+                            600: '#6F7C8E',
+                            700: '#525E6F',
+                            800: '#323C49',
+                            900: '#14181F',
+                        },
+                        success: {
+                            50: '#E8F8EE',
+                            500: '#00B517',
+                        },
+                        warning: {
+                            50: '#FFF0DE',
+                            500: '#FF9017',
+                        },
+                        danger: {
+                            50: '#FFE5E5',
+                            500: '#FA3434',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Custom Script -->
+    <script src="script.js" defer></script>
+</head>
+<body class="h-full flex overflow-hidden text-neutral-900 text-sm antialiased">
+
+    <!-- SIDEBAR: QUẢN TRỊ SÀN TRUNG GIAN (MARKETPLACE ADMIN) -->
+    <aside class="w-[280px] bg-white border-r border-neutral-200 flex flex-col flex-shrink-0 z-20 select-none">
+        <!-- Logo Header (Click to return to Dashboard) -->
+        <a href="#dashboard" onclick="switchTab('view-dashboard'); return false;" title="Về trang Tổng quan Sàn" class="h-16 flex items-center px-5 border-b border-neutral-200 gap-3 hover:bg-neutral-50 transition-colors cursor-pointer">
+            <img src="jml-store-icon.svg" alt="JML Store Icon" class="w-10 h-10 object-contain shrink-0">
+            <div class="min-w-0">
+                <span class="text-lg font-bold tracking-tight text-neutral-900 block leading-tight">JML <span class="text-[#ff4d8d]">Store</span></span>
+                <span class="inline-block text-[10px] font-semibold uppercase tracking-wider text-primary-500 bg-primary-50 px-1.5 py-0.5 rounded mt-0.5">Marketplace Admin</span>
+            </div>
+        </a>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+            <div class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Điều hành toàn sàn</div>
+            
+            <a href="#dashboard" data-tab="view-dashboard" class="nav-item active flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+                    <span class="truncate whitespace-nowrap">Tổng quan Sàn (GMV)</span>
+                </div>
+            </a>
+
+            <a href="#shops" data-tab="view-shops" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="store" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="truncate whitespace-nowrap">Quản lý Shop / Sellers</span>
+                </div>
+                <span id="badgeShopsCount" class="ml-2 px-2 py-0.5 text-[11px] font-semibold bg-neutral-100 text-neutral-700 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <a href="#categories" data-tab="view-categories" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="folder-tree" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="truncate whitespace-nowrap">Ngành hàng & Phí sàn</span>
+                </div>
+            </a>
+
+            <div class="pt-4 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Giao dịch & Tranh chấp</div>
+
+            <a href="#orders" data-tab="view-orders" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="shopping-bag" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="whitespace-nowrap">Đơn hàng Trung gian</span>
+                </div>
+                <span id="badgeOrdersCount" class="ml-2 px-2 py-0.5 text-[11px] font-semibold bg-neutral-200 text-neutral-700 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <a href="#disputes" data-tab="view-disputes" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="scale" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="whitespace-nowrap">Tranh chấp / Hoàn tiền</span>
+                </div>
+                <span class="ml-2 px-2 py-0.5 text-[11px] font-semibold bg-neutral-100 text-neutral-600 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <a href="#payouts" data-tab="view-payouts" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="landmark" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="whitespace-nowrap">Đối soát & Rút tiền Shop</span>
+                </div>
+                <span class="ml-2 px-2 py-0.5 text-[11px] font-semibold bg-neutral-100 text-neutral-600 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <div class="pt-4 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Khách Hàng & Người Dùng</div>
+
+            <a href="#customers" data-tab="view-customers" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="users" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="whitespace-nowrap">Quản lý Khách hàng</span>
+                </div>
+                <span id="badgeCustomersCount" class="ml-2 px-2 py-0.5 text-[11px] font-semibold bg-neutral-200 text-neutral-700 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <div class="pt-4 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Marketing Toàn Sàn</div>
+
+            <a href="#campaigns" onclick="toggleModal('campaignModal'); return false;" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="zap" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="truncate whitespace-nowrap">Flash Sale & Voucher Sàn</span>
+                </div>
+            </a>
+
+
+        </nav>
+
+        <!-- Admin User Profile Card -->
+        <div class="p-3 border-t border-neutral-200">
+            <div class="flex items-center gap-3 p-2 rounded-lg bg-neutral-50 border border-neutral-200">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80" alt="Super Admin Avatar" class="w-9 h-9 rounded-full object-cover border border-neutral-200 shrink-0">
+                <div class="flex-1 min-w-0">
+                    <p id="adminProfileName" class="text-xs font-semibold text-neutral-900 truncate">Hoàng Nam (Super Admin)</p>
+                    <p class="text-[11px] text-neutral-500 truncate">Ban Quản Trị Sàn</p>
+                </div>
+                <button type="button" onclick="handleAdminLogout()" title="Đăng xuất / Khóa bảng điều khiển" class="p-1.5 text-neutral-500 hover:text-danger-500 hover:bg-white rounded transition-colors shrink-0">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- TOP HEADER -->
+        <header class="h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-6 flex-shrink-0 z-10">
+            <!-- Platform Brand / Section Title -->
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-neutral-900 text-sm">Kênh Quản Trị Sàn JML Store</span>
+            </div>
+
+            <!-- Header Actions: Chỉ giữ lại 2 nút theo yêu cầu -->
+            <div class="flex items-center gap-3">
+                <!-- 1. View Storefront Link -->
+                <a href="../user/index.html" target="_blank" class="inline-flex items-center gap-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors whitespace-nowrap" title="Mở giao diện khách hàng (User Storefront) trong tab mới">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0 text-primary-500"></i>
+                    <span>Xem Cửa Hàng (Storefront)</span>
+                </a>
+
+                <!-- 2. Create Platform Campaign / Voucher -->
+                <button onclick="toggleModal('campaignModal')" class="inline-flex items-center gap-1.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold px-4 py-2 rounded-lg text-xs shadow-sm transition-colors whitespace-nowrap">
+                    <i data-lucide="zap" class="w-4 h-4 shrink-0"></i>
+                    <span>Tạo Chiến dịch Sàn</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT CONTAINER (MULTI-TAB VIEWS) -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+
+            <!-- =================================================================
+                 TAB 1: TỔNG QUAN SÀN (DASHBOARD VIEW)
+                 ================================================================= -->
+            <section id="view-dashboard" class="tab-view space-y-6">
+                <!-- Title & Date filter -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-bold text-neutral-900">Trung Tâm Điều Hành Sàn TMĐT</h1>
+                            <span class="px-2 py-0.5 text-[11px] font-semibold bg-primary-50 text-primary-500 rounded-md border border-primary-200">Multi-vendor Marketplace</span>
+                        </div>
+                        <p class="text-xs text-neutral-500 mt-0.5">Giám sát dòng tiền trung gian (GMV), phí hoa hồng, hoạt động của các Shop và giải quyết tranh chấp.</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white border border-neutral-200 rounded-lg p-1 text-xs">
+                        <button class="px-3 py-1.5 font-medium rounded-md bg-neutral-100 text-neutral-900">Hôm nay</button>
+                        <button class="px-3 py-1.5 font-medium text-neutral-600 hover:text-neutral-900">7 ngày qua</button>
+                        <button class="px-3 py-1.5 font-medium text-neutral-600 hover:text-neutral-900">Tháng này</button>
+                    </div>
+                </div>
+
+                <!-- 4 KPI Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tổng GMV Toàn Sàn</span>
+                            <div class="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center text-primary-500">
+                                <i data-lucide="globe" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div id="statTotalGmv" class="text-2xl font-bold text-neutral-900">0 ₫</div>
+                            <div class="flex items-center gap-1.5 mt-2 text-xs">
+                                <span class="inline-flex items-center text-primary-600 font-semibold bg-primary-50 px-1.5 py-0.5 rounded">Real-time SQL</span>
+                                <span class="text-neutral-500">tổng giá trị hàng giao dịch</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Doanh Thu Sàn (Hoa Hồng)</span>
+                            <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                <i data-lucide="coins" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div id="statTotalRevenue" class="text-2xl font-bold text-emerald-600">0 ₫</div>
+                            <div class="flex items-center gap-1.5 mt-2 text-xs">
+                                <span class="inline-flex items-center text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">Chiết khấu 7%</span>
+                                <span class="text-neutral-500">tổng hoa hồng thu về</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('view-shops')" class="bg-white p-5 rounded-xl border border-neutral-200 hover:border-primary-500 cursor-pointer shadow-sm flex flex-col justify-between transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tổng Số Shop Hoạt Động</span>
+                            <div class="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                <i data-lucide="store" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div id="statTotalShops" class="text-2xl font-bold text-neutral-900">0 <span class="text-sm font-medium text-neutral-500">Shops</span></div>
+                            <div class="flex items-center gap-1.5 mt-2 text-xs">
+                                <span id="statKycCount" class="inline-flex items-center text-neutral-600 font-semibold bg-neutral-100 px-1.5 py-0.5 rounded">0 chờ duyệt</span>
+                                <span class="text-primary-500 font-medium hover:underline">Xem danh sách &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('view-shops')" class="bg-white p-5 rounded-xl border border-neutral-200 hover:border-primary-500 cursor-pointer shadow-sm flex flex-col justify-between transition-all">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Sản Phẩm Trên Sàn</span>
+                            <div class="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center text-primary-500">
+                                <i data-lucide="package" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div id="statTotalProducts" class="text-2xl font-bold text-primary-600">0 <span class="text-sm font-medium text-neutral-500">Sản phẩm</span></div>
+                            <div class="flex items-center gap-1.5 mt-2 text-xs">
+                                <span class="text-primary-500 font-medium hover:underline">Xem cửa hàng &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div>
+                                <h2 class="font-bold text-neutral-900 text-sm">Biểu đồ Tăng trưởng GMV Toàn Sàn & Doanh thu Hoa hồng (2026)</h2>
+                                <p class="text-xs text-neutral-500">Theo dõi tổng dòng tiền qua sàn và lợi nhuận phí dịch vụ thu về</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <span class="flex items-center gap-1.5 font-medium text-neutral-700">
+                                    <span class="w-3 h-3 rounded-full bg-primary-500"></span> Tổng GMV ($)
+                                </span>
+                                <span class="flex items-center gap-1.5 font-medium text-neutral-700">
+                                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Phí hoa hồng Sàn ($)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="h-72">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <h2 class="font-bold text-neutral-900 text-sm">Tỷ trọng GMV theo Phân hạng Shop</h2>
+                                <p class="text-xs text-neutral-500">Đóng góp doanh số từ các nhóm Seller</p>
+                            </div>
+                            <span id="chartShopTotalBadge" class="text-xs font-semibold text-primary-500 bg-primary-50 px-2 py-0.5 rounded">0 Shops</span>
+                        </div>
+                        <div class="h-52 relative flex items-center justify-center">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="space-y-2 pt-3 border-t border-neutral-100 text-xs text-neutral-700">
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-danger-500"></span><strong>JML Mall</strong> (Chính hãng)</span>
+                                <span class="font-semibold">0% (0 ₫)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-warning-500"></span><strong>Shop Yêu Thích+</strong> (Uy tín)</span>
+                                <span class="font-semibold">0% (0 ₫)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-primary-500"></span><strong>Shop Tiêu Chuẩn</strong> (Cá nhân)</span>
+                                <span class="font-semibold">0% (0 ₫)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders & Right Column -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <!-- Escrow Orders Table -->
+                    <div class="xl:col-span-2 bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
+                        <div class="p-5 border-b border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <h2 class="font-bold text-neutral-900 text-base">Đơn hàng Trung gian gần đây</h2>
+                                <p class="text-xs text-neutral-500">Bấm vào từng đơn hoặc tên Shop để xem chi tiết Sản phẩm & Cửa hàng</p>
+                            </div>
+                            <button onclick="switchTab('view-orders')" class="text-xs font-semibold text-primary-500 hover:underline">
+                                Mở trang Quản lý Đơn hàng &rarr;
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                                        <th class="py-3 px-4">Mã đơn</th>
+                                        <th class="py-3 px-4">Cửa hàng (Seller)</th>
+                                        <th class="py-3 px-4">Sản phẩm & Người mua</th>
+                                        <th class="py-3 px-4">Tổng tiền</th>
+                                        <th class="py-3 px-4">Trạng thái Tiền</th>
+                                        <th class="py-3 px-4 text-right">Chi tiết</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersTableBody" class="divide-y divide-neutral-200 text-xs">
+                                    <tr>
+                                        <td colspan="6" class="py-8 text-center text-neutral-400 text-xs">
+                                            Chưa có đơn hàng giao dịch nào trên Sàn.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top Shops Card -->
+                    <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-bold text-neutral-900 text-sm">Top Cửa Hàng (Shops) Xuất Sắc</h2>
+                            <button onclick="switchTab('view-shops')" class="text-xs text-primary-500 hover:underline font-medium">Xem tất cả</button>
+                        </div>
+                        <div id="topShopsListContainer" class="space-y-4">
+                            <div class="py-8 text-center text-neutral-400 text-xs">
+                                Chưa có cửa hàng nào hoạt động trên Sàn.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 TAB 2: QUẢN LÝ SHOP / SELLERS (XEM ĐƯỢC CẢ DANH SÁCH SP CỦA SHOP)
+                 ================================================================= -->
+            <section id="view-shops" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-neutral-900">Quản Lý Cửa Hàng & Nhà Bán (Sellers / Shops)</h1>
+                        <p class="text-xs text-neutral-500 mt-0.5">Bấm vào nút <strong>"Xem Shop & Sản phẩm"</strong> ở từng dòng để kiểm tra toàn bộ mặt hàng và đơn hàng của Shop đó.</p>
+                    </div>
+                </div>
+
+                <!-- Pending KYC Shops Queue -->
+                <div class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-warning-50/60 border-b border-amber-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="user-check" class="w-5 h-5 text-warning-500"></i>
+                            <h2 class="font-bold text-neutral-900 text-sm">Hồ sơ đăng ký mở Shop mới chờ duyệt KYC <span id="kycHeaderCount">(0)</span></h2>
+                        </div>
+                        <span class="text-xs text-neutral-600">Kiểm tra CCCD / Giấy phép kinh doanh trước khi cấp quyền bán hàng</span>
+                    </div>
+                    <div id="kycContainer" class="divide-y divide-neutral-200">
+                        <div class="p-8 text-center text-neutral-400 text-xs">
+                            ✓ Hiện không có hồ sơ đăng ký mở Shop nào chờ duyệt KYC.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Shops Directory Table -->
+                <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-neutral-200 flex items-center justify-between">
+                        <h2 class="font-bold text-neutral-900 text-base">Danh sách Cửa hàng đang hoạt động trên Sàn</h2>
+                        <span class="text-xs text-neutral-500">Bấm "Xem Shop & Sản phẩm" để xem kho hàng của từng Shop</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                                    <th class="py-3 px-4">Mã Shop</th>
+                                    <th class="py-3 px-4">Tên Cửa Hàng & Chủ Shop</th>
+                                    <th class="py-3 px-4">Phân Hạng</th>
+                                    <th class="py-3 px-4">Sản Phẩm Đang Bán</th>
+                                    <th class="py-3 px-4">Đơn Đã Bán</th>
+                                    <th class="py-3 px-4">Tổng GMV</th>
+                                    <th class="py-3 px-4">Phí Sàn Đã Thu</th>
+                                    <th class="py-3 px-4">Đánh Giá</th>
+                                    <th class="py-3 px-4 text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeShopsTableBody" class="divide-y divide-neutral-200 text-xs">
+                                <tr>
+                                    <td colspan="8" class="py-8 text-center text-neutral-400 text-xs">
+                                        Chưa có cửa hàng nào đang hoạt động trên Sàn.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 TAB 4: NGÀNH HÀNG & BIỂU PHÍ HOA HỒNG SÀN
+                 ================================================================= -->
+            <section id="view-categories" class="tab-view hidden space-y-6">
+                <div>
+                    <h1 class="text-xl font-bold text-neutral-900">Quản Lý Ngành Hàng & Cấu Hình Phí Hoa Hồng Sàn</h1>
+                    <p class="text-xs text-neutral-500 mt-0.5">Thiết lập tỷ lệ chiết khấu (% Commission) mà Sàn thu trên mỗi đơn hàng thành công theo từng danh mục.</p>
+                </div>
+                <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                                <th class="py-3 px-4">Tên Ngành Hàng (Theo Figma UI Kit)</th>
+                                <th class="py-3 px-4">Số lượng Shop</th>
+                                <th class="py-3 px-4">Số lượng Sản phẩm</th>
+                                <th class="py-3 px-4">Phí Shop Mall (%)</th>
+                                <th class="py-3 px-4">Phí Shop Thường (%)</th>
+                                <th class="py-3 px-4">Phí Thanh Toán (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-200 text-xs">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-neutral-400 text-xs">
+                                    Chưa có ngành hàng nào được thiết lập trên Sàn.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 TAB 5: QUẢN LÝ ĐƠN HÀNG TRUNG GIAN (XEM ĐẦY ĐỦ SẢN PHẨM & SHOP)
+                 ================================================================= -->
+            <section id="view-orders" class="tab-view hidden space-y-6">
+                <!-- Header & Filters -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-neutral-900">Quản Lý Đơn Hàng Trung Gian Toàn Sàn</h1>
+                        <p class="text-xs text-neutral-500 mt-0.5">Xem chi tiết danh sách sản phẩm trong từng đơn, cửa hàng bán (Shop/Seller), trạng thái vận chuyển và đối soát tiền.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="fullOrderShopFilter" onchange="filterFullOrders()" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-xs text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="all">Tất cả Cửa hàng (Shops)</option>
+                        </select>
+                        <select id="fullOrderStatusFilter" onchange="filterFullOrders()" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-xs text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="all">Tất cả trạng thái đơn</option>
+                            <option value="escrow">🔒 Sàn đang giữ tiền (Escrow)</option>
+                            <option value="released">✓ Đã giải ngân cho Shop</option>
+                            <option value="dispute">⚠️ Đang khiếu nại / Tranh chấp</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Full Orders List (Shopee-style Order Cards with Shop & Product details) -->
+                <div id="fullOrdersContainer" class="space-y-4">
+                    <div class="py-12 text-center bg-white rounded-xl border border-neutral-200 text-neutral-400 text-xs">
+                        Chưa có đơn hàng nào phát sinh trên Sàn.
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 TAB 6: TRANH CHẤP & HOÀN TIỀN (RIÊNG BIỆT)
+                 ================================================================= -->
+            <section id="view-disputes" class="tab-view hidden space-y-6">
+                <div>
+                    <h1 class="text-xl font-bold text-neutral-900">Tòa Án Sàn: Giải Quyết Tranh Chấp & Trả Hàng Hoàn Tiền</h1>
+                    <p class="text-xs text-neutral-500 mt-0.5">Khi Người mua và Shop không tự thỏa thuận được, Admin Sàn sẽ xem bằng chứng và đưa ra phán quyết cuối cùng.</p>
+                </div>
+
+                <div id="disputesContainer" class="p-8 text-center bg-white rounded-xl border border-neutral-200 text-neutral-400 text-xs">
+                    ✓ Hiện không có vụ việc khiếu nại hay tranh chấp nào trên Sàn.
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 TAB 7: ĐỐI SOÁT & RÚT TIỀN VÍ SHOP
+                 ================================================================= -->
+            <section id="view-payouts" class="tab-view hidden space-y-6">
+                <div>
+                    <h1 class="text-xl font-bold text-neutral-900">Đối Soát Tài Chính & Duyệt Lệnh Rút Tiền Ví Shop</h1>
+                    <p class="text-xs text-neutral-500 mt-0.5">Kiểm tra số dư Ví Seller sau khi trừ phí hoa hồng và phê duyệt lệnh rút tiền về ngân hàng.</p>
+                </div>
+                <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                                <th class="py-3 px-4">Mã Lệnh</th>
+                                <th class="py-3 px-4">Cửa Hàng Yêu Cầu</th>
+                                <th class="py-3 px-4">Ngân Hàng Nhận</th>
+                                <th class="py-3 px-4">Số Tiền Rút</th>
+                                <th class="py-3 px-4">Trạng Thái</th>
+                                <th class="py-3 px-4 text-right">Xác Nhận Chuyển Khoản</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payoutsTableBody" class="divide-y divide-neutral-200 text-xs">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-neutral-400 text-xs">
+                                    ✓ Hiện không có yêu cầu rút tiền nào cần đối soát.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 TAB 8: QUẢN LÝ KHÁCH HÀNG / NGƯỜI MUA (BUYERS & USERS)
+                 ================================================================= -->
+            <section id="view-customers" class="tab-view hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-neutral-900">Quản Lý Tài Khoản Khách Hàng</h1>
+                        <p class="text-xs text-neutral-500 mt-0.5">Kiểm soát người dùng trong hệ thống, lịch sử đặt hàng và khóa tài khoản vi phạm / bom hàng.</p>
+                    </div>
+                    <button onclick="toggleModal('addCustomerModal')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg text-xs shadow-sm transition-colors shrink-0">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        <span>Thêm Khách Hàng Mới</span>
+                    </button>
+                </div>
+
+                <!-- Customer Statistics Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-500 flex items-center justify-center text-xl shrink-0">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-neutral-500 block">Tổng Người Mua</span>
+                            <span id="statCustTotal" class="text-xl font-bold text-neutral-900">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0">
+                            <i data-lucide="award" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-neutral-500 block">Khách Hàng VIP</span>
+                            <span id="statCustVip" class="text-xl font-bold text-indigo-600">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                            <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-neutral-500 block">Đã Mua Hàng</span>
+                            <span id="statCustBought" class="text-xl font-bold text-emerald-600">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-red-50 text-danger-500 flex items-center justify-center text-xl shrink-0">
+                            <i data-lucide="user-x" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-neutral-500 block">Tài Khoản Đang Khóa</span>
+                            <span id="statCustBanned" class="text-xl font-bold text-danger-500">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Table -->
+                <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-3 bg-neutral-50/50">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <i data-lucide="search" class="w-4 h-4 text-neutral-400"></i>
+                            <input id="customerSearchInput" oninput="filterCustomers()" type="text" placeholder="Tìm tên khách hàng, số điện thoại, email..." class="bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-xs w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-auto">
+                            <select id="customerRankFilter" onchange="filterCustomers()" class="bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="all">Tất cả hạng thành viên</option>
+                                <option value="Kim Cương">Hạng Kim Cương</option>
+                                <option value="Bạch Kim">Hạng Bạch Kim</option>
+                                <option value="Vàng">Hạng Vàng</option>
+                                <option value="Bạc">Hạng Bạc</option>
+                                <option value="Đồng">Hạng Đồng</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                                    <th class="py-3 px-4">Khách Hàng</th>
+                                    <th class="py-3 px-4">Số Điện Thoại & Email</th>
+                                    <th class="py-3 px-4">Hạng Thành Viên</th>
+                                    <th class="py-3 px-4">Số Đơn Hàng</th>
+                                    <th class="py-3 px-4">Tổng Chi Tiêu (GMV)</th>
+                                    <th class="py-3 px-4">Trạng Thái</th>
+                                    <th class="py-3 px-4 text-right">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customersTableBody" class="divide-y divide-neutral-200 text-xs">
+                                <!-- Populated dynamically via script.js from FastAPI SQL -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- =================================================================
+         MODAL 1: XEM CHI TIẾT CỬA HÀNG (SHOP) & DANH SÁCH SẢN PHẨM CỦA SHOP
+         ================================================================= -->
+    <div id="shopDetailModal" class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="p-5 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div class="flex items-center gap-3">
+                    <div id="modalShopAvatar" class="w-11 h-11 rounded-xl bg-primary-500 text-white font-bold flex items-center justify-center text-base shadow-sm">
+                        AB
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="modalShopName" class="text-base font-bold text-neutral-900">AB Technology Ltd</h2>
+                            <span id="modalShopBadge" class="px-2 py-0.5 bg-danger-500 text-white text-[10px] font-bold rounded uppercase">JML MALL</span>
+                        </div>
+                        <p id="modalShopMeta" class="text-xs text-neutral-500 mt-0.5">Mã Shop: #SH-102 • Quận 1, TP.HCM • Tham gia: 15/03/2024</p>
+                    </div>
+                </div>
+                <button onclick="toggleModal('shopDetailModal')" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <!-- Shop KPI Summary -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div class="p-3 rounded-xl bg-neutral-50 border border-neutral-200">
+                        <span class="text-[11px] text-neutral-500 block">Tổng doanh số (GMV)</span>
+                        <span id="modalShopGmv" class="text-base font-bold text-neutral-900 mt-1 block">0 ₫</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                        <span class="text-[11px] text-blue-700 block">Đơn hàng đã bán</span>
+                        <span id="modalShopOrdersCount" class="text-base font-bold text-blue-600 mt-1 block">0 đơn</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <span class="text-[11px] text-emerald-700 block">Phí sàn đã thu (7%)</span>
+                        <span id="modalShopFee" class="text-base font-bold text-emerald-600 mt-1 block">0 ₫</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-neutral-50 border border-neutral-200">
+                        <span class="text-[11px] text-neutral-500 block">Tổng sản phẩm</span>
+                        <span id="modalShopProductCount" class="text-base font-bold text-primary-500 mt-1 block">0 mặt hàng</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-neutral-50 border border-neutral-200">
+                        <span class="text-[11px] text-neutral-500 block">Đánh giá trung bình</span>
+                        <span id="modalShopRating" class="text-base font-bold text-warning-500 mt-1 block">★ 5.0</span>
+                    </div>
+                </div>
+
+                <!-- Products sold by this Shop -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-600">Danh sách Sản phẩm đang bày bán của Shop này</h3>
+                        <span class="text-xs text-neutral-500">Hiển thị các sản phẩm chủ lực</span>
+                    </div>
+                    <div class="border border-neutral-200 rounded-xl overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase text-neutral-500">
+                                    <th class="py-2.5 px-4">Tên Sản Phẩm</th>
+                                    <th class="py-2.5 px-4">Mã SKU</th>
+                                    <th class="py-2.5 px-4">Giá Bán</th>
+                                    <th class="py-2.5 px-4">Kho Hàng</th>
+                                    <th class="py-2.5 px-4">Đã Bán</th>
+                                    <th class="py-2.5 px-4 text-right">Trạng Thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalShopProductsBody" class="divide-y divide-neutral-200 text-xs">
+                                <!-- Populated dynamically via script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <button onclick="alert('Đã gửi cảnh báo nhắc nhở tới chủ Shop!')" class="px-3.5 py-2 rounded-lg border border-red-200 text-danger-500 hover:bg-danger-50 text-xs font-semibold">
+                    Gửi cảnh cáo / Tạm khóa Shop
+                </button>
+                <button onclick="toggleModal('shopDetailModal')" class="px-4 py-2 rounded-lg bg-neutral-800 text-white text-xs font-semibold hover:bg-neutral-900">
+                    Đóng cửa sổ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+         MODAL 2: XEM CHI TIẾT ĐƠN HÀNG (GỒM SẢN PHẨM, SHOP, NGƯỜI MUA, VẬN ĐƠN)
+         ================================================================= -->
+    <div id="orderDetailModal" class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 id="modalOrderId" class="text-base font-bold text-primary-500">Chi Tiết Đơn Hàng #MP-9041</h2>
+                        <span id="modalOrderEscrowBadge" class="px-2 py-0.5 bg-primary-50 text-primary-500 text-xs font-semibold rounded">🔒 Sàn đang giữ tiền</span>
+                    </div>
+                    <p id="modalOrderTime" class="text-xs text-neutral-500 mt-0.5">Thời gian đặt: 07/11/2026 08:30 • Đơn vị vận chuyển: GHN Express (Mã vận đơn: GHN8829104)</p>
+                </div>
+                <button onclick="toggleModal('orderDetailModal')" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-5">
+                <!-- 2 Columns: Seller (Shop) Info & Buyer Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-1.5 text-xs">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-primary-500 block">1. Thông tin Cửa hàng bán (Seller)</span>
+                        <p id="modalOrderShopName" class="font-bold text-neutral-900 text-sm">AB Technology Ltd (JML Mall)</p>
+                        <p id="modalOrderShopAddress" class="text-neutral-600">Kho lấy hàng: Nguyễn Thị Minh Khai, Quận 1, TP.HCM</p>
+                        <p class="text-neutral-500">Hotline Shop: 028.3999.8888</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-1.5 text-xs">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 block">2. Thông tin Người mua (Buyer)</span>
+                        <p id="modalOrderBuyerName" class="font-bold text-neutral-900 text-sm">Trần Minh Quân</p>
+                        <p id="modalOrderBuyerAddress" class="text-neutral-600">Địa chỉ nhận: Phố Đi Bộ Nguyễn Huệ, Quận 1, TP.HCM</p>
+                        <p class="text-neutral-500">Thanh toán: Đã thanh toán qua Thẻ Visa/Mastercard</p>
+                    </div>
+                </div>
+
+                <!-- Products Table inside Order -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2.5">3. Danh sách Sản phẩm trong đơn hàng này</h3>
+                    <div class="border border-neutral-200 rounded-xl overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase text-neutral-500">
+                                    <th class="py-2.5 px-4">Sản phẩm</th>
+                                    <th class="py-2.5 px-4">Phân loại / SKU</th>
+                                    <th class="py-2.5 px-4">Đơn giá</th>
+                                    <th class="py-2.5 px-4">SL</th>
+                                    <th class="py-2.5 px-4 text-right">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalOrderItemsBody" class="divide-y divide-neutral-200 text-xs">
+                                <!-- Populated dynamically via script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Financial Breakdown -->
+                <div class="p-4 rounded-xl bg-primary-50/50 border border-primary-100 space-y-2 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-neutral-600">Tổng tiền hàng Người mua trả:</span>
+                        <span id="modalOrderTotal" class="font-bold text-neutral-900">$899.00</span>
+                    </div>
+                    <div class="flex justify-between text-emerald-600">
+                        <span>Khấu trừ Phí Hoa Hồng Sàn (7%):</span>
+                        <span id="modalOrderFee" class="font-bold">-$62.93</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-primary-200 text-sm">
+                        <span class="font-bold text-neutral-900">Số tiền thực nhận giải ngân về Ví Shop:</span>
+                        <span id="modalOrderNet" class="font-bold text-primary-500">$836.07</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-neutral-200 flex items-center justify-end gap-3 bg-neutral-50">
+                <button onclick="toggleModal('orderDetailModal')" class="px-4 py-2 rounded-lg bg-neutral-800 text-white text-xs font-semibold hover:bg-neutral-900">
+                    Đóng chi tiết
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: TẠO CHIẾN DỊCH SÀN / VOUCHER & CẤU HÌNH PHÍ SÀN -->
+    <div id="campaignModal" class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-neutral-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-bold text-neutral-900">Tạo Chiến Dịch Sàn & Phát Hành Voucher</h2>
+                    <p class="text-xs text-neutral-500">Phát hành Voucher toàn sàn hoặc mở cổng Flash Sale cho các Shop đăng ký</p>
+                </div>
+                <button onclick="toggleModal('campaignModal')" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form class="p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Tên chiến dịch / Sự kiện toàn sàn <span class="text-danger-500">*</span></label>
+                    <input id="campaignNameInput" type="text" placeholder="Ví dụ: Siêu Sale 11.11 - Trợ giá Freeship Toàn Sàn" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Loại chương trình</label>
+                        <select class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option>Flash Sale Khung Giờ Vàng</option>
+                            <option>Mã Freeship Xtra Toàn Sàn</option>
+                            <option>Voucher Hoàn Xu / Giảm Giá Sàn</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Mã Voucher Sàn</label>
+                        <input type="text" placeholder="BRAND1111" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Phí Shop Mall (%)</label>
+                        <input type="number" value="5.0" step="0.5" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Phí Shop Thường (%)</label>
+                        <input type="number" value="7.0" step="0.5" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Ngân sách Sàn ($)</label>
+                        <input type="number" value="15000" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+            </form>
+
+            <div class="p-4 border-t border-neutral-200 flex items-center justify-end gap-3 bg-neutral-50">
+                <button onclick="toggleModal('campaignModal')" class="px-4 py-2 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">
+                    Hủy bỏ
+                </button>
+                <button onclick="saveCampaign()" class="px-4 py-2 rounded-lg bg-primary-500 text-xs font-semibold text-white hover:bg-primary-600 shadow-sm">
+                    Phát hành Chiến dịch
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: XEM CHI TIẾT KHÁCH HÀNG & LỊCH SỬ ĐẶT HÀNG -->
+    <div id="customerDetailModal" class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div class="flex items-center gap-3">
+                    <img id="modalCustAvatar" src="" alt="Avatar" class="w-12 h-12 rounded-full object-cover border border-neutral-200">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="modalCustName" class="text-base font-bold text-neutral-900">Trần Minh Quân</h2>
+                            <span id="modalCustRank" class="px-2 py-0.5 text-[10px] font-bold rounded uppercase bg-indigo-50 text-indigo-700 border border-indigo-200">Kim Cương</span>
+                        </div>
+                        <p id="modalCustMeta" class="text-xs text-neutral-500 mt-0.5">ID: #CUST-001 • Tham gia: 12/01/2024</p>
+                    </div>
+                </div>
+                <button onclick="toggleModal('customerDetailModal')" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-5">
+                <!-- Contact & Spending Info -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 space-y-1 text-xs">
+                        <span class="text-neutral-500 block font-semibold">Thông tin liên hệ</span>
+                        <p class="font-bold text-neutral-800" id="modalCustPhone">0908.123.456</p>
+                        <p class="text-neutral-600 truncate" id="modalCustEmail">minhquan.tran@gmail.com</p>
+                        <p class="text-neutral-500 text-[11px] mt-1" id="modalCustAddress">Quận 1, TP.HCM</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-primary-50/50 border border-primary-100 space-y-1 text-xs">
+                        <span class="text-primary-700 block font-semibold">Tổng chi tiêu trên Sàn</span>
+                        <p class="text-xl font-bold text-primary-600" id="modalCustSpent">$4,850.00</p>
+                        <p class="text-neutral-600" id="modalCustOrdersCount">28 đơn hàng hoàn tất</p>
+                    </div>
+                </div>
+
+                <!-- Order History Table -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">Lịch Sử Mua Hàng Của Khách Này</h3>
+                    <div class="border border-neutral-200 rounded-xl overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-semibold uppercase text-neutral-500">
+                                    <th class="py-2.5 px-3">Mã Đơn</th>
+                                    <th class="py-2.5 px-3">Shop Bán</th>
+                                    <th class="py-2.5 px-3">Ngày Đặt</th>
+                                    <th class="py-2.5 px-3">Giá Trị</th>
+                                    <th class="py-2.5 px-3 text-right">Trạng Thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalCustOrdersHistory" class="divide-y divide-neutral-200 text-xs">
+                                <!-- Populated dynamically via script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <button id="modalCustBanBtn" onclick="toggleCustomerBanCurrent()" class="px-3 py-1.5 rounded-lg border border-red-200 text-danger-500 hover:bg-danger-50 text-xs font-semibold">
+                    Khóa tài khoản khách này
+                </button>
+                <button onclick="toggleModal('customerDetailModal')" class="px-4 py-2 rounded-lg bg-neutral-800 text-white text-xs font-semibold hover:bg-neutral-900">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: THÊM SẢN PHẨM MỚI LÊN SÀN (LƯU VÀO SQL DATABASE) -->
+    <div id="addProductModal" class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+                        <i data-lucide="package-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-neutral-900">Thêm Sản Phẩm Mới</h2>
+                        <p class="text-[11px] text-neutral-500">Lưu vào bảng <code>products</code> và hiển thị trực tiếp trên trang User</p>
+                    </div>
+                </div>
+                <button onclick="toggleModal('addProductModal')" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAdminAddNewProduct(event)" class="p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Tên Sản Phẩm <span class="text-danger-500">*</span></label>
+                    <input id="newProdTitle" type="text" placeholder="Ví dụ: Tai Nghe Gaming ROG Cetra True Wireless" required class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Ngành Hàng</label>
+                        <select id="newProdCategory" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="tech">Công nghệ (Tech & Gadgets)</option>
+                            <option value="audio">Thiết bị âm thanh (Audio)</option>
+                            <option value="watch">Đồng hồ cao cấp (Watch)</option>
+                            <option value="fashion">Thời trang & Phụ kiện (Fashion)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Cửa Hàng Đăng Bán</label>
+                        <select id="newProdShop" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="AB Technology Ltd">AB Technology Ltd (JML Mall)</option>
+                            <option value="Zara Fashion Store">Zara Fashion Store</option>
+                            <option value="Canon Flagship Store">Canon Flagship Store (JML Mall)</option>
+                            <option value="SoundMax Audio Shop">SoundMax Audio Shop</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Giá Bán Khách Mua (VNĐ) <span class="text-danger-500">*</span></label>
+                        <input id="newProdPrice" type="number" placeholder="2490000" required class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Giá Gốc Niêm Yết (VNĐ)</label>
+                        <input id="newProdOriginalPrice" type="number" placeholder="2990000" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Link Ảnh Sản Phẩm (URL)</label>
+                    <input id="newProdImage" type="url" placeholder="https://images.unsplash.com/photo-..." value="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80" required class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+
+                <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                    <span>Sản phẩm sẽ được thực thi lệnh <code>INSERT INTO products</code> và đồng bộ sang trang <strong>User</strong>.</span>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-neutral-200">
+                    <button type="button" onclick="toggleModal('addProductModal')" class="px-4 py-2 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">
+                        Hủy
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold shadow-sm">
+                        Đăng Bán Ngay Lên Sàn
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Thêm Khách Hàng Mới Vào SQL -->
+    <div id="addCustomerModal" class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-neutral-900 text-sm">Thêm Khách Hàng Mới</h3>
+                        <p class="text-[11px] text-neutral-500">Tạo người mua mới lưu vào bảng <code>customers</code> & cập nhật chỉ số sàn</p>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleModal('addCustomerModal')" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAdminAddNewCustomer(event)" class="p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Họ và tên khách hàng *</label>
+                    <input id="newCustName" type="text" required placeholder="VD: Nguyễn Tuấn Anh" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Số điện thoại *</label>
+                        <input id="newCustPhone" type="text" required placeholder="VD: 0988.112.233" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 mb-1">Cấp bậc khách hàng</label>
+                        <select id="newCustRank" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Đồng">Hạng Đồng</option>
+                            <option value="Bạc">Hạng Bạc</option>
+                            <option value="Vàng">Hạng Vàng (VIP)</option>
+                            <option value="Bạch Kim">Hạng Bạch Kim (VIP)</option>
+                            <option value="Kim Cương">Hạng Kim Cương (VIP)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Email liên hệ *</label>
+                    <input id="newCustEmail" type="email" required placeholder="VD: tuananh@gmail.com" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Địa chỉ nhận hàng mặc định *</label>
+                    <input id="newCustAddress" type="text" required placeholder="VD: Số 12 Ba Tháng Hai, Quận 10, TP.HCM" class="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-xs text-indigo-800 flex items-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+                    <span>Khách hàng sẽ được lưu vào hệ thống và số lượng khách hàng sẽ tăng ngay lập tức.</span>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-neutral-200">
+                    <button type="button" onclick="toggleModal('addCustomerModal')" class="px-4 py-2 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-100">
+                        Hủy
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm">
+                        Lưu Khách Hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL: KHÓA MÀN HÌNH & ĐĂNG NHẬP ADMIN TRỰC TIẾP TRÊN TRANG (ADMIN AUTH LOCK)
+         ===================================================================== -->
+    <div id="adminLockModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 hidden">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-neutral-200">
+            <!-- Modal Header -->
+            <div class="p-6 bg-gradient-to-r from-blue-700 to-indigo-800 text-white text-center relative">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-3 shadow-inner">
+                    <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
+                </div>
+                <h3 class="font-extrabold text-lg text-white">Xác Thực Quản Trị Viên Sàn</h3>
+                <p class="text-xs text-blue-200 mt-1">Hệ Thống Điều Hành & Giám Sát JML Marketplace</p>
+            </div>
+
+            <!-- Form Body -->
+            <form onsubmit="handleAdminLoginSubmit(event)" class="p-6 space-y-4">
+                <div id="adminAuthAlert" class="hidden p-3 rounded-lg text-xs font-semibold"></div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 mb-1">Tài khoản Quản Trị (Username) *</label>
+                    <div class="relative">
+                        <input id="adminLoginUser" type="text" required value="admin" placeholder="VD: admin" class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 pl-10 text-xs font-medium text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <i data-lucide="user" class="w-4 h-4 text-neutral-400 absolute left-3.5 top-3"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 mb-1">Mật khẩu bảo mật *</label>
+                    <div class="relative">
+                        <input id="adminLoginPass" type="password" required value="123456" placeholder="••••••••" class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 pl-10 text-xs font-medium text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <i data-lucide="lock" class="w-4 h-4 text-neutral-400 absolute left-3.5 top-3"></i>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200/60 text-[11px] text-blue-800 space-y-1">
+                    <p class="font-bold flex items-center gap-1.5 text-blue-900">
+                        <i data-lucide="key" class="w-3.5 h-3.5 text-blue-600"></i>
+                        <span>Tài khoản Super Admin mặc định:</span>
+                    </p>
+                    <p class="text-slate-600 pl-5">Tên đăng nhập: <strong class="font-mono text-blue-900">admin</strong> / Mật khẩu: <strong class="font-mono text-blue-900">123456</strong></p>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="unlock" class="w-4 h-4"></i>
+                    <span>Mở Khóa Bảng Điều Khiển Admin</span>
+                </button>
+
+                <div class="text-center pt-2">
+                    <a href="../user/index.html" class="text-xs text-neutral-500 hover:text-blue-600 font-semibold inline-flex items-center gap-1 transition-colors">
+                        &larr; Xem giao diện Người Mua (Storefront)
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container (Góc dưới bên phải để không che khuất nút thao tác) -->
+    <div id="adminToastContainer" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+</body>
+</html>

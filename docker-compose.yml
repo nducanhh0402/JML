@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 1. Cơ sở dữ liệu MySQL Server 8.0
+  db:
+    image: mysql:8.0
+    container_name: jml_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "jml_marketplace"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./backend/db/seeds/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    networks:
+      - jml_network
+
+  # 2. Ứng dụng Backend FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jml_backend_api
+    restart: always
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DB=jml_marketplace
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - jml_network
+
+volumes:
+  mysql_data:
+
+networks:
+  jml_network:
+    driver: bridge
+
