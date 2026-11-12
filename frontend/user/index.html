@@ -1623,16 +1623,17 @@
        ========================================================================== */
       .toast-container {
         position: fixed;
-        top: 24px;
+        bottom: 24px;
         right: 24px;
         z-index: 9999;
         display: flex;
-        flex-direction: column;
+        flex-direction: column-reverse;
         gap: 10px;
         pointer-events: none;
       }
       .toast {
         pointer-events: auto;
+        cursor: pointer;
         background: #ffffff;
         border-left: 4px solid var(--success);
         border-radius: var(--radius-sm);
@@ -1641,8 +1642,8 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        min-width: 320px;
-        max-width: 400px;
+        min-width: 300px;
+        max-width: 380px;
         transform: translateX(120%);
         opacity: 0;
         transition:
@@ -1792,11 +1793,9 @@
           <span>✉️ Hỗ trợ: <strong style="color: #fff;">cskh@jmlstore.vn</strong></span>
         </div>
         <div class="top-links">
+          <a href="products.html" style="color: #fb923c; font-weight: 700;">🛍️ Tất Cả Sản Phẩm (Bộ Lọc)</a>
           <a href="#" onclick="showToast('Thông báo', 'Hệ thống tra cứu đơn hàng trực tuyến đang hoạt động'); return false;">Tra cứu đơn hàng</a>
           <a href="#" onclick="showToast('Thông báo', 'Tải ứng dụng JML Store trên iOS / Android'); return false;">Tải ứng dụng</a>
-          <a href="../admin/index.html" style="color: #fdba74; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Chuyển sang trang Quản trị Sàn JML Store">
-            <span>🛡️ Kênh Quản Trị Sàn (Admin)</span>
-          </a>
         </div>
       </div>
     </div>
@@ -1855,6 +1854,31 @@
 
         <!-- Actions -->
         <div class="header-actions">
+          <!-- Notification Button -->
+          <div style="position: relative">
+            <button
+              aria-label="Đơn hàng của tôi"
+              class="cart-btn"
+              onclick="openUserOrdersModal()"
+              title="Xem Lịch sử Đơn hàng đã đặt"
+            >
+              <svg
+                fill="none"
+                height="21"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="21"
+              >
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </button>
+          </div>
+
           <!-- Notification Button -->
           <div style="position: relative">
             <button
@@ -1987,8 +2011,8 @@
               class="user-profile"
               id="userProfileBtn"
             >
-              <div class="user-avatar">AD</div>
-              <span style="font-size: 13px; font-weight: 600">Anh Đức</span>
+              <div class="user-avatar" id="headerUserAvatar">KH</div>
+              <span id="headerUserName" style="font-size: 13px; font-weight: 600">Khách hàng</span>
               <svg
                 width="12"
                 height="12"
@@ -2004,7 +2028,7 @@
               class="cart-dropdown"
               id="userDropdown"
               style="
-                width: 240px;
+                width: 250px;
                 padding: 8px 0;
                 gap: 0;
               "
@@ -2017,19 +2041,20 @@
                   color: var(--text-muted);
                 "
               >
-                Tài khoản:
+                Tài khoản đang dùng:
                 <strong
+                  id="dropdownUserFullName"
                   style="
                     color: var(--secondary);
                     display: block;
                     font-size: 13px;
                   "
-                  >Anh Đức (VIP Member)</strong
+                  >Khách vãng lai (Chưa đăng nhập)</strong
                 >
               </div>
               <a
                 href="#"
-                onclick="showToast('Hồ sơ', 'Mở trang hồ sơ cá nhân'); return false;"
+                onclick="openCustomerAuthModal('login'); return false;"
                 style="
                   display: flex;
                   align-items: center;
@@ -2047,10 +2072,11 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                Hồ sơ cá nhân
+                Đăng nhập / Đăng ký Khách
               </a>
               <a
-                href="../admin/index.html"
+                href="#"
+                onclick="openUserOrdersModal(); return false;"
                 style="
                   display: flex;
                   align-items: center;
@@ -2058,24 +2084,23 @@
                   padding: 10px 16px;
                   font-size: 13px;
                   font-weight: 600;
-                  color: #0D6EFD;
+                  color: var(--primary);
                   transition: background 0.2s;
                 "
                 onmouseover="this.style.background = 'var(--surface-dim)'"
                 onmouseout="this.style.background = 'transparent'"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
                 </svg>
-                Quản Trị Sàn (Admin)
+                Đơn hàng đã đặt (Lịch sử)
               </a>
               <div style="height: 1px; background: var(--border); margin: 4px 0"></div>
               <a
                 href="#"
-                onclick="showToast('Đăng xuất', 'Bạn đã đăng xuất tài khoản'); return false;"
+                onclick="handleUserLogout(); return false;"
                 style="
                   display: flex;
                   align-items: center;
@@ -2094,7 +2119,7 @@
                   <polyline points="16 17 21 12 16 7"></polyline>
                   <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
-                Đăng xuất
+                Đăng xuất / Đổi tài khoản
               </a>
             </div>
           </div>
@@ -2428,13 +2453,16 @@
 
         <!-- Recommend Section (Gợi Ý Hôm Nay) -->
         <section class="recommend-section reveal-on-scroll revealed">
-          <div class="section-title-wrap">
+          <div class="section-title-wrap" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
             <div>
               <h2 class="section-title">Gợi Ý Hôm Nay</h2>
               <p class="section-subtitle">
                 Sản phẩm được gợi ý riêng cho gu thẩm mỹ của bạn (Nhấp vào ảnh để xem chi tiết sản phẩm)
               </p>
             </div>
+            <a href="products.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #fff7ed; border: 1px solid #fdba74; color: #ea580c; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='#ffedd5'" onmouseout="this.style.background='#fff7ed'">
+              Xem Bố Cục Lưới 2 Cột &amp; Bộ Lọc →
+            </a>
           </div>
           <!-- Category Filter Tabs -->
           <div class="recommend-tabs">
@@ -2502,7 +2530,6 @@
               <a href="#">Tuyển dụng nhân tài</a>
               <a href="#">Điều khoản dịch vụ</a>
               <a href="#">Chính sách bảo mật</a>
-              <a href="../admin/index.html" style="color: #fdba74; font-weight: 600;">Kênh Quản Trị Sàn (Admin)</a>
             </div>
           </div>
 
@@ -2561,7 +2588,8 @@
       // --------------------------------------------------------------------------
       // DỮ LIỆU SẢN PHẨM MẪU (DATA STORE KÈM BỘ SƯU TẬP ẢNH ĐA GÓC CHỤP CHO MỖI SẢN PHẨM)
       // --------------------------------------------------------------------------
-      const FLASH_PRODUCTS = [
+      const API_BASE_URL = "http://127.0.0.1:8000";
+      const DEFAULT_FLASH_PRODUCTS = [
         {
           id: 101,
           category: "audio",
@@ -2684,7 +2712,7 @@
         },
       ];
 
-      const RECOMMEND_PRODUCTS = [
+      const DEFAULT_RECOMMEND_PRODUCTS = [
         {
           id: 201,
           category: "tech",
@@ -2907,6 +2935,42 @@
         },
       ];
 
+      // --------------------------------------------------------------------------
+      // ĐỒNG BỘ DỮ LIỆU SẢN PHẨM TỪ FASTAPI + SQL DATABASE
+      // --------------------------------------------------------------------------
+      let FLASH_PRODUCTS = JSON.parse(localStorage.getItem('JML_FLASH_PRODUCTS') || 'null') || DEFAULT_FLASH_PRODUCTS;
+      let RECOMMEND_PRODUCTS = JSON.parse(localStorage.getItem('JML_RECOMMEND_PRODUCTS') || 'null') || DEFAULT_RECOMMEND_PRODUCTS;
+
+      async function loadProductsFromFastAPI() {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/products`);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.flash_products)) {
+              FLASH_PRODUCTS = data.flash_products;
+            }
+            if (Array.isArray(data.recommend_products)) {
+              RECOMMEND_PRODUCTS = data.recommend_products;
+            }
+            renderFlashSaleProducts();
+            renderRecommendProducts("all");
+          }
+        } catch (err) {
+          // Chạy ở chế độ Local nếu chưa bật server FastAPI
+          FLASH_PRODUCTS = JSON.parse(localStorage.getItem('JML_FLASH_PRODUCTS') || 'null') || DEFAULT_FLASH_PRODUCTS;
+          RECOMMEND_PRODUCTS = JSON.parse(localStorage.getItem('JML_RECOMMEND_PRODUCTS') || 'null') || DEFAULT_RECOMMEND_PRODUCTS;
+          renderFlashSaleProducts();
+          renderRecommendProducts("all");
+        }
+      }
+
+      window.addEventListener('storage', () => {
+        loadProductsFromFastAPI();
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) loadProductsFromFastAPI();
+      });
+
       // Dữ liệu mô tả chi tiết & thông số kỹ thuật bổ sung cho trang chi tiết
       const PRODUCT_EXTRA_INFO = {
         101: {
@@ -3040,6 +3104,14 @@
       function renderFlashSaleProducts() {
         const container = document.getElementById("flashProductsContainer");
         if (!container) return;
+        if (!FLASH_PRODUCTS || FLASH_PRODUCTS.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 36px 16px; background: #fff; border-radius: 16px; border: 1px dashed #cbd5e1; margin: 8px 0;">
+              <p style="font-weight: 600; font-size: 14px; color: #64748b;">Chưa có sản phẩm Flash Sale nào đang chạy</p>
+            </div>
+          `;
+          return;
+        }
         container.innerHTML = FLASH_PRODUCTS.map((product) => {
           const percentSold = Math.round(
             (product.sold / product.totalStock) * 100,
@@ -3067,7 +3139,7 @@
                   <span>${percentSold}%</span>
                 </div>
               </div>
-              <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}')">
+              <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || '').replace(/'/g, "\\'")}')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                 Thêm Vào Giỏ
               </button>
@@ -3086,6 +3158,17 @@
             ? RECOMMEND_PRODUCTS
             : RECOMMEND_PRODUCTS.filter((p) => p.category === category);
 
+        if (!filtered || filtered.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: #fff; border-radius: 16px; border: 1px dashed #cbd5e1; margin: 16px 0;">
+              <div style="font-size: 36px; margin-bottom: 8px;">📦</div>
+              <p style="font-weight: 700; font-size: 15px; color: #334155; margin-bottom: 4px;">Hiện chưa có sản phẩm nào trên kệ</p>
+              <p style="font-size: 13px; color: #64748b;">Admin có thể thêm sản phẩm mới từ trang Quản trị Sàn để xuất hiện tại đây.</p>
+            </div>
+          `;
+          return;
+        }
+
         container.innerHTML = filtered
           .map((product) => {
             const mainImg = product.images ? product.images[0] : product.image;
@@ -3103,7 +3186,7 @@
                 <span class="original-price">${formatCurrency(product.originalPrice)}</span>
               </div>
               <div style="margin-top: auto;">
-                <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}')">
+                <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || '').replace(/'/g, "\\'")}')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                   Thêm Vào Giỏ
                 </button>
@@ -3235,7 +3318,7 @@
                   <span class="original-price">${formatCurrency(rel.originalPrice)}</span>
                 </div>
                 <div style="margin-top: auto;">
-                  <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${rel.title.replace(/'/g, "\\'")}', ${rel.price}, '${relImg}')">
+                  <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${rel.title.replace(/'/g, "\\'")}', ${rel.price}, '${relImg}', '${(rel.shopName || '').replace(/'/g, "\\'")}')">
                     Thêm Vào Giỏ
                   </button>
                 </div>
@@ -3577,13 +3660,15 @@
         if (!currentDetailProduct) return;
         const mainImg = currentDetailProduct.images ? currentDetailProduct.images[0] : currentDetailProduct.image;
         const titleWithVariant = `${currentDetailProduct.title} (${currentSelectedColor || "Tiêu chuẩn"})`;
+        const shopName = currentDetailProduct.shopName || "Trungshop";
         
         for (let i = 0; i < currentDetailQty; i++) {
           cartItems.push({
             title: titleWithVariant,
             price: currentDetailProduct.price,
             image: mainImg,
-            qty: 1
+            qty: 1,
+            shopName: shopName
           });
         }
         updateCartDisplay();
@@ -3806,12 +3891,13 @@
         closeAllDropdowns();
       });
 
-      function addToCart(title, price, image) {
+      function addToCart(title, price, image, shopName = "") {
+        const productShop = shopName || "Trungshop";
         const existing = cartItems.find((item) => item.title === title);
         if (existing) {
           existing.qty = (existing.qty || 1) + 1;
         } else {
-          cartItems.push({ title, price, image, qty: 1 });
+          cartItems.push({ title, price, image, qty: 1, shopName: productShop });
         }
         updateCartDisplay();
 
@@ -3872,12 +3958,653 @@
           showToast("Thông báo", "Giỏ hàng đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.");
           return;
         }
-        showToast("Khởi tạo thanh toán", `Đơn hàng trị giá ${cartTotalSum.textContent} đã được xác nhận.`);
+        openCheckoutModal();
+      }
+
+      function syncCustomerAuthHeader() {
+        const rawCust = localStorage.getItem("JML_CUSTOMER_USER") || localStorage.getItem("JML_AUTH_USER");
+        const avatarEl = document.getElementById("headerUserAvatar");
+        const nameEl = document.getElementById("headerUserName");
+        const dropNameEl = document.getElementById("dropdownUserFullName");
+
+        if (rawCust) {
+          try {
+            const user = JSON.parse(rawCust);
+            if (user && user.full_name) {
+              const words = user.full_name.trim().split(/\s+/);
+              const initials = words.length >= 2
+                ? (words[0][0] + words[words.length - 1][0]).toUpperCase()
+                : user.full_name.slice(0, 2).toUpperCase();
+              if (avatarEl) avatarEl.textContent = initials;
+              if (nameEl) nameEl.textContent = user.full_name;
+              if (dropNameEl) {
+                const roleLabel = user.role === "admin" ? "Admin" : user.role === "seller" ? "Chủ Shop" : (user.rank || "Thành viên");
+                dropNameEl.textContent = `${user.full_name} (${roleLabel})`;
+              }
+              return;
+            }
+          } catch (e) {}
+        }
+        if (avatarEl) avatarEl.textContent = "KH";
+        if (nameEl) nameEl.textContent = "Đăng nhập";
+        if (dropNameEl) dropNameEl.textContent = "Khách vãng lai (Chưa đăng nhập)";
+      }
+
+      function handleUserLogout() {
+        localStorage.removeItem("JML_CUSTOMER_USER");
+        localStorage.removeItem("JML_AUTH_USER");
+        syncCustomerAuthHeader();
+        showToast("Đăng xuất", "Bạn đã đăng xuất tài khoản thành công!");
+      }
+
+      function openCustomerAuthModal(mode = 'login') {
+        const modal = document.getElementById("customerAuthModal");
+        if (!modal) return;
+        modal.style.display = "flex";
+        switchCustAuthMode(mode);
+      }
+
+      function closeCustomerAuthModal() {
+        const modal = document.getElementById("customerAuthModal");
+        if (modal) modal.style.display = "none";
+      }
+
+      function switchCustAuthMode(mode) {
+        const tabLogin = document.getElementById("custTabLogin");
+        const tabReg = document.getElementById("custTabRegister");
+        const formLogin = document.getElementById("custLoginForm");
+        const formReg = document.getElementById("custRegisterForm");
+        const alertEl = document.getElementById("custAuthAlert");
+        if (alertEl) alertEl.style.display = "none";
+
+        if (mode === 'login') {
+          tabLogin.style.background = "#fff";
+          tabLogin.style.color = "#0d6efd";
+          tabLogin.style.borderBottom = "2px solid #0d6efd";
+          tabReg.style.background = "transparent";
+          tabReg.style.color = "#64748b";
+          tabReg.style.borderBottom = "2px solid transparent";
+          formLogin.style.display = "flex";
+          formReg.style.display = "none";
+        } else {
+          tabReg.style.background = "#fff";
+          tabReg.style.color = "#0d6efd";
+          tabReg.style.borderBottom = "2px solid #0d6efd";
+          tabLogin.style.background = "transparent";
+          tabLogin.style.color = "#64748b";
+          tabLogin.style.borderBottom = "2px solid transparent";
+          formLogin.style.display = "none";
+          formReg.style.display = "flex";
+        }
+      }
+
+      async function handleCustomerLoginSubmit(e) {
+        e.preventDefault();
+        const username = document.getElementById("custLoginUser").value.trim();
+        const password = document.getElementById("custLoginPass").value;
+        const alertEl = document.getElementById("custAuthAlert");
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password, role: "customer" })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alertEl.style.display = "block";
+            alertEl.style.background = "#fef2f2";
+            alertEl.style.color = "#ef4444";
+            alertEl.style.border = "1px solid #fecaca";
+            alertEl.textContent = data.detail || "Đăng nhập thất bại!";
+            return;
+          }
+          localStorage.setItem("JML_CUSTOMER_USER", JSON.stringify(data.user));
+          syncCustomerAuthHeader();
+          closeCustomerAuthModal();
+          showToast("Đăng nhập thành công", `Chào mừng ${data.user.full_name} quay trở lại!`);
+        } catch (err) {
+          alertEl.style.display = "block";
+          alertEl.style.background = "#fef2f2";
+          alertEl.style.color = "#ef4444";
+          alertEl.textContent = "Không thể kết nối máy chủ!";
+        }
+      }
+
+      async function handleCustomerRegisterSubmit(e) {
+        e.preventDefault();
+        const name = document.getElementById("custRegName").value.trim();
+        const phone = document.getElementById("custRegPhone").value.trim();
+        const password = document.getElementById("custRegPass").value;
+        const address = document.getElementById("custRegAddress").value.trim();
+        const alertEl = document.getElementById("custAuthAlert");
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: phone,
+              password: password,
+              role: "customer",
+              full_name: name,
+              phone: phone,
+              email: `${phone}@jmlstore.vn`,
+              address: address
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alertEl.style.display = "block";
+            alertEl.style.background = "#fef2f2";
+            alertEl.style.color = "#ef4444";
+            alertEl.style.border = "1px solid #fecaca";
+            alertEl.textContent = data.detail || "Đăng ký thất bại!";
+            return;
+          }
+          localStorage.setItem("JML_CUSTOMER_USER", JSON.stringify(data.user));
+          syncCustomerAuthHeader();
+          closeCustomerAuthModal();
+          showToast("Đăng ký thành công", `Chúc mừng ${data.user.full_name} đã tạo tài khoản thành công!`);
+        } catch (err) {
+          alertEl.style.display = "block";
+          alertEl.style.background = "#fef2f2";
+          alertEl.style.color = "#ef4444";
+          alertEl.textContent = "Không thể kết nối máy chủ!";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        syncCustomerAuthHeader();
+      });
+
+      // Quản lý Voucher & Phương Thức Vận Chuyển
+      let appliedVoucher = null;
+
+      const AVAILABLE_VOUCHERS = {
+        "FREESHIP": { code: "FREESHIP", type: "shipping", desc: "Miễn phí 100% tiền vận chuyển", minOrder: 0 },
+        "JML50K": { code: "JML50K", type: "fixed", amount: 50000, desc: "Giảm ngay 50.000 ₫", minOrder: 100000 },
+        "GIAM10": { code: "GIAM10", type: "percent", percent: 10, maxAmount: 100000, desc: "Giảm 10% (tối đa 100.000 ₫)", minOrder: 0 },
+        "VIP100K": { code: "VIP100K", type: "fixed", amount: 100000, desc: "Giảm 100.000 ₫ cho đơn từ 1.000.000 ₫", minOrder: 1000000 }
+      };
+
+      function openCheckoutModal() {
+        const modal = document.getElementById("userCheckoutModal");
+        if (!modal) return;
+
+        // Reset voucher
+        appliedVoucher = null;
+        const vInput = document.getElementById("checkoutVoucherInput");
+        if (vInput) vInput.value = "";
+        const vStatus = document.getElementById("voucherStatusText");
+        if (vStatus) {
+          vStatus.style.display = "none";
+          vStatus.textContent = "";
+        }
+
+        // Tự động điền thông tin Khách hàng đang đăng nhập nếu có
+        const rawCust = localStorage.getItem("JML_CUSTOMER_USER") || localStorage.getItem("JML_AUTH_USER");
+        if (rawCust) {
+          try {
+            const u = JSON.parse(rawCust);
+            if (u.full_name) document.getElementById("checkoutBuyerName").value = u.full_name;
+            if (u.phone) document.getElementById("checkoutBuyerPhone").value = u.phone;
+            if (u.address) document.getElementById("checkoutBuyerAddress").value = u.address;
+          } catch (e) {}
+        }
+
+        updateCheckoutTotals();
+        modal.style.display = "flex";
+      }
+
+      function closeCheckoutModal() {
+        const modal = document.getElementById("userCheckoutModal");
+        if (modal) modal.style.display = "none";
+      }
+
+      function updateCheckoutTotals() {
+        const subtotal = cartItems.reduce((sum, item) => sum + item.price * (item.qty || 1), 0);
+        const count = cartItems.reduce((sum, item) => sum + (item.qty || 1), 0);
+
+        const shipSelect = document.getElementById("checkoutShippingMethod");
+        const selectedOpt = shipSelect ? shipSelect.options[shipSelect.selectedIndex] : null;
+        let baseShipFee = selectedOpt ? parseInt(selectedOpt.getAttribute("data-fee") || "15000") : 15000;
+        let shipName = selectedOpt ? (selectedOpt.getAttribute("data-name") || "Tiêu Chuẩn (GHN Express)") : "Tiêu Chuẩn (GHN Express)";
+
+        let discountAmount = 0;
+        let isFreeShipping = false;
+
+        if (appliedVoucher) {
+          if (appliedVoucher.type === "shipping") {
+            isFreeShipping = true;
+            discountAmount = baseShipFee;
+          } else if (appliedVoucher.type === "fixed") {
+            discountAmount = Math.min(appliedVoucher.amount, subtotal);
+          } else if (appliedVoucher.type === "percent") {
+            const calculated = Math.round(subtotal * (appliedVoucher.percent / 100));
+            discountAmount = Math.min(calculated, appliedVoucher.maxAmount || calculated);
+          }
+        }
+
+        const effectiveShipFee = isFreeShipping ? 0 : baseShipFee;
+        const finalTotal = Math.max(0, subtotal + baseShipFee - discountAmount);
+
+        // Cập nhật giao diện tóm tắt
+        const countEl = document.getElementById("checkoutModalItemCount");
+        if (countEl) countEl.textContent = `${count} sản phẩm • ${formatCurrency(subtotal)}`;
+
+        const shipLabelEl = document.getElementById("checkoutShippingLabel");
+        if (shipLabelEl) shipLabelEl.textContent = `Vận chuyển (${shipName.split(" ")[0]}):`;
+
+        const shipFeeEl = document.getElementById("checkoutShippingFeeText");
+        if (shipFeeEl) {
+          if (isFreeShipping) {
+            shipFeeEl.innerHTML = `<span style="color: #10b981; font-weight: 700;">Miễn phí (${appliedVoucher.code})</span>`;
+          } else {
+            shipFeeEl.textContent = formatCurrency(baseShipFee);
+          }
+        }
+
+        const discountRow = document.getElementById("checkoutDiscountRow");
+        const discountLabel = document.getElementById("checkoutDiscountLabel");
+        const discountAmountEl = document.getElementById("checkoutDiscountAmountText");
+        if (discountRow) {
+          if (appliedVoucher && discountAmount > 0) {
+            discountRow.style.display = "flex";
+            if (discountLabel) discountLabel.textContent = `Mã giảm (${appliedVoucher.code}):`;
+            if (discountAmountEl) discountAmountEl.textContent = `-${formatCurrency(discountAmount)}`;
+          } else {
+            discountRow.style.display = "none";
+          }
+        }
+
+        const totalSumEl = document.getElementById("checkoutModalTotalSum");
+        if (totalSumEl) totalSumEl.textContent = formatCurrency(finalTotal);
+
+        return {
+          subtotal,
+          baseShipFee,
+          effectiveShipFee,
+          discountAmount,
+          finalTotal,
+          shipName
+        };
+      }
+
+      function selectQuickVoucher(code) {
+        const input = document.getElementById("checkoutVoucherInput");
+        if (input) input.value = code;
+        applyVoucherCode();
+      }
+
+      function applyVoucherCode() {
+        const input = document.getElementById("checkoutVoucherInput");
+        const code = (input ? input.value : "").trim().toUpperCase();
+        const statusEl = document.getElementById("voucherStatusText");
+
+        if (!code) {
+          appliedVoucher = null;
+          if (statusEl) statusEl.style.display = "none";
+          updateCheckoutTotals();
+          return;
+        }
+
+        const v = AVAILABLE_VOUCHERS[code];
+        if (!v) {
+          if (statusEl) {
+            statusEl.style.display = "inline";
+            statusEl.style.color = "#ef4444";
+            statusEl.textContent = "✕ Mã không tồn tại hoặc đã hết lượt!";
+          }
+          appliedVoucher = null;
+          updateCheckoutTotals();
+          return;
+        }
+
+        const subtotal = cartItems.reduce((sum, item) => sum + item.price * (item.qty || 1), 0);
+        if (v.minOrder && subtotal < v.minOrder) {
+          if (statusEl) {
+            statusEl.style.display = "inline";
+            statusEl.style.color = "#ef4444";
+            statusEl.textContent = `✕ Mã ${code} chỉ áp dụng cho đơn từ ${formatCurrency(v.minOrder)}!`;
+          }
+          appliedVoucher = null;
+          updateCheckoutTotals();
+          return;
+        }
+
+        appliedVoucher = v;
+        if (statusEl) {
+          statusEl.style.display = "inline";
+          statusEl.style.color = "#10b981";
+          statusEl.innerHTML = `✓ Đã áp dụng <strong>${code}</strong> <button type="button" onclick="cancelVoucher()" style="background: none; border: none; color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">Hủy mã</button>`;
+        }
+        updateCheckoutTotals();
+        showToast("Áp dụng mã thành công", `Mã ${code} đã được áp dụng: ${v.desc}!`);
+      }
+
+      function cancelVoucher() {
+        appliedVoucher = null;
+        const input = document.getElementById("checkoutVoucherInput");
+        if (input) input.value = "";
+        const statusEl = document.getElementById("voucherStatusText");
+        if (statusEl) statusEl.style.display = "none";
+        updateCheckoutTotals();
+        showToast("Đã hủy voucher", "Đã gỡ bỏ mã giảm giá khỏi đơn hàng.");
+      }
+
+      async function confirmCheckoutOrder(e) {
+        if (e) e.preventDefault();
+
+        const name = (document.getElementById("checkoutBuyerName")?.value || "Khách mua hàng").trim();
+        const phone = (document.getElementById("checkoutBuyerPhone")?.value || "0908123456").trim();
+        const address = (document.getElementById("checkoutBuyerAddress")?.value || "Quận 1, TP.HCM").trim();
+
+        const totals = updateCheckoutTotals();
+        const totalNum = totals.finalTotal;
+        const totalFormatted = formatCurrency(totalNum);
+        const feeFormatted = "-" + formatCurrency(Math.round(totalNum * 0.07));
+        const netFormatted = formatCurrency(Math.round(totalNum * 0.93));
+
+        const orderShopName = cartItems[0]?.shopName || "JML Official Store";
+        const shippingMethod = totals.shipName;
+        const voucherCode = appliedVoucher ? appliedVoucher.code : "";
+        const discountAmount = totals.discountAmount;
+        const paymentMethod = document.getElementById("checkoutPaymentMethod")?.value || "cod";
+
+        const itemsPayload = cartItems.map(item => ({
+          name: item.title,
+          variant: "Chính hãng • Shop: " + (item.shopName || orderShopName),
+          price: formatCurrency(item.price),
+          qty: String(item.qty || 1),
+          subtotal: formatCurrency(item.price * (item.qty || 1))
+        }));
+
+        let orderId = "#MP-" + Math.floor(1000 + Math.random() * 9000);
+
+        // 1. Gọi FastAPI lưu đơn hàng vào Database
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/orders`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              buyer_name: name,
+              buyer_phone: phone,
+              buyer_address: address,
+              shop_name: orderShopName,
+              total: totalFormatted,
+              numeric_total: totalNum,
+              fee: feeFormatted,
+              net: netFormatted,
+              shipping_method: shippingMethod,
+              shipping_fee: totals.baseShipFee,
+              discount_code: voucherCode,
+              discount_amount: discountAmount,
+              payment_method: paymentMethod,
+              items: itemsPayload
+            })
+          });
+
+          if (res.status === 403) {
+            const errData = await res.json();
+            alert("❌ TÀI KHOẢN ĐÃ BỊ KHÓA!\n\n" + (errData.detail || "Tài khoản này đã bị Ban Quản Trị Sàn khóa."));
+            return;
+          }
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.order_id) orderId = data.order_id;
+          }
+        } catch (err) {
+          // Fallback kiểm tra banned trong localStorage nếu chưa bật port 8000
+          const bannedList = JSON.parse(localStorage.getItem('JML_BANNED_CUSTOMERS') || '[]');
+          if (bannedList.includes(phone) || bannedList.includes(name)) {
+            alert("❌ TÀI KHOẢN ĐÃ BỊ KHÓA!\n\nSố điện thoại/Tài khoản (" + phone + ") đã bị Ban Quản Trị Sàn tạm khóa.");
+            return;
+          }
+        }
+
+        // 2. Đồng bộ dự phòng vào localStorage để tab Admin nhận tín hiệu tức thì
+        const newOrder = {
+          id: orderId,
+          key: orderId.replace("#", ""),
+          escrowBadge: "🔒 Sàn đang giữ tiền",
+          escrowClass: "bg-primary-50 text-primary-500",
+          time: "Thời gian đặt: " + new Date().toLocaleString("vi-VN") + " • Vận chuyển: " + shippingMethod + (voucherCode ? " • Voucher: " + voucherCode : ""),
+          shopName: orderShopName,
+          shopAddress: "Kho lấy hàng: Nguyễn Thị Minh Khai, Quận 1, TP.HCM",
+          buyerName: name + " (" + phone + ")",
+          buyerPhone: phone,
+          buyerAddress: address,
+          total: totalFormatted,
+          numericTotal: totalNum,
+          fee: feeFormatted,
+          net: netFormatted,
+          shippingMethod: shippingMethod,
+          voucherCode: voucherCode,
+          status: "escrow",
+          items: itemsPayload
+        };
+
+        const orders = JSON.parse(localStorage.getItem("JML_ORDERS") || "[]");
+        orders.unshift(newOrder);
+        localStorage.setItem("JML_ORDERS", JSON.stringify(orders));
+        window.dispatchEvent(new Event("storage"));
+
         cartItems = [];
         updateCartDisplay();
-        setTimeout(() => {
-          if (cartDropdown) cartDropdown.classList.remove("active");
-        }, 1200);
+        closeCheckoutModal();
+        if (cartDropdown) cartDropdown.classList.remove("active");
+
+        showToast("Đặt hàng thành công", `Đơn hàng ${orderId} (${totalFormatted}) đã được lưu vào hệ thống!`);
+        openUserOrdersModal();
+      }
+
+      // --------------------------------------------------------------------------
+      // MODAL: LỊCH SỬ ĐƠN HÀNG ĐÃ ĐẶT CỦA KHÁCH HÀNG
+      // --------------------------------------------------------------------------
+      async function openUserOrdersModal() {
+        const modal = document.getElementById("userOrdersModal");
+        if (!modal) return;
+        modal.style.display = "flex";
+        await loadUserOrdersList();
+      }
+
+      function closeUserOrdersModal() {
+        const modal = document.getElementById("userOrdersModal");
+        if (modal) modal.style.display = "none";
+      }
+
+      async function loadUserOrdersList() {
+        const container = document.getElementById("userOrdersListBody");
+        if (!container) return;
+
+        container.innerHTML = `
+          <div style="padding: 40px; text-align: center; color: #94a3b8;">
+            <div style="font-size: 24px; margin-bottom: 8px;">⏳</div>
+            <p style="font-size: 13px;">Đang tải lịch sử đơn hàng của bạn...</p>
+          </div>
+        `;
+
+        let phone = "";
+        let name = "";
+        const rawCust = localStorage.getItem("JML_CUSTOMER_USER") || localStorage.getItem("JML_AUTH_USER");
+        if (rawCust) {
+          try {
+            const u = JSON.parse(rawCust);
+            if (u.phone) phone = u.phone;
+            if (u.full_name) name = u.full_name;
+          } catch (e) {}
+        }
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/user/orders?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`);
+          if (res.ok) {
+            const data = await res.json();
+            renderUserOrders(data.orders || []);
+            return;
+          }
+        } catch (err) {}
+
+        // Fallback từ localStorage
+        const localOrders = JSON.parse(localStorage.getItem("JML_ORDERS") || "[]");
+        renderUserOrders(localOrders.map(o => ({
+          order_key: o.key,
+          id_display: o.id,
+          created_at: o.time || "Hôm nay",
+          shop_name: o.shopName,
+          status: o.status || "preparing",
+          escrow_badge: o.escrowBadge || "📦 Shop đang chuẩn bị đơn",
+          total: o.total,
+          items: o.items || []
+        })));
+      }
+
+      function renderUserOrders(orders) {
+        const container = document.getElementById("userOrdersListBody");
+        const countBadge = document.getElementById("userOrdersTotalCount");
+        if (countBadge) countBadge.textContent = `${orders.length} đơn hàng`;
+
+        if (!container) return;
+
+        if (!orders || orders.length === 0) {
+          container.innerHTML = `
+            <div style="padding: 48px 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
+              <div style="font-size: 36px; margin-bottom: 10px;">📦</div>
+              <p style="font-weight: 700; font-size: 14px; color: #1e293b; margin-bottom: 4px;">Bạn chưa có đơn hàng nào</p>
+              <p style="font-size: 12px; color: #94a3b8;">Hãy dạo một vòng trang chủ và chọn món đồ yêu thích để đặt hàng ngay!</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = orders.map(o => {
+          // Trạng thái theo phong cách Shopee
+          let badgeText = o.escrow_badge || "📦 Shop đang chuẩn bị đơn";
+          let badgeBg = "#fffbeb";
+          let badgeColor = "#d97706";
+          let badgeBorder = "#fde68a";
+
+          if (o.status === "shipping" || badgeText.includes("vận chuyển")) {
+            badgeText = "🚚 Đang vận chuyển";
+            badgeBg = "#eff6ff";
+            badgeColor = "#2563eb";
+            badgeBorder = "#bfdbfe";
+          } else if (o.status === "delivered" || o.status === "released" || badgeText.includes("giao hàng") || badgeText.includes("hoàn tất")) {
+            badgeText = "✓ Đã giao hàng thành công";
+            badgeBg = "#ecfdf5";
+            badgeColor = "#059669";
+            badgeBorder = "#a7f3d0";
+          } else if (o.status === "dispute" || badgeText.includes("tranh chấp")) {
+            badgeText = "⚠️ Đang xử lý khiếu nại";
+            badgeBg = "#fef2f2";
+            badgeColor = "#dc2626";
+            badgeBorder = "#fecaca";
+          } else {
+            badgeText = "📦 Shop đang chuẩn bị đơn";
+            badgeBg = "#fffbeb";
+            badgeColor = "#d97706";
+            badgeBorder = "#fde68a";
+          }
+
+          return `
+            <div class="user-order-card" data-order-key="${o.order_key}" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); flex-shrink: 0; width: 100%;">
+              <!-- Order Header -->
+              <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-weight: 800; color: #0f172a;">${o.id_display || "#" + o.order_key}</span>
+                  <span style="color: #cbd5e1;">•</span>
+                  <span style="color: #64748b;">Shop: <strong style="color: #ea580c;">${o.shop_name || "Trungshop"}</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="order-status-badge" style="padding: 4px 12px; border-radius: 99px; font-weight: 700; font-size: 11px; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder};">
+                    ${badgeText}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Order Items List -->
+              <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+                ${(o.items || []).map(it => `
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px;">
+                    <div style="min-width: 0;">
+                      <p style="font-weight: 700; color: #1e293b; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${it.name}</p>
+                      <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${it.variant || "Chính hãng"} • Số lượng: <strong>x${it.qty || 1}</strong></p>
+                    </div>
+                    <span style="font-weight: 700; color: #0f172a; white-space: nowrap;">${it.subtotal || it.price}</span>
+                  </div>
+                `).join("")}
+              </div>
+
+              <!-- Order Footer -->
+              <div style="padding: 12px 16px; background: #fafafa; border-top: 1px dashed #e2e8f0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px;">
+                <span style="color: #64748b;">${o.time_info || o.created_at || ""}</span>
+                <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+                  <div>
+                    <span style="color: #64748b; margin-right: 6px;">Tổng thanh toán:</span>
+                    <strong style="font-size: 15px; color: #ea580c; font-weight: 800;">${o.total}</strong>
+                  </div>
+                  <!-- Duy Nhất 1 Nút Xác Nhận Ở Chân Đơn Hàng -->
+                  ${(o.status === 'shipping' || (o.escrow_badge && o.escrow_badge.includes('vận chuyển'))) ? `
+                    <button onclick="handleUserConfirmReceived(this, '${o.order_key}')" style="padding: 7px 16px; border-radius: 8px; border: none; background: #16a34a; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(22,163,74,0.3); display: inline-flex; align-items: center; gap: 5px;">
+                      <span>✓ Đã Nhận Được Hàng</span>
+                    </button>
+                  ` : (o.status === 'delivered' || o.status === 'released') ? `
+                    <span style="padding: 4px 10px; border-radius: 6px; background: #ecfdf5; color: #15803d; font-weight: 700; font-size: 11px; border: 1px solid #bbf7d0;">
+                      ✓ Đã nhận hàng thành công
+                    </span>
+                  ` : `
+                    <span style="padding: 4px 10px; border-radius: 6px; background: #fef3c7; color: #b45309; font-weight: 600; font-size: 11px;">
+                      Chờ shop gửi hàng
+                    </span>
+                  `}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      async function handleUserConfirmReceived(arg1, arg2) {
+        let btn = null;
+        let orderKey = '';
+        if (arg1 && arg1.nodeType === 1) {
+          btn = arg1;
+          orderKey = arg2;
+        } else {
+          orderKey = arg1;
+        }
+
+        const card = btn ? btn.closest('.user-order-card') : document.querySelector(`.user-order-card[data-order-key="${orderKey}"]`);
+        
+        // Cập nhật trạng thái trực tiếp trên giao diện tức thì (KHÔNG reload lại modal)
+        if (btn) {
+          btn.outerHTML = `
+            <span style="padding: 5px 12px; border-radius: 8px; background: #ecfdf5; color: #15803d; font-weight: 700; font-size: 12px; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; gap: 4px;">
+              <span>✓ Đã nhận hàng thành công</span>
+            </span>
+          `;
+        }
+
+        if (card) {
+          const badge = card.querySelector('.order-status-badge');
+          if (badge) {
+            badge.textContent = '✓ Đã giao hàng thành công';
+            badge.style.background = '#ecfdf5';
+            badge.style.color = '#059669';
+            badge.style.border = '1px solid #a7f3d0';
+          }
+        }
+
+        showToast("Thành công", "Bạn đã xác nhận nhận hàng thành công!");
+        window.dispatchEvent(new Event('storage'));
+
+        // Gửi lệnh ngầm đến FastAPI Backend
+        try {
+          await fetch(`${API_BASE_URL}/api/user/orders/${orderKey}/confirm-received`, {
+            method: 'PUT'
+          });
+        } catch (e) {}
       }
 
       // --------------------------------------------------------------------------
@@ -3895,7 +4622,16 @@
           <div class="toast-title">${title}</div>
           <div class="toast-msg">${message}</div>
         </div>
+        <button style="border: none; background: transparent; color: #94a3b8; font-size: 14px; cursor: pointer; padding: 2px 6px;">✕</button>
       `;
+
+        toast.onclick = () => {
+          toast.classList.remove("show");
+          toast.classList.add("hide");
+          setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+          }, 250);
+        };
 
         toastContainer.appendChild(toast);
 
@@ -3983,7 +4719,7 @@
                     <span class="original-price">${formatCurrency(product.originalPrice)}</span>
                   </div>
                   <div style="margin-top: auto;">
-                    <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}')">
+                    <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || '').replace(/'/g, "\\'")}')">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                       Thêm Vào Giỏ
                     </button>
@@ -4009,14 +4745,231 @@
         }
       }
 
-      // Khởi chạy render ban đầu
+      // Khởi chạy render ban đầu và đồng bộ dữ liệu từ FastAPI + SQL
       renderFlashSaleProducts();
       renderRecommendProducts("all");
+      loadProductsFromFastAPI();
 
       // Kiểm tra URL hash khi mở trang lần đầu
       if (window.location.hash.startsWith("#product/")) {
         checkUrlHash();
       }
     </script>
+
+    <!-- ==========================================================================
+         CUSTOMER AUTH MODAL (ĐĂNG NHẬP & ĐĂNG KÝ TRỰC TIẾP TẠI TRANG KHÁCH HÀNG)
+         ========================================================================== -->
+    <div id="customerAuthModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+      <div style="background: #fff; width: 100%; max-width: 440px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; font-family: inherit;">
+        <!-- Modal Header -->
+        <div style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #0d6efd, #1e40af); color: #fff;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px;">👤</div>
+            <div>
+              <h3 id="custAuthModalTitle" style="font-size: 16px; font-weight: 700; margin: 0; color: #fff;">Tài Khoản Khách Hàng</h3>
+              <p style="font-size: 11px; color: #bfdbfe; margin: 2px 0 0 0;">Đăng nhập hoặc tạo tài khoản mua sắm</p>
+            </div>
+          </div>
+          <button onclick="closeCustomerAuthModal()" style="border: none; background: transparent; font-size: 20px; color: #fff; cursor: pointer; opacity: 0.8;">✕</button>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+          <button type="button" id="custTabLogin" onclick="switchCustAuthMode('login')" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 700; border: none; background: #fff; color: #0d6efd; border-bottom: 2px solid #0d6efd; cursor: pointer;">
+            Đăng Nhập
+          </button>
+          <button type="button" id="custTabRegister" onclick="switchCustAuthMode('register')" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 600; border: none; background: transparent; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer;">
+            Đăng Ký Mới
+          </button>
+        </div>
+
+        <div style="padding: 24px;">
+          <!-- Alert Box -->
+          <div id="custAuthAlert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 16px;"></div>
+
+          <!-- Login Form -->
+          <form id="custLoginForm" onsubmit="handleCustomerLoginSubmit(event)" style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">Số điện thoại hoặc Tên đăng nhập *</label>
+              <input type="text" id="custLoginUser" required placeholder="VD: 0908123456" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; background: #f8fafc;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">Mật khẩu *</label>
+              <input type="password" id="custLoginPass" required placeholder="••••••••" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; background: #f8fafc;">
+            </div>
+            <button type="submit" style="padding: 12px; border-radius: 10px; border: none; background: #0d6efd; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(13,110,253,0.3); margin-top: 4px;">
+              Đăng Nhập Mua Sắm
+            </button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="custRegisterForm" onsubmit="handleCustomerRegisterSubmit(event)" style="display: none; flex-direction: column; gap: 12px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Họ và tên của bạn *</label>
+              <input type="text" id="custRegName" required placeholder="VD: Nguyễn Văn A" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; background: #f8fafc;">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Số điện thoại *</label>
+                <input type="tel" id="custRegPhone" required placeholder="0909123456" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; background: #f8fafc;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Mật khẩu *</label>
+                <input type="password" id="custRegPass" required placeholder="••••••••" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; background: #f8fafc;">
+              </div>
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Địa chỉ nhận hàng mặc định *</label>
+              <input type="text" id="custRegAddress" required placeholder="VD: Số 12 Ba Tháng Hai, Quận 10, TP.HCM" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box; background: #f8fafc;">
+            </div>
+            <button type="submit" style="padding: 12px; border-radius: 10px; border: none; background: #0d6efd; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(13,110,253,0.3); margin-top: 4px;">
+              Đăng Ký Khách Hàng Mới
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         CHECKOUT MODAL (XÁC NHẬN ĐƠN HÀNG & LƯU VÀO SQL DATABASE QUA FASTAPI)
+         ========================================================================== -->
+    <div id="userCheckoutModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+      <div style="background: #fff; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); font-family: inherit;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #e0edff; color: #0d6efd; display: flex; align-items: center; justify-content: center; font-size: 18px;">🛡️</div>
+            <div>
+              <h3 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0;">Thanh Toán Đơn Hàng</h3>
+              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Giao dịch an toàn • Bảo vệ quyền lợi người mua 100%</p>
+            </div>
+          </div>
+          <button onclick="closeCheckoutModal()" style="border: none; background: transparent; font-size: 18px; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+        </div>
+
+        <form id="checkoutForm" onsubmit="confirmCheckoutOrder(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">Họ và Tên Người Nhận <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="checkoutBuyerName" value="Trần Minh Quân" required style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">Số Điện Thoại <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="checkoutBuyerPhone" value="0908.123.456" required style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">Hình Thức Thanh Toán</label>
+              <select id="checkoutPaymentMethod" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; outline: none; box-sizing: border-box; background: #fff;">
+                <option value="cod">📦 Nhận hàng trả tiền (COD)</option>
+                <option value="escrow">🔒 Thanh toán bảo đảm qua Sàn</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">Địa Chỉ Nhận Hàng <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="checkoutBuyerAddress" value="Phố Đi Bộ Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM" required style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; box-sizing: border-box;">
+          </div>
+
+          <!-- Phương Thức Vận Chuyển -->
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 5px;">🚚 Phương Thức Vận Chuyển</label>
+            <select id="checkoutShippingMethod" onchange="updateCheckoutTotals()" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; outline: none; box-sizing: border-box; background: #fff;">
+              <option value="standard" data-fee="15000" data-name="Tiêu Chuẩn (GHN Express)" selected>🚚 Tiêu Chuẩn (GHN Express) — 15.000 ₫ (2-3 ngày)</option>
+              <option value="express" data-fee="35000" data-name="Hỏa Tốc 2H (GrabExpress)">⚡ Hỏa Tốc 2H (GrabExpress) — 35.000 ₫ (Trong 2 giờ)</option>
+              <option value="saving" data-fee="10000" data-name="Tiết Kiệm (Viettel Post)">🚀 Tiết Kiệm (Viettel Post) — 10.000 ₫ (3-5 ngày)</option>
+            </select>
+          </div>
+
+          <!-- Mã Giảm Giá / Voucher -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label style="font-size: 12px; font-weight: 600; color: #334155;">🏷️ Mã Giảm Giá / Voucher Sàn</label>
+              <span id="voucherStatusText" style="font-size: 11px; font-weight: 600; color: #10b981; display: none;"></span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="checkoutVoucherInput" placeholder="Nhập mã (FREESHIP, JML50K, GIAM10...)" style="flex: 1; padding: 9px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; outline: none; text-transform: uppercase;">
+              <button type="button" onclick="applyVoucherCode()" id="btnApplyVoucher" style="padding: 9px 16px; border-radius: 8px; border: none; background: #ea580c; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity 0.2s;">Áp Dụng</button>
+            </div>
+            <!-- Quick Voucher Badges -->
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+              <button type="button" onclick="selectQuickVoucher('FREESHIP')" style="padding: 3px 8px; font-size: 11px; font-weight: 600; background: #fff7ed; border: 1px dashed #ea580c; color: #ea580c; border-radius: 6px; cursor: pointer;">🎫 FREESHIP</button>
+              <button type="button" onclick="selectQuickVoucher('JML50K')" style="padding: 3px 8px; font-size: 11px; font-weight: 600; background: #eff6ff; border: 1px dashed #2563eb; color: #2563eb; border-radius: 6px; cursor: pointer;">🎫 JML50K (Giảm 50K)</button>
+              <button type="button" onclick="selectQuickVoucher('GIAM10')" style="padding: 3px 8px; font-size: 11px; font-weight: 600; background: #fdf2f8; border: 1px dashed #db2777; color: #db2777; border-radius: 6px; cursor: pointer;">🎫 GIAM10 (Giảm 10%)</button>
+              <button type="button" onclick="selectQuickVoucher('VIP100K')" style="padding: 3px 8px; font-size: 11px; font-weight: 600; background: #fefce8; border: 1px dashed #ca8a04; color: #ca8a04; border-radius: 6px; cursor: pointer;">🎫 VIP100K (Giảm 100K)</button>
+            </div>
+          </div>
+
+          <!-- Order Summary Card -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; color: #64748b;">
+              <span>Tạm tính tiền hàng:</span>
+              <span id="checkoutModalItemCount" style="font-weight: 600; color: #0f172a;">0 sản phẩm</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #64748b;">
+              <span id="checkoutShippingLabel">Vận chuyển (Tiêu chuẩn):</span>
+              <span id="checkoutShippingFeeText" style="font-weight: 600; color: #0f172a;">15.000 ₫</span>
+            </div>
+            <div id="checkoutDiscountRow" style="display: none; justify-content: space-between; color: #ea580c; font-weight: 600;">
+              <span id="checkoutDiscountLabel">Mã giảm (Voucher):</span>
+              <span id="checkoutDiscountAmountText">-0 ₫</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: #0f172a; border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 2px;">
+              <span>Tổng Tiền Thanh Toán:</span>
+              <span id="checkoutModalTotalSum" style="color: #2563eb;">0 ₫</span>
+            </div>
+          </div>
+
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 9px 12px; font-size: 11px; color: #166534; display: flex; align-items: center; gap: 8px;">
+            <span>🛡️</span>
+            <span>Đơn hàng được bảo vệ bởi <strong>JML Đảm Bảo</strong> — Kiểm tra hàng trước khi nhận, đổi trả miễn phí trong 7 ngày.</span>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;">
+            <button type="button" onclick="closeCheckoutModal()" style="padding: 9px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer;">Hủy</button>
+            <button type="submit" style="padding: 9px 20px; border-radius: 8px; border: none; background: #0d6efd; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 4px 10px rgba(13,110,253,0.3);">Xác Nhận Đặt Hàng</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL: LỊCH SỬ ĐƠN HÀNG ĐÃ ĐẶT (USER ORDERS HISTORY MODAL)
+         ===================================================================== -->
+    <div id="userOrdersModal" style="position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 16px;">
+      <div style="background: #ffffff; border-radius: 20px; max-width: 680px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0;">
+        <!-- Header -->
+        <div style="padding: 16px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; display: flex; align-items: center; justify-content: center; color: #ea580c;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0;">Lịch Sử Đơn Hàng Đã Đặt</h3>
+              <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Theo dõi đơn hàng, trạng thái vận chuyển và giải ngân</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="userOrdersTotalCount" style="padding: 4px 10px; border-radius: 99px; background: #f1f5f9; font-size: 11px; font-weight: 700; color: #475569;">0 đơn hàng</span>
+            <button onclick="closeUserOrdersModal()" style="width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px;">✕</button>
+          </div>
+        </div>
+
+        <!-- Body List -->
+        <div id="userOrdersListBody" style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0; overscroll-behavior: contain;">
+          <!-- Orders rendered dynamically here -->
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+          <span style="color: #64748b;">💡 Nhấn <strong>F5</strong> hoặc mở lại modal để cập nhật trạng thái mới nhất.</span>
+          <button onclick="loadUserOrdersList()" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; color: #0f172a; cursor: pointer;">Làm mới ↻</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
