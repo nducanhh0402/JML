@@ -45,7 +45,50 @@ CREATE TABLE IF NOT EXISTS `products` (
     INDEX `idx_prod_shop` (`shop_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3. BẢNG KHÁCH HÀNG & PHÂN HẠNG THÀNH VIÊN (CUSTOMERS)
+-- 3. BẢNG TÀI KHOẢN NGƯỜI DÙNG (USERS - RBAC: BUYER, SELLER, ADMIN)
+CREATE TABLE IF NOT EXISTS `users` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `username` VARCHAR(100) NOT NULL UNIQUE,
+    `password` VARCHAR(255) NOT NULL,
+    `role` VARCHAR(50) NOT NULL DEFAULT 'customer',
+    `full_name` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(50) NOT NULL,
+    `email` VARCHAR(100) DEFAULT '',
+    `address` TEXT,
+    `shop_key` VARCHAR(50) DEFAULT '',
+    `shop_name` VARCHAR(255) DEFAULT '',
+    `cust_key` VARCHAR(50) DEFAULT '',
+    `created_at` VARCHAR(50) NOT NULL,
+    INDEX `idx_user_role` (`role`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. BẢNG GIỎ HÀNG (CARTS)
+CREATE TABLE IF NOT EXISTS `carts` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `status` VARCHAR(50) NOT NULL DEFAULT 'active',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    INDEX `idx_cart_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. BẢNG CHI TIẾT GIỎ HÀNG (CART_ITEMS)
+CREATE TABLE IF NOT EXISTS `cart_items` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `cart_id` INT NOT NULL,
+    `product_id` INT NOT NULL,
+    `quantity` INT NOT NULL DEFAULT 1,
+    `price` BIGINT NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+    UNIQUE KEY `uniq_cart_product` (`cart_id`, `product_id`),
+    INDEX `idx_cart_item_product` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. BẢNG KHÁCH HÀNG & PHÂN HẠNG THÀNH VIÊN (CUSTOMERS)
 CREATE TABLE IF NOT EXISTS `customers` (
     `cust_key` VARCHAR(50) NOT NULL PRIMARY KEY,
     `id_display` VARCHAR(50) NOT NULL,
@@ -66,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
     INDEX `idx_cust_rank` (`rank`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 4. BẢNG ĐƠN HÀNG ESCROW & VẬN CHUYỂN (ORDERS)
+-- 7. BẢNG ĐƠN HÀNG ESCROW & VẬN CHUYỂN (ORDERS)
 CREATE TABLE IF NOT EXISTS `orders` (
     `order_key` VARCHAR(50) NOT NULL PRIMARY KEY,
     `id_display` VARCHAR(50) NOT NULL,
@@ -89,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
     INDEX `idx_order_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. BẢNG CHI TIẾT SẢN PHẨM TRONG ĐƠN (ORDER_ITEMS)
+-- 8. BẢNG CHI TIẾT SẢN PHẨM TRONG ĐƠN (ORDER_ITEMS)
 CREATE TABLE IF NOT EXISTS `order_items` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `order_key` VARCHAR(50) NOT NULL,
@@ -100,21 +143,4 @@ CREATE TABLE IF NOT EXISTS `order_items` (
     `subtotal` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`order_key`) REFERENCES `orders` (`order_key`) ON DELETE CASCADE,
     INDEX `idx_item_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 6. BẢNG TÀI KHOẢN NGƯỜI DÙNG (USERS - RBAC: BUYER, SELLER, ADMIN)
-CREATE TABLE IF NOT EXISTS `users` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(100) NOT NULL UNIQUE,
-    `password` VARCHAR(255) NOT NULL,
-    `role` VARCHAR(50) NOT NULL DEFAULT 'customer',
-    `full_name` VARCHAR(255) NOT NULL,
-    `phone` VARCHAR(50) NOT NULL,
-    `email` VARCHAR(100) DEFAULT '',
-    `address` TEXT,
-    `shop_key` VARCHAR(50) DEFAULT '',
-    `shop_name` VARCHAR(255) DEFAULT '',
-    `cust_key` VARCHAR(50) DEFAULT '',
-    `created_at` VARCHAR(50) NOT NULL,
-    INDEX `idx_user_role` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
