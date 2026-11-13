@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Đơn Hàng Admin - JML Store Marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-50: #F0F7FF;
+            --primary-100: #E0EDFF;
+            --primary-500: #0D6EFD;
+            --primary-600: #0B5ED7;
+            --neutral-0: #FFFFFF;
+            --neutral-50: #F6F7F9;
+            --neutral-100: #EDF0F2;
+            --neutral-200: #DCE0E5;
+            --neutral-300: #CBD3DB;
+            --neutral-500: #6F7C8E;
+            --neutral-700: #323C49;
+            --neutral-900: #14181F;
+            --success-bg: #E8F8EE;
+            --success-text: #008A12;
+            --warning-bg: #FFF3E0;
+            --warning-text: #C76A00;
+            --info-bg: #E0EDFF;
+            --info-text: #0D6EFD;
+            --purple-bg: #F3E8FF;
+            --purple-text: #7E22CE;
+            --danger-bg: #FFE5E5;
+            --danger-text: #D92D20;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--neutral-50);
+            color: var(--neutral-900);
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--neutral-0);
+            border-right: 1px solid var(--neutral-200);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            height: 64px;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0D6EFD, #FF4D8D);
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .brand-title span {
+            color: #FF4D8D;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-500);
+            background: var(--primary-50);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--neutral-500);
+            padding: 10px 12px 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--neutral-700);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-link:hover {
+            background-color: var(--neutral-100);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-50);
+            color: var(--primary-500);
+            font-weight: 600;
+        }
+
+        .nav-count {
+            background: var(--primary-500);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        /* Main Area */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 64px;
+            background: var(--neutral-0);
+            border-bottom: 1px solid var(--neutral-200);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--neutral-900);
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            color: var(--primary-500);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content {
+            padding: 24px 28px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--neutral-900);
+        }
+
+        .page-header p {
+            font-size: 13px;
+            color: var(--neutral-500);
+            margin-top: 2px;
+        }
+
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-500);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-export:hover {
+            background: var(--primary-600);
+        }
+
+        /* KPI Summary Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: var(--neutral-0);
+            border: 1px solid var(--neutral-200);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--neutral-500);
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 4px;
+            color: var(--neutral-900);
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* Card Container */
+        .table-card {
+            background: var(--neutral-0);
+            border: 1px solid var(--neutral-200);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+            overflow: hidden;
+        }
+
+        /* Status Filter Tabs */
+        .status-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 14px 20px 0;
+            border-bottom: 1px solid var(--neutral-200);
+            background: #FAFBFC;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 8px 12px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--neutral-500);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .tab-btn:hover {
+            color: var(--neutral-900);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-500);
+            border-bottom-color: var(--primary-500);
+        }
+
+        .tab-pill {
+            font-size: 11px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+        }
+
+        .tab-btn.active .tab-pill {
+            background: var(--primary-50);
+            color: var(--primary-500);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 12px;
+            background: var(--neutral-0);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group.grow {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--neutral-500);
+        }
+
+        .form-control {
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid var(--neutral-300);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--neutral-900);
+            background: var(--neutral-0);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+        }
+
+        .btn-reset {
+            height: 36px;
+            padding: 0 14px;
+            border: 1px solid var(--neutral-300);
+            border-radius: 8px;
+            background: var(--neutral-50);
+            color: var(--neutral-700);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-reset:hover {
+            background: var(--neutral-100);
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead tr {
+            background-color: var(--neutral-50);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        th {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--neutral-500);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--neutral-100);
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        tbody tr:hover {
+            background-color: #F9FBFF;
+        }
+
+        .order-code {
+            font-weight: 700;
+            color: var(--primary-500);
+            font-family: 'Inter', monospace;
+            display: block;
+        }
+
+        .order-channel {
+            font-size: 11px;
+            color: var(--neutral-500);
+        }
+
+        .customer-name {
+            font-weight: 600;
+            color: var(--neutral-900);
+            display: block;
+        }
+
+        .customer-contact {
+            font-size: 12px;
+            color: var(--neutral-500);
+        }
+
+        .product-summary {
+            font-weight: 500;
+            color: var(--neutral-700);
+            max-width: 240px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .shop-sub {
+            font-size: 11px;
+            color: var(--neutral-500);
+        }
+
+        .amount-total {
+            font-weight: 700;
+            color: var(--neutral-900);
+            white-space: nowrap;
+            display: block;
+        }
+
+        .payment-method {
+            font-size: 11px;
+            color: var(--neutral-500);
+        }
+
+        .order-date {
+            font-weight: 500;
+            color: var(--neutral-700);
+            white-space: nowrap;
+            display: block;
+        }
+
+        .order-time {
+            font-size: 11px;
+            color: var(--neutral-500);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .badge-pending { background: var(--warning-bg); color: var(--warning-text); }
+        .badge-escrow { background: var(--info-bg); color: var(--info-text); }
+        .badge-shipping { background: var(--purple-bg); color: var(--purple-text); }
+        .badge-delivered { background: var(--success-bg); color: var(--success-text); }
+        .badge-cancelled { background: var(--danger-bg); color: var(--danger-text); }
+
+        .btn-detail {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--neutral-200);
+            background: var(--neutral-0);
+            color: var(--neutral-700);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-detail:hover {
+            border-color: var(--primary-500);
+            color: var(--primary-500);
+            background: var(--primary-50);
+        }
+
+        /* Table Footer */
+        .table-footer {
+            padding: 14px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #FAFBFC;
+            font-size: 12px;
+            color: var(--neutral-500);
+        }
+
+        .empty-state {
+            display: none;
+            padding: 48px 20px;
+            text-align: center;
+            color: var(--neutral-500);
+        }
+
+        /* Detail Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 24, 31, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 50;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--neutral-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--neutral-50);
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            border: none;
+            background: transparent;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--neutral-500);
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--neutral-200);
+            font-size: 13px;
+        }
+
+        .detail-row span:first-child {
+            color: var(--neutral-500);
+        }
+
+        .detail-row span:last-child {
+            font-weight: 600;
+            color: var(--neutral-900);
+            text-align: right;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-brand">
+            <div class="brand-logo">JML</div>
+            <div>
+                <div class="brand-title">JML <span>Store</span></div>
+                <span class="brand-badge">Marketplace Admin</span>
+            </div>
+        </a>
+        <nav class="sidebar-nav">
+            <div class="nav-section-title">Điều hành sàn</div>
+            <a href="index.html#dashboard" class="nav-link">Tổng quan Sàn (GMV)</a>
+            <a href="index.html#shops" class="nav-link">Quản lý Shop / Sellers</a>
+            <a href="index.html#categories" class="nav-link">Ngành hàng &amp; Phí sàn</a>
+
+            <div class="nav-section-title">Giao dịch &amp; Đơn hàng</div>
+            <a href="orders.html" class="nav-link active">
+                <span>Bảng Đơn hàng Admin</span>
+                <span class="nav-count" id="sidebarCount">12</span>
+            </a>
+            <a href="index.html#disputes" class="nav-link">Tranh chấp / Hoàn tiền</a>
+            <a href="index.html#payouts" class="nav-link">Đối soát &amp; Rút tiền</a>
+            <a href="index.html#customers" class="nav-link">Khách hàng / Buyers</a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="topbar-title">Hệ Thống Quản Trị Đơn Hàng Toàn Sàn</div>
+            <div class="topbar-user">
+                <div class="user-avatar">AD</div>
+                <div>
+                    <div style="font-weight: 600;">Quản Trị Viên Sàn</div>
+                    <div style="font-size: 11px; color: var(--neutral-500);">admin@jmlstore.vn</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <!-- Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Quản Lý Đơn Hàng Admin</h1>
+                    <p>Theo dõi mã đơn, khách hàng, tổng tiền, ngày đặt và lọc nhanh theo trạng thái xử lý trên toàn sàn.</p>
+                </div>
+                <button class="btn-export" onclick="exportOrdersCSV()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Xuất Danh Sách (.CSV)</span>
+                </button>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Tổng số đơn hàng</div>
+                    <div class="kpi-value" id="kpiTotal">12</div>
+                    <div class="kpi-sub" style="color: var(--primary-500);">Tổng doanh thu: 277.015.000 ₫</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Chờ xác nhận</div>
+                    <div class="kpi-value" id="kpiPending" style="color: var(--warning-text);">2</div>
+                    <div class="kpi-sub" style="color: var(--neutral-500);">Cần Shop duyệt đơn</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Đang giữ tiền (Escrow)</div>
+                    <div class="kpi-value" id="kpiEscrow" style="color: var(--info-text);">3</div>
+                    <div class="kpi-sub" style="color: var(--neutral-500);">Sàn bảo vệ thanh toán</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Đang vận chuyển</div>
+                    <div class="kpi-value" id="kpiShipping" style="color: var(--purple-text);">3</div>
+                    <div class="kpi-sub" style="color: var(--neutral-500);">Đơn vị giao hàng xử lý</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Hoàn thành / Đã hủy</div>
+                    <div class="kpi-value"><span id="kpiDelivered" style="color: var(--success-text);">3</span> / <span id="kpiCancelled" style="color: var(--danger-text);">1</span></div>
+                    <div class="kpi-sub" style="color: var(--success-text);">Tỷ lệ giao thành công cao</div>
+                </div>
+            </div>
+
+            <!-- Orders Table Card -->
+            <div class="table-card">
+                <!-- Quick Status Filter Tabs -->
+                <div class="status-tabs" id="statusTabs">
+                    <button class="tab-btn active" data-status="all" onclick="selectStatusTab(this, 'all')">
+                        Tất cả đơn <span class="tab-pill">12</span>
+                    </button>
+                    <button class="tab-btn" data-status="pending" onclick="selectStatusTab(this, 'pending')">
+                        Chờ xác nhận <span class="tab-pill">2</span>
+                    </button>
+                    <button class="tab-btn" data-status="escrow" onclick="selectStatusTab(this, 'escrow')">
+                        Giữ tiền Escrow <span class="tab-pill">3</span>
+                    </button>
+                    <button class="tab-btn" data-status="shipping" onclick="selectStatusTab(this, 'shipping')">
+                        Đang giao <span class="tab-pill">3</span>
+                    </button>
+                    <button class="tab-btn" data-status="delivered" onclick="selectStatusTab(this, 'delivered')">
+                        Đã giao <span class="tab-pill">3</span>
+                    </button>
+                    <button class="tab-btn" data-status="cancelled" onclick="selectStatusTab(this, 'cancelled')">
+                        Đã hủy <span class="tab-pill">1</span>
+                    </button>
+                </div>
+
+                <!-- Advanced Filter Bar -->
+                <div class="filter-bar">
+                    <div class="filter-group grow">
+                        <label class="filter-label" for="searchInput">Tìm kiếm (Mã đơn / Khách hàng / SĐT)</label>
+                        <input id="searchInput" type="text" class="form-control" placeholder="Nhập mã đơn (VD: MP-1501) hoặc tên khách..." oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="statusFilter">Trạng thái đơn</label>
+                        <select id="statusFilter" class="form-control" onchange="syncTabAndFilter()">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="pending">Chờ xác nhận</option>
+                            <option value="escrow">Đang giữ tiền Escrow</option>
+                            <option value="shipping">Đang vận chuyển</option>
+                            <option value="delivered">Đã giao thành công</option>
+                            <option value="cancelled">Đã hủy</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="dateFrom">Từ ngày</label>
+                        <input id="dateFrom" type="date" class="form-control" onchange="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="dateTo">Đến ngày</label>
+                        <input id="dateTo" type="date" class="form-control" onchange="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="sortFilter">Sắp xếp theo</label>
+                        <select id="sortFilter" class="form-control" onchange="applyFilters()">
+                            <option value="date_desc">Ngày mới nhất</option>
+                            <option value="date_asc">Ngày cũ nhất</option>
+                            <option value="total_desc">Tổng tiền giảm dần</option>
+                            <option value="total_asc">Tổng tiền tăng dần</option>
+                        </select>
+                    </div>
+                    <button class="btn-reset" onclick="resetFilters()">Đặt lại bộ lọc</button>
+                </div>
+
+                <!-- HTML Static Orders Table with Mock Data -->
+                <div class="table-responsive">
+                    <table id="adminOrdersTable">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Sản phẩm &amp; Cửa hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Ngày đặt</th>
+                                <th>Trạng thái</th>
+                                <th style="text-align: right;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr data-code="MP-9520" data-customer="Nguyễn Đức Anh 0869684299" data-status="pending" data-date="2026-11-13" data-total="28990000">
+                                <td>
+                                    <span class="order-code">#MP-9520</span>
+                                    <span class="order-channel">Web • JML Pay</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Nguyễn Đức Anh</span>
+                                    <span class="customer-contact">0869 684 299 • ducanh@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="iPhone 15 Pro Max 256GB Titan Tự Nhiên">iPhone 15 Pro Max 256GB Titan Tự Nhiên (x1)</span>
+                                    <span class="shop-sub">Shop: Apple Flagship Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">28.990.000 ₫</span>
+                                    <span class="payment-method">VNPAY QR</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">13/11/2026</span>
+                                    <span class="order-time">09:15</span>
+                                </td>
+                                <td><span class="badge badge-pending"><span class="badge-dot"></span>Chờ xác nhận</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-9405" data-customer="Trịnh Quốc Trung 0912345678" data-status="escrow" data-date="2026-11-12" data-total="68990000">
+                                <td>
+                                    <span class="order-code">#MP-9405</span>
+                                    <span class="order-channel">App • Escrow</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Trịnh Quốc Trung</span>
+                                    <span class="customer-contact">0912 345 678 • quoctrung@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="MacBook Pro 16 M3 Max 36GB / 1TB SSD">MacBook Pro 16 M3 Max 36GB / 1TB SSD (x1)</span>
+                                    <span class="shop-sub">Shop: Apple Flagship Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">68.990.000 ₫</span>
+                                    <span class="payment-method">Ví Escrow JML</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">12/11/2026</span>
+                                    <span class="order-time">20:42</span>
+                                </td>
+                                <td><span class="badge badge-escrow"><span class="badge-dot"></span>Giữ tiền Escrow</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-9318" data-customer="Vũ Dũng 0965112233" data-status="shipping" data-date="2026-11-12" data-total="13490000">
+                                <td>
+                                    <span class="order-code">#MP-9318</span>
+                                    <span class="order-channel">Web • Giao nhanh</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Vũ Dũng</span>
+                                    <span class="customer-contact">0965 112 233 • vudung@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Máy Chơi Game Sony PlayStation 5 Slim 1TB">Sony PlayStation 5 Slim 1TB SSD (x1)</span>
+                                    <span class="shop-sub">Shop: Sony Center Vietnam</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">13.490.000 ₫</span>
+                                    <span class="payment-method">Ví MoMo</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">12/11/2026</span>
+                                    <span class="order-time">16:18</span>
+                                </td>
+                                <td><span class="badge badge-shipping"><span class="badge-dot"></span>Đang vận chuyển</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-9250" data-customer="Hoàng Nam VIP 0977665544" data-status="escrow" data-date="2026-11-11" data-total="19490000">
+                                <td>
+                                    <span class="order-code">#MP-9250</span>
+                                    <span class="order-channel">App • Escrow</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Hoàng Nam VIP</span>
+                                    <span class="customer-contact">0977 665 544 • namvip@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Apple Watch Ultra 2 GPS + Cellular 49mm">Apple Watch Ultra 2 GPS + Cellular 49mm (x1)</span>
+                                    <span class="shop-sub">Shop: Apple Flagship Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">19.490.000 ₫</span>
+                                    <span class="payment-method">Chuyển khoản NH</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">11/11/2026</span>
+                                    <span class="order-time">14:05</span>
+                                </td>
+                                <td><span class="badge badge-escrow"><span class="badge-dot"></span>Giữ tiền Escrow</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-9104" data-customer="Trần Minh Quân 0908123456" data-status="pending" data-date="2026-11-11" data-total="4850000">
+                                <td>
+                                    <span class="order-code">#MP-9104</span>
+                                    <span class="order-channel">Web • JML Mall</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Trần Minh Quân</span>
+                                    <span class="customer-contact">0908 123 456 • minquan@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Bộ Suit Nam May Đo Thủ Công Aristino">Bộ Suit Nam May Đo Thủ Công Aristino (x1)</span>
+                                    <span class="shop-sub">Shop: Aristino Tailor</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">4.850.000 ₫</span>
+                                    <span class="payment-method">COD (Thu hộ)</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">11/11/2026</span>
+                                    <span class="order-time">10:30</span>
+                                </td>
+                                <td><span class="badge badge-pending"><span class="badge-dot"></span>Chờ xác nhận</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-9012" data-customer="Lê Hoàng Long 0933445566" data-status="cancelled" data-date="2026-11-10" data-total="3200000">
+                                <td>
+                                    <span class="order-code">#MP-9012</span>
+                                    <span class="order-channel">Web • Khuyến mãi</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Lê Hoàng Long</span>
+                                    <span class="customer-contact">0933 445 566 • hoanglong@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Giày Chạy Bộ Nam Adidas Ultraboost Light 23">Adidas Ultraboost Light 23 - Size 42 (x1)</span>
+                                    <span class="shop-sub">Shop: Adidas Originals Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">3.200.000 ₫</span>
+                                    <span class="payment-method">VNPAY (Đã hoàn tiền)</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">10/11/2026</span>
+                                    <span class="order-time">19:20</span>
+                                </td>
+                                <td><span class="badge badge-cancelled"><span class="badge-dot"></span>Đã hủy</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-2091" data-customer="Nguyễn Đức Anh 0869684299" data-status="shipping" data-date="2026-11-10" data-total="49915000">
+                                <td>
+                                    <span class="order-code">#MP-2091</span>
+                                    <span class="order-channel">Web • JML Mall</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Nguyễn Đức Anh</span>
+                                    <span class="customer-contact">0869 684 299 • ducanh@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Card đồ họa RTX 5090 Gaming OC + Màn hình">Card đồ họa RTX 5090 + Phụ kiện (x2)</span>
+                                    <span class="shop-sub">Shop: AB Technology Ltd</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">49.915.000 ₫</span>
+                                    <span class="payment-method">Ví Escrow JML</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">10/11/2026</span>
+                                    <span class="order-time">11:12</span>
+                                </td>
+                                <td><span class="badge badge-shipping"><span class="badge-dot"></span>Đang vận chuyển</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-8615" data-customer="Trần Minh Quân 0908123456" data-status="shipping" data-date="2026-11-09" data-total="2850000">
+                                <td>
+                                    <span class="order-code">#MP-8615</span>
+                                    <span class="order-channel">App • Flash Sale</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Trần Minh Quân</span>
+                                    <span class="customer-contact">0908 123 456 • minquan@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Giày Chạy Bộ Nam Nike Air Zoom Pegasus 40">Nike Air Zoom Pegasus 40 - Đen Trắng (x1)</span>
+                                    <span class="shop-sub">Shop: Nike Official Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">2.850.000 ₫</span>
+                                    <span class="payment-method">Ví MoMo</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">09/11/2026</span>
+                                    <span class="order-time">15:40</span>
+                                </td>
+                                <td><span class="badge badge-shipping"><span class="badge-dot"></span>Đang vận chuyển</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-3618" data-customer="Phạm Thị Hương 0987654321" data-status="escrow" data-date="2026-11-08" data-total="27490000">
+                                <td>
+                                    <span class="order-code">#MP-3618</span>
+                                    <span class="order-channel">Web • JML Mall</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Phạm Thị Hương</span>
+                                    <span class="customer-contact">0987 654 321 • huongpham@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Samsung Galaxy S24 Ultra 512GB Titanium">Samsung Galaxy S24 Ultra 512GB Titanium (x1)</span>
+                                    <span class="shop-sub">Shop: Samsung Official Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">27.490.000 ₫</span>
+                                    <span class="payment-method">VNPAY QR</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">08/11/2026</span>
+                                    <span class="order-time">13:25</span>
+                                </td>
+                                <td><span class="badge badge-escrow"><span class="badge-dot"></span>Giữ tiền Escrow</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-4986" data-customer="Nguyễn Đức Anh 0869684299" data-status="delivered" data-date="2026-11-07" data-total="50000000">
+                                <td>
+                                    <span class="order-code">#MP-4986</span>
+                                    <span class="order-channel">Web • Escrow</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Nguyễn Đức Anh</span>
+                                    <span class="customer-contact">0869 684 299 • ducanh@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Màn Hình Đồ Họa Samsung ViewFinity S9 5K">Màn Hình Đồ Họa Samsung ViewFinity S9 (x2)</span>
+                                    <span class="shop-sub">Shop: Samsung Official Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">50.000.000 ₫</span>
+                                    <span class="payment-method">Chuyển khoản NH</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">07/11/2026</span>
+                                    <span class="order-time">18:10</span>
+                                </td>
+                                <td><span class="badge badge-delivered"><span class="badge-dot"></span>Đã giao thành công</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-1501" data-customer="Trịnh Quốc Trung 0912345678" data-status="delivered" data-date="2026-11-07" data-total="6990000">
+                                <td>
+                                    <span class="order-code">#MP-1501</span>
+                                    <span class="order-channel">App • JML Mall</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Trịnh Quốc Trung</span>
+                                    <span class="customer-contact">0912 345 678 • quoctrung@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Tai nghe Chống Ồn Sony WH-1000XM5">Tai nghe Sony WH-1000XM5 Hi-Res (x1)</span>
+                                    <span class="shop-sub">Shop: Sony Center Vietnam</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">6.990.000 ₫</span>
+                                    <span class="payment-method">Ví Escrow JML</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">07/11/2026</span>
+                                    <span class="order-time">09:45</span>
+                                </td>
+                                <td><span class="badge badge-delivered"><span class="badge-dot"></span>Đã giao thành công</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+
+                            <tr data-code="MP-6931" data-customer="Đỗ Gia Bảo 0944556677" data-status="delivered" data-date="2026-11-06" data-total="760000">
+                                <td>
+                                    <span class="order-code">#MP-6931</span>
+                                    <span class="order-channel">Web • Thời trang</span>
+                                </td>
+                                <td>
+                                    <span class="customer-name">Đỗ Gia Bảo</span>
+                                    <span class="customer-contact">0944 556 677 • giabao@gmail.com</span>
+                                </td>
+                                <td>
+                                    <span class="product-summary" title="Áo Sơ Mi Nam Sợi Tre Bamboo Owen">Áo Sơ Mi Nam Sợi Tre Bamboo Owen (x1)</span>
+                                    <span class="shop-sub">Shop: Owen Fashion Store</span>
+                                </td>
+                                <td>
+                                    <span class="amount-total">760.000 ₫</span>
+                                    <span class="payment-method">COD (Đã thu)</span>
+                                </td>
+                                <td>
+                                    <span class="order-date">06/11/2026</span>
+                                    <span class="order-time">08:50</span>
+                                </td>
+                                <td><span class="badge badge-delivered"><span class="badge-dot"></span>Đã giao thành công</span></td>
+                                <td style="text-align: right;"><button class="btn-detail" onclick="openOrderModal(this)">Chi tiết</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="emptyState" class="empty-state">
+                        <p style="font-size: 15px; font-weight: 600; color: var(--neutral-700);">Không tìm thấy đơn hàng nào phù hợp với bộ lọc</p>
+                        <p style="font-size: 13px; margin-top: 4px;">Hãy thử thay đổi từ khóa tìm kiếm hoặc bấm "Đặt lại bộ lọc".</p>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="table-footer">
+                    <span id="tableSummaryText">Hiển thị <strong>12 / 12</strong> đơn hàng</span>
+                    <span id="filteredTotalAmount">Tổng giá trị đang lọc: <strong>277.015.000 ₫</strong></span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ORDER DETAIL MODAL -->
+    <div id="orderModal" class="modal-backdrop" onclick="if(event.target === this) closeOrderModal()">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle">Chi tiết đơn hàng</h3>
+                <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-row"><span>Mã đơn hàng:</span><span id="mCode">-</span></div>
+                <div class="detail-row"><span>Khách hàng:</span><span id="mCustomer">-</span></div>
+                <div class="detail-row"><span>Sản phẩm &amp; Shop:</span><span id="mProduct">-</span></div>
+                <div class="detail-row"><span>Tổng thanh toán:</span><span id="mTotal" style="color: var(--primary-500);">-</span></div>
+                <div class="detail-row"><span>Ngày giờ đặt:</span><span id="mDate">-</span></div>
+                <div class="detail-row" style="border-bottom: none;"><span>Trạng thái hiện tại:</span><span id="mStatus">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatVND(num) {
+            return Number(num).toLocaleString('vi-VN') + ' ₫';
+        }
+
+        function selectStatusTab(btn, status) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('statusFilter').value = status;
+            applyFilters();
+        }
+
+        function syncTabAndFilter() {
+            const val = document.getElementById('statusFilter').value;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-status') === val);
+            });
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const sortBy = document.getElementById('sortFilter').value;
+
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            // Sort rows first
+            rows.sort((a, b) => {
+                const dateA = a.getAttribute('data-date');
+                const dateB = b.getAttribute('data-date');
+                const totalA = Number(a.getAttribute('data-total'));
+                const totalB = Number(b.getAttribute('data-total'));
+                if (sortBy === 'date_desc') return dateB.localeCompare(dateA);
+                if (sortBy === 'date_asc') return dateA.localeCompare(dateB);
+                if (sortBy === 'total_desc') return totalB - totalA;
+                if (sortBy === 'total_asc') return totalA - totalB;
+                return 0;
+            });
+            rows.forEach(r => tbody.appendChild(r));
+
+            let visibleCount = 0;
+            let visibleSum = 0;
+
+            rows.forEach(row => {
+                const code = row.getAttribute('data-code').toLowerCase();
+                const cust = row.getAttribute('data-customer').toLowerCase();
+                const rowStatus = row.getAttribute('data-status');
+                const rowDate = row.getAttribute('data-date');
+                const rowTotal = Number(row.getAttribute('data-total'));
+
+                const matchQuery = !query || code.includes(query) || cust.includes(query);
+                const matchStatus = status === 'all' || rowStatus === status;
+                const matchFrom = !dateFrom || rowDate >= dateFrom;
+                const matchTo = !dateTo || rowDate <= dateTo;
+
+                if (matchQuery && matchStatus && matchFrom && matchTo) {
+                    row.style.display = '';
+                    visibleCount++;
+                    visibleSum += rowTotal;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+            document.getElementById('tableSummaryText').innerHTML = `Hiển thị <strong>${visibleCount} / ${rows.length}</strong> đơn hàng`;
+            document.getElementById('filteredTotalAmount').innerHTML = `Tổng giá trị đang lọc: <strong>${formatVND(visibleSum)}</strong>`;
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('sortFilter').value = 'date_desc';
+            syncTabAndFilter();
+        }
+
+        function openOrderModal(btn) {
+            const row = btn.closest('tr');
+            document.getElementById('modalTitle').textContent = 'Chi tiết đơn ' + row.querySelector('.order-code').textContent;
+            document.getElementById('mCode').textContent = row.querySelector('.order-code').textContent;
+            document.getElementById('mCustomer').textContent = row.querySelector('.customer-name').textContent + ' (' + row.querySelector('.customer-contact').textContent + ')';
+            document.getElementById('mProduct').textContent = row.querySelector('.product-summary').textContent + ' — ' + row.querySelector('.shop-sub').textContent;
+            document.getElementById('mTotal').textContent = row.querySelector('.amount-total').textContent + ' (' + row.querySelector('.payment-method').textContent + ')';
+            document.getElementById('mDate').textContent = row.querySelector('.order-date').textContent + ' lúc ' + row.querySelector('.order-time').textContent;
+            document.getElementById('mStatus').innerHTML = row.querySelector('.badge').outerHTML;
+            document.getElementById('orderModal').classList.add('open');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.remove('open');
+        }
+
+        function exportOrdersCSV() {
+            const rows = Array.from(document.querySelectorAll('#ordersTableBody tr')).filter(r => r.style.display !== 'none');
+            const lines = ['MaDon,KhachHang,SanPham,TongTien,NgayDat,TrangThai'];
+            rows.forEach(r => {
+                const code = r.querySelector('.order-code').textContent;
+                const cust = r.querySelector('.customer-name').textContent;
+                const prod = r.querySelector('.product-summary').textContent.replace(/,/g, ' ');
+                const amt = r.getAttribute('data-total');
+                const dt = r.querySelector('.order-date').textContent;
+                const st = r.querySelector('.badge').textContent;
+                lines.push(`${code},"${cust}","${prod}",${amt},${dt},"${st}"`);
+            });
+            const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'danh_sach_don_hang_admin.csv';
+            link.click();
+        }
+    </script>
+</body>
+</html>
