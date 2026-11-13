@@ -118,3 +118,44 @@ CREATE TABLE IF NOT EXISTS `users` (
     `created_at` VARCHAR(50) NOT NULL,
     INDEX `idx_user_role` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================================
+-- BO SUNG BOI TRAN GIA HUY (TASK: TF172C2)
+-- Cap nhat lien ket user cho orders & Tao bang payments, order_status_history
+-- ============================================================================
+
+-- 7. Bo sung cot user_id va index theo user cho bang orders hien co
+ALTER TABLE `orders`
+ADD COLUMN `user_id` INT NULL AFTER `order_key`,
+ADD INDEX `idx_order_user_id` (`user_id`);
+
+-- 8. BANG THANH TOAN DON HANG (PAYMENTS)
+CREATE TABLE IF NOT EXISTS `payments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `order_key` VARCHAR(50) NOT NULL,
+  `user_id` INT NULL,
+  `payment_method` VARCHAR(50) NOT NULL DEFAULT 'COD',
+  `payment_status` VARCHAR(50) NOT NULL DEFAULT 'pending',
+  `amount` BIGINT NOT NULL DEFAULT 0,
+  `transaction_code` VARCHAR(100) DEFAULT '',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_payment_order_key` (`order_key`),
+  INDEX `idx_payment_user_id` (`user_id`),
+  INDEX `idx_payment_status` (`payment_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. BANG LICH SU TRANG THAI DON HANG (ORDER_STATUS_HISTORY)
+CREATE TABLE IF NOT EXISTS `order_status_history` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `order_key` VARCHAR(50) NOT NULL,
+  `old_status` VARCHAR(50) NULL,
+  `new_status` VARCHAR(50) NOT NULL,
+  `changed_by` INT NULL,
+  `note` VARCHAR(255) DEFAULT '',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_history_order_key` (`order_key`),
+  INDEX `idx_history_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+Add-Content -Path "backend/db/schema.sql" -Encoding UTF8
