@@ -102,7 +102,7 @@ shopee-clone/
 │   │       ├── voucher/        # Quản lý mã giảm giá (FREESHIP, JML50K, GIAM10...)
 │   │       └── admin/          # Quản trị cửa hàng, khách hàng, duyệt sản phẩm
 │   ├── db/
-│   │   ├── schema.sql          # File DDL khởi tạo toàn bộ 6 bảng MySQL
+│   │   ├── schema.sql          # File DDL các bảng nền (shops, users, customers, orders...); products và carts nằm trong migrations/
 │   │   ├── migrations/         # Lịch sử cập nhật cấu trúc database
 │   │   └── seeds/              # Dữ liệu mẫu khởi tạo các Shop, Sản phẩm, Tài khoản
 │   ├── tests/                  # Bộ test tự động (unittest) kiểm tra API
@@ -157,7 +157,12 @@ shopee-clone/
 ### Cách 1: Chạy trực tiếp (Local Machine)
 1. **Khởi động MySQL Server:**
    - Đảm bảo MySQL đang chạy trên cổng `3306` (Database: `jml_marketplace`, user: `root`, pass: `123456`).
-   - Khởi tạo cấu trúc bằng file `backend/db/schema.sql`.
+   - Khởi tạo cấu trúc, chạy lần lượt các file sau:
+     1. `backend/db/schema.sql`
+     2. `backend/db/migrations/004_create_catalog_tables_and_seed.sql`
+     3. `backend/db/migrations/002_create_carts_tables.sql`
+     4. `backend/db/migrations/003_create_users_and_roles_schema.sql`
+     5. `backend/db/seeds/seed.sql`
 
 2. **Cài đặt thư viện Python:**
    ```bash
