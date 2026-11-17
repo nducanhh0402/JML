@@ -1,10 +1,28 @@
-<!-- SHARED COMPONENT: HEADER SÀN TMĐT JML STORE -->
+<!-- SHARED COMPONENT: HEADER SÀN TMĐT JML STORE (TF16E1F) -->
 <header class="jml-shared-header">
-  <div class="container flex items-center justify-between py-3">
-    <a href="/frontend/user/index.html" class="flex items-center gap-2">
+  <div class="container flex items-center justify-between gap-4 py-3">
+    <a href="/frontend/buyer/index.html" class="flex items-center gap-2 shrink-0">
       <div class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold">JML</div>
       <span class="font-extrabold text-lg text-neutral-900 tracking-tight">JML STORE</span>
     </a>
+
+    <!-- Ô tìm kiếm dùng chung ở Header + Gợi ý từ khóa -->
+    <div class="search-wrapper">
+      <form
+        class="search-box"
+        id="searchForm"
+        onsubmit="event.preventDefault(); if (window.HeaderSearch) { window.HeaderSearch.submitSearch(); }"
+      >
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục..."
+          autocomplete="off"
+        />
+        <button class="search-btn" type="submit">Tìm Kiếm</button>
+      </form>
+      <div id="searchSuggestionsDropdown" class="search-suggestions-dropdown"></div>
+    </div>
   </div>
 </header>
-

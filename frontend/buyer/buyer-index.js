@@ -2329,84 +2329,42 @@
       // --------------------------------------------------------------------------
       function handleSearch() {
         const input = document.getElementById("searchInput");
-        const query = (input ? input.value : "").trim().toLowerCase();
-
-        // Äáº£m báº£o Ä‘ang á»Ÿ view home khi tÃ¬m kiáº¿m
-        showHomeView();
-
-        if (!query) {
-          renderRecommendProducts("all");
+        const query = (input ? input.value : "").trim();
+        if (window.HeaderSearch && typeof window.HeaderSearch.submitSearch === "function") {
+          window.HeaderSearch.submitSearch(query);
           return;
         }
-
-        const matched = RECOMMEND_PRODUCTS.filter(
-          (p) =>
-            p.title.toLowerCase().includes(query) ||
-            p.category.toLowerCase().includes(query),
-        );
-
-        const container = document.getElementById("recommendProductsContainer");
-        if (container) {
-          if (matched.length === 0) {
-            container.innerHTML = `
-              <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #fff; border-radius: var(--radius-md); border: 1px dashed var(--border);">
-                <div style="font-size: 36px; margin-bottom: 12px;">ðŸ”</div>
-                <h3 style="font-size: 16px; font-weight: 700; color: var(--secondary);">KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m phÃ¹ há»£p</h3>
-                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Thá»­ tÃ¬m vá»›i tá»« khÃ³a: "ipad", "tai nghe", "Ä‘á»“ng há»“", "vÃ­ da", "loa"...</p>
-              </div>
-            `;
-          } else {
-            container.innerHTML = matched
-              .map((product) => {
-                const mainImg = product.images
-                  ? product.images[0]
-                  : product.image;
-                return `
-              <div class="product-card" onclick="openProductDetail(${product.id})">
-                ${createCarouselMarkup(product)}
-                <div class="product-body">
-                  <h3 class="product-title" title="${product.title}">${product.title}</h3>
-                  <div class="product-meta">
-                    <span class="rating-stars">â˜… ${product.rating}</span>
-                    <span>â€¢ ÄÃ£ bÃ¡n ${product.soldCount}</span>
-                  </div>
-                  <div class="price-row">
-                    <span class="current-price">${formatCurrency(product.price)}</span>
-                    <span class="original-price">${formatCurrency(product.originalPrice)}</span>
-                  </div>
-                  <div style="margin-top: auto;">
-                    <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || "").replace(/'/g, "\\'")}')">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                      ThÃªm VÃ o Giá»
-                    </button>
-                  </div>
-                </div>
-              </div>
-            `;
-              })
-              .join("");
-            attachHoverCarouselListeners(container);
-          }
-        }
-
-        scrollToRecommend();
-        showToast("TÃ¬m kiáº¿m", `TÃ¬m tháº¥y ${matched.length} sáº£n pháº©m phÃ¹ há»£p`);
+        window.location.href = query ? `products.html?q=${encodeURIComponent(query)}` : "products.html";
       }
 
       function applyQuickSearch(term) {
-        const input = document.getElementById("searchInput");
-        if (input) {
-          input.value = term;
-          handleSearch();
+        if (window.HeaderSearch && typeof window.HeaderSearch.submitSearch === "function") {
+          window.HeaderSearch.submitSearch(term);
+          return;
         }
+        window.location.href = `products.html?q=${encodeURIComponent(term)}`;
       }
 
-      // Khá»Ÿi cháº¡y render ban Ä‘áº§u vÃ  Ä‘á»“ng bá»™ dá»¯ liá»‡u tá»« FastAPI + SQL
+      if (window.HeaderSearch && typeof window.HeaderSearch.init === "function") {
+        window.HeaderSearch.init({
+          inputId: "searchInput",
+          isResultsPage: false,
+          resultsUrl: "products.html",
+        });
+      }
+
+      // Khởi chạy render ban đầu và đồng bộ dữ liệu từ FastAPI + SQL
       renderFlashSaleProducts();
       renderRecommendProducts("all");
       loadProductsFromFastAPI();
 
-      // Kiá»ƒm tra URL hash khi má»Ÿ trang láº§n Ä‘áº§u
+      // Kiểm tra URL hash hoặc query ?productId=... khi mở trang lần đầu
       if (window.location.hash.startsWith("#product/")) {
         checkUrlHash();
+      } else {
+        const _urlParams = new URLSearchParams(window.location.search);
+        const _pid = Number(_urlParams.get("productId"));
+        if (_pid) {
+          openProductDetail(_pid);
+        }
       }

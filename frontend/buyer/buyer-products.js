@@ -260,40 +260,101 @@
       let currentPage = 1;
       const pageSize = 8;
 
-      // Khá»Ÿi táº¡o trang
+      let baseCatalogProducts = [...MOCK_PRODUCTS];
+      let rawSearchQuery = "";
+      let isSearchApiActive = false;
+
+      function mapApiProductItem(p) {
+        return {
+          id: p.id,
+          category: p.category || "tech",
+          brand: p.brand || "",
+          description: p.description || "",
+          title: p.title,
+          price: p.price,
+          originalPrice: p.originalPrice || Math.round(p.price * 1.2),
+          discount: p.discount || "-15%",
+          rating: p.rating || 5.0,
+          sold: p.sold || 0,
+          totalStock: p.totalStock || 50,
+          image: (p.images && p.images[0]) ? p.images[0] : (p.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"),
+          shopName: p.shopName || "JML Official Store",
+          exclusive: p.exclusive || "Chính Hãng",
+          isFlashSale: Boolean(p.isFlashSale || p.is_flash_sale)
+        };
+      }
+
+      function syncQueryFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        rawSearchQuery = (params.get("q") || "").trim();
+        searchQuery = rawSearchQuery.toLowerCase();
+        const inputEl = document.getElementById("searchInput");
+        if (inputEl) inputEl.value = rawSearchQuery;
+
+        const catParam = (params.get("category") || "").trim().toLowerCase();
+        if (catParam && ["all", "audio", "watch", "fashion", "tech"].includes(catParam)) {
+          currentCategory = catParam;
+        }
+      }
+
+      // Khởi tạo trang kết quả tìm kiếm & danh sách sản phẩm
       document.addEventListener("DOMContentLoaded", () => {
-        // Cá»‘ gáº¯ng fetch tá»« API náº¿u backend Ä‘ang cháº¡y
-        fetchProductsFromAPI();
+        syncQueryFromUrl();
+
+        if (window.HeaderSearch && typeof window.HeaderSearch.init === "function") {
+          window.HeaderSearch.init({
+            inputId: "searchInput",
+            isResultsPage: true,
+            resultsUrl: "products.html",
+            onSearchResults: (kw) => {
+              rawSearchQuery = (kw || "").trim();
+              searchQuery = rawSearchQuery.toLowerCase();
+              fetchProductsFromAPI(rawSearchQuery);
+            },
+          });
+        }
+
+        fetchProductsFromAPI(rawSearchQuery);
         updateCartBadge();
       });
 
-      async function fetchProductsFromAPI() {
+      window.addEventListener("popstate", () => {
+        syncQueryFromUrl();
+        fetchProductsFromAPI(rawSearchQuery);
+      });
+
+      async function fetchProductsFromAPI(keyword = "") {
+        const cleanKw = (keyword || "").trim();
+        isSearchApiActive = false;
+
         try {
-          const res = await fetch("http://127.0.0.1:8000/api/products");
-          if (res.ok) {
-            const data = await res.json();
-            const list = [...(data.flash_products || []), ...(data.recommend_products || [])];
-            if (list.length > 0) {
-              allProducts = list.map(p => ({
-                id: p.id,
-                category: p.category,
-                title: p.title,
-                price: p.price,
-                originalPrice: p.originalPrice || Math.round(p.price * 1.2),
-                discount: p.discount || "-15%",
-                rating: p.rating || 5.0,
-                sold: p.sold || 0,
-                totalStock: p.totalStock || 50,
-                image: (p.images && p.images[0]) ? p.images[0] : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
-                shopName: p.shopName || "JML Official Store",
-                exclusive: p.exclusive || "ChÃ­nh HÃ£ng",
-                isFlashSale: Boolean(p.is_flash_sale)
-              }));
+          if (cleanKw) {
+            const res = await fetch(`http://127.0.0.1:8000/api/products/search?q=${encodeURIComponent(cleanKw)}&page_size=100`);
+            if (res.ok) {
+              const data = await res.json();
+              const list = Array.isArray(data.items) ? data.items : [];
+              allProducts = list.map(mapApiProductItem);
+              isSearchApiActive = true;
+            }
+          } else {
+            const res = await fetch("http://127.0.0.1:8000/api/products");
+            if (res.ok) {
+              const data = await res.json();
+              const list = [...(data.flash_products || []), ...(data.recommend_products || [])];
+              if (list.length > 0) {
+                baseCatalogProducts = list.map(mapApiProductItem);
+                allProducts = [...baseCatalogProducts];
+              }
             }
           }
         } catch (e) {
-          console.log("Sá»­ dá»¥ng bá»™ dá»¯ liá»‡u Mock tÄ©nh Ä‘áº§y Ä‘á»§ 16 sáº£n pháº©m.");
+          console.log("Backend offline — sử dụng bộ dữ liệu Mock tĩnh đầy đủ.");
         }
+
+        if (!isSearchApiActive) {
+          allProducts = [...baseCatalogProducts];
+        }
+
         applyAllFilters();
       }
 
@@ -350,20 +411,61 @@
       }
 
       function handleSearch(val) {
-        searchQuery = val.trim().toLowerCase();
+        rawSearchQuery = (val || "").trim();
+        searchQuery = rawSearchQuery.toLowerCase();
         applyAllFilters();
       }
 
       function executeSearch() {
-        applyAllFilters();
+        const inputEl = document.getElementById("searchInput");
+        const kw = (inputEl ? inputEl.value : "").trim();
+        if (window.HeaderSearch && typeof window.HeaderSearch.submitSearch === "function") {
+          window.HeaderSearch.submitSearch(kw);
+        } else {
+          rawSearchQuery = kw;
+          searchQuery = kw.toLowerCase();
+          fetchProductsFromAPI(rawSearchQuery);
+        }
         if (window.innerWidth <= 900) closeFilterDrawer();
+      }
+
+      function clearSearchKeyword() {
+        const inputEl = document.getElementById("searchInput");
+        if (inputEl) inputEl.value = "";
+        rawSearchQuery = "";
+        searchQuery = "";
+        try {
+          window.history.pushState({}, "", "products.html");
+        } catch (e) {}
+        fetchProductsFromAPI("");
+      }
+
+      function updateSearchBannerUI() {
+        const banner = document.getElementById("searchResultsBanner");
+        const kwDisplay = document.getElementById("searchKeywordDisplay");
+        const countDisplay = document.getElementById("searchBannerCount");
+        const breadcrumbCat = document.getElementById("breadcrumbCurrentCategory");
+
+        if (rawSearchQuery) {
+          if (banner) banner.classList.add("visible");
+          if (kwDisplay) kwDisplay.textContent = `"${rawSearchQuery}"`;
+          if (countDisplay) countDisplay.textContent = filteredProducts.length;
+          if (breadcrumbCat) breadcrumbCat.textContent = `Tìm kiếm: "${rawSearchQuery}"`;
+          document.title = `Tìm kiếm "${rawSearchQuery}" - JML Store`;
+        } else {
+          if (banner) banner.classList.remove("visible");
+          document.title = "Danh Sách Sản Phẩm - JML Store";
+        }
       }
 
       function resetAllFilters() {
         currentCategory = "all";
         currentPriceRange = "all";
         currentRating = "all";
+        rawSearchQuery = "";
         searchQuery = "";
+        const wasSearchApi = isSearchApiActive;
+        isSearchApiActive = false;
         document.getElementById("searchInput").value = "";
         document.getElementById("minPriceInput").value = "";
         document.getElementById("maxPriceInput").value = "";
@@ -374,25 +476,35 @@
         document.querySelectorAll(".category-item").forEach((it, idx) => {
           it.classList.toggle("active", idx === 0);
         });
-        document.getElementById("breadcrumbCurrentCategory").textContent = "Táº¥t cáº£ ngÃ nh hÃ ng";
-        applyAllFilters();
-        showToast("ÄÃ£ Ä‘áº·t láº¡i táº¥t cáº£ bá»™ lá»c");
+        document.getElementById("breadcrumbCurrentCategory").textContent = "Tất cả ngành hàng";
+        try {
+          window.history.pushState({}, "", "products.html");
+        } catch (err) {}
+        if (wasSearchApi) {
+          fetchProductsFromAPI("");
+        } else {
+          allProducts = [...baseCatalogProducts];
+          applyAllFilters();
+        }
+        showToast("Đã đặt lại tất cả bộ lọc");
       }
 
-      // Ãp dá»¥ng tá»•ng há»£p táº¥t cáº£ tiÃªu chÃ­ lá»c
+      // Áp dụng tổng hợp tất cả tiêu chí lọc
       function applyAllFilters() {
         const isFlashOnly = document.getElementById("chkFlashSale")?.checked;
         const isExclusiveOnly = document.getElementById("chkExclusive")?.checked;
 
         filteredProducts = allProducts.filter(p => {
-          // 1. Danh má»¥c
           if (currentCategory !== "all" && p.category !== currentCategory) return false;
 
-          // 2. TÃ¬m kiáº¿m tÃªn sáº£n pháº©m / shop
-          if (searchQuery) {
-            const matchTitle = p.title.toLowerCase().includes(searchQuery);
-            const matchShop = p.shopName.toLowerCase().includes(searchQuery);
-            if (!matchTitle && !matchShop) return false;
+          // 2. Tìm kiếm tên sản phẩm / mô tả / thương hiệu / shop
+          if (!isSearchApiActive && searchQuery) {
+            const matchTitle = (p.title || "").toLowerCase().includes(searchQuery);
+            const matchDesc = (p.description || "").toLowerCase().includes(searchQuery);
+            const matchBrand = (p.brand || "").toLowerCase().includes(searchQuery);
+            const matchShop = (p.shopName || "").toLowerCase().includes(searchQuery);
+            const matchCat = (p.category || "").toLowerCase().includes(searchQuery);
+            if (!matchTitle && !matchDesc && !matchBrand && !matchShop && !matchCat) return false;
           }
 
           // 3. Khoáº£ng giÃ¡
@@ -422,6 +534,7 @@
         // Cáº­p nháº­t sá»‘ lÆ°á»£ng
         document.getElementById("productCountText").textContent = filteredProducts.length;
         document.getElementById("countAll").textContent = allProducts.length;
+        updateSearchBannerUI();
 
         // Äáº¿m bá»™ lá»c Ä‘ang kÃ­ch hoáº¡t
         let activeCount = 0;

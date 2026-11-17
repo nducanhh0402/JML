@@ -11,6 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="../shared/css/header-search.css" />
     <style>
       /* ==========================================================================
          1. RESET & CSS VARIABLES (KẾ THỪA 100% TỪ JML STORE)
@@ -126,24 +127,32 @@
         max-width: 600px;
         position: relative;
         display: flex;
-      }
-      .search-input {
-        width: 100%;
-        padding: 10px 16px;
-        border-radius: 99px 0 0 99px;
-        border: 2px solid var(--border);
-        border-right: none;
-        font-size: 13px;
-        outline: none;
+        align-items: center;
+        background: var(--surface-dim);
+        border: 1.5px solid var(--border);
+        border-radius: 99px;
+        padding: 4px 5px 4px 16px;
         transition: var(--transition);
       }
-      .search-input:focus {
+      .search-box:focus-within {
+        background: #ffffff;
         border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+      }
+      .search-input {
+        flex: 1;
+        width: 100%;
+        padding: 6px 8px 6px 0;
+        border: none;
+        background: transparent;
+        font-size: 13.5px;
+        outline: none;
+        color: var(--text-main);
       }
       .search-btn {
-        padding: 0 20px;
-        border-radius: 0 99px 99px 0;
-        border: 2px solid var(--primary);
+        padding: 8px 18px;
+        border-radius: 99px;
+        border: none;
         background: var(--primary);
         color: #fff;
         font-weight: 700;
@@ -152,6 +161,8 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        flex-shrink: 0;
+        transition: var(--transition);
       }
       .search-btn:hover {
         background: var(--primary-hover);
@@ -803,22 +814,24 @@
           <span>STORE</span>
         </a>
 
-        <!-- Search Box -->
-        <div class="search-box">
-          <input
-            type="text"
-            id="searchInput"
-            class="search-input"
-            placeholder="Tìm kiếm sản phẩm trong danh mục..."
-            oninput="handleSearch(this.value)"
-          />
-          <button class="search-btn" type="button" onclick="executeSearch()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            Tìm
-          </button>
+        <!-- Search Box + Keyword Suggestions (TF16E1F) -->
+        <div class="search-wrapper">
+          <form class="search-box" id="searchForm" onsubmit="event.preventDefault(); executeSearch();">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Tìm kiếm sản phẩm, thương hiệu, mô tả..."
+              autocomplete="off"
+            />
+            <button class="search-btn" type="submit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Tìm
+            </button>
+          </form>
         </div>
 
         <!-- Header Actions -->
@@ -971,6 +984,17 @@
 
         <!-- 2. CỘT PHẢI: LƯỚI KẾT QUẢ SẢN PHẨM & THANH SẮP XẾP -->
         <main class="products-main">
+          <!-- Banner Kết quả tìm kiếm (TF16E1F) -->
+          <div id="searchResultsBanner" class="search-results-banner">
+            <div>
+              🔍 Kết quả tìm kiếm cho từ khóa: <strong id="searchKeywordDisplay"></strong>
+              (<span id="searchBannerCount">0</span> sản phẩm)
+            </div>
+            <button type="button" class="btn-clear-search-banner" onclick="clearSearchKeyword()">
+              ✕ Xóa tìm kiếm
+            </button>
+          </div>
+
           <!-- Thanh sắp xếp (Sort Bar) -->
           <div class="sort-bar">
             <div class="sort-left">
@@ -1024,6 +1048,7 @@
     <!-- ==========================================================================
          JAVASCRIPT LOGIC CHO TRANG DANH SÁCH SẢN PHẨM & DRAWER
          ========================================================================== -->
+<script src="../shared/js/header-search.js"></script>
 <script src="buyer-products.js"></script>
   </body>
 </html>

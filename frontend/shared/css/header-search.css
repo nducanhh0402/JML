@@ -1,0 +1,292 @@
+/* ==========================================================================
+   TF16E1F - HEADER SEARCH & KEYWORD SUGGESTIONS DROPDOWN
+   Dùng chung cho trang chủ (index.html) và trang kết quả (products.html)
+   ========================================================================== */
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 620px;
+}
+
+.search-box {
+  position: relative;
+}
+
+/* Nút xóa nhanh trong ô tìm kiếm */
+.search-clear-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.search-clear-btn:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+.search-clear-btn.visible {
+  display: inline-flex;
+}
+
+/* Dropdown gợi ý từ khóa khi gõ */
+.search-suggestions-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
+  z-index: 1200;
+  overflow: hidden;
+  display: none;
+  max-height: 440px;
+  overflow-y: auto;
+  animation: jmlSearchFadeIn 0.16s ease-out;
+}
+
+.search-suggestions-dropdown.open {
+  display: block;
+}
+
+@keyframes jmlSearchFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestion-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.suggestion-clear-history {
+  background: transparent;
+  border: none;
+  color: #ea580c;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.suggestion-clear-history:hover {
+  background: #ffedd5;
+}
+
+.suggestion-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1e293b;
+  transition: background-color 0.14s ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background-color: #fff7ed;
+  color: #c2410c;
+}
+
+.suggestion-item-icon {
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.suggestion-item:hover .suggestion-item-icon,
+.suggestion-item.active .suggestion-item-icon {
+  color: #ea580c;
+}
+
+.suggestion-item-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-item-badge {
+  font-size: 11px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+/* Highlight từ khóa khớp */
+.search-highlight {
+  background: transparent;
+  color: #ea580c;
+  font-weight: 800;
+}
+
+/* Item sản phẩm gợi ý có ảnh thu nhỏ */
+.suggestion-product-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background-color 0.14s ease;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.suggestion-product-item:hover,
+.suggestion-product-item.active {
+  background-color: #fff7ed;
+}
+
+.suggestion-product-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.suggestion-product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-product-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-product-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  margin-top: 2px;
+}
+
+.suggestion-product-price {
+  color: #ea580c;
+  font-weight: 700;
+}
+
+.suggestion-product-brand {
+  color: #64748b;
+}
+
+.suggestion-footer-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #fff7ed;
+  border-top: 1px solid #ffedd5;
+  color: #c2410c;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.suggestion-footer-action:hover,
+.suggestion-footer-action.active {
+  background: #ffedd5;
+}
+
+.suggestion-empty {
+  padding: 16px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Search Result Summary Banner trên trang kết quả (products.html) */
+.search-results-banner {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+
+.search-results-banner.visible {
+  display: flex;
+}
+
+.search-results-banner strong {
+  color: #ea580c;
+}
+
+.btn-clear-search-banner {
+  background: #ffffff;
+  border: 1px solid #fdba74;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-clear-search-banner:hover {
+  background: #ea580c;
+  color: #ffffff;
+  border-color: #ea580c;
+}
