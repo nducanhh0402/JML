@@ -2093,14 +2093,11 @@
       function checkoutNow() {
         const cart = JSON.parse(localStorage.getItem("JML_CART_ITEMS") || "[]");
         if (cart.length === 0) {
-          showToast("Giỏ hàng đang trống!");
+          showToast("Giỏ hàng đang trống! Đang chuyển đến trang đặt hàng...");
+          setTimeout(() => { window.location.href = "checkout.html"; }, 500);
           return;
         }
-        localStorage.removeItem("JML_CART_ITEMS");
-        renderCartDrawer();
-        updateCartBadge();
-        closeCartDrawer();
-        showToast("🎉 Đặt hàng thành công! Đơn hàng đang được đóng gói.");
+        window.location.href = "checkout.html";
       }
 
       // =========================================================================
