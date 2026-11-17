@@ -183,7 +183,10 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_cart_user ON carts (user_id);")
+    try:
+        cursor.execute("CREATE INDEX idx_cart_user ON carts (user_id);")
+    except Exception:
+        pass
 
     # 5. Bảng CART_ITEMS (Chi tiết từng mặt hàng trong giỏ)
     cursor.execute("""
@@ -201,9 +204,10 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
-    cursor.execute(
-        "CREATE INDEX IF NOT EXISTS idx_cart_item_product ON cart_items (product_id);"
-    )
+    try:
+        cursor.execute("CREATE INDEX idx_cart_item_product ON cart_items (product_id);")
+    except Exception:
+        pass
 
     # 6. Bảng CUSTOMERS (Khách hàng / Người mua)
     cursor.execute("""
