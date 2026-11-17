@@ -1,8 +1,9 @@
 import random
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
 from backend.schemas import LoginRequest, RegisterRequest
+from backend.src.middlewares.auth_middleware import create_access_token, get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
@@ -35,8 +36,20 @@ def auth_login(payload: LoginRequest):
 
     conn.close()
 
+    # Tạo JWT Access Token chứa vai trò và thông tin định danh
+    access_token = create_access_token({
+        "sub": str(user_row["id"]),
+        "user_id": user_row["id"],
+        "username": user_row["username"],
+        "role": user_row["role"],
+        "email": user_row["email"] or "",
+        "full_name": user_row["full_name"],
+    })
+
     return {
         "message": "Đăng nhập thành công!",
+        "access_token": access_token,
+        "token_type": "bearer",
         "user": {
             "id": user_row["id"],
             "username": user_row["username"],
@@ -71,6 +84,7 @@ def auth_register(payload: RegisterRequest):
         INSERT INTO users (username, password, role, full_name, phone, email, address, cust_key, created_at)
         VALUES (?, ?, ?, ?, ?, ?, '', ?, ?);
     """, (payload.username.strip(), payload.password.strip(), payload.role, payload.full_name.strip(), payload.phone.strip(), payload.email.strip(), cust_key, now_str))
+    new_user_id = cursor.lastrowid
 
     cursor.execute("""
         INSERT INTO customers (cust_key, id_display, name, phone, email, avatar, `rank`, rank_badge, joined, orders_count, total_spent, status, status_badge, address, is_banned)
@@ -80,4 +94,24 @@ def auth_register(payload: RegisterRequest):
     conn.commit()
     conn.close()
 
-    return {"message": "Đăng ký tài khoản thành công!", "username": payload.username}
+    # Tạo JWT Token cho người dùng mới đăng ký
+    access_token = create_access_token({
+        "sub": str(new_user_id),
+        "user_id": new_user_id,
+        "username": payload.username.strip(),
+        "role": payload.role,
+        "email": payload.email.strip(),
+        "full_name": payload.full_name.strip(),
+    })
+
+    return {
+        "message": "Đăng ký tài khoản thành công!",
+        "username": payload.username,
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
+@router.get("/me")
+def get_current_user_profile(current_user: dict = Depends(get_current_user)):
+    """Lấy thông tin tài khoản hiện tại từ JWT Token xác thực."""
+    return {"user": current_user}

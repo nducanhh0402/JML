@@ -1,11 +1,12 @@
 import json
 import random
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
 from backend.schemas import ProductCreate, CustomerCreate, FreezeOrderRequest
+from backend.src.middlewares.auth_middleware import require_admin
 
-router = APIRouter(prefix="/api/admin", tags=["Admin"])
+router = APIRouter(prefix="/api/admin", tags=["Admin"], dependencies=[Depends(require_admin)])
 
 @router.get("/shops")
 def get_all_shops():

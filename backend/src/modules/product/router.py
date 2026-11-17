@@ -1,5 +1,6 @@
 import json
-from typing import Optional, Tuple, List, Dict, Any
+import math
+from typing import Any, Dict, List, Optional, Tuple
 from fastapi import APIRouter, HTTPException, Query
 from backend.src.config.database import get_db_connection
 
@@ -7,6 +8,15 @@ router = APIRouter(prefix="/api/products", tags=["Products"])
 
 MAX_KEYWORD_LENGTH = 100
 LIKE_ESCAPE_CHAR = "!"
+
+SORT_ORDER_SQL = {
+    "newest": "p.id DESC",
+    "price_asc": "p.price ASC, p.id DESC",
+    "price_desc": "p.price DESC, p.id DESC",
+    "bestselling": "p.sold DESC, p.id DESC",
+    "sold_desc": "p.sold DESC, p.id DESC",
+    "rating_desc": "p.rating DESC, p.id DESC",
+}
 
 
 def _normalize_keyword(raw_keyword: Optional[str]) -> Tuple[str, bool]:
@@ -29,17 +39,64 @@ def _escape_like_pattern(keyword: str, escape_char: str = LIKE_ESCAPE_CHAR) -> s
     return f"%{escaped}%"
 
 
-def _get_search_capabilities(cursor) -> Dict[str, bool]:
+def _parse_multi_values(raw: Optional[str]) -> List[str]:
+    """Tách danh sách giá trị phân cách bởi dấu phẩy (bỏ qua 'all' hoặc giá trị rỗng)."""
+    if not raw:
+        return []
+    values = [v.strip().lower() for v in str(raw).split(",") if v.strip() and v.strip().lower() != "all"]
+    return list(dict.fromkeys(values))
+
+
+def _validate_filter_params(min_price: Optional[int], max_price: Optional[int], sort: str) -> str:
+    """Kiểm tra tính hợp lệ của khoảng giá và tùy chọn sắp xếp."""
+    if min_price is not None and max_price is not None and min_price > max_price:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Khoảng giá không hợp lệ: min_price ({min_price}) không được lớn hơn max_price ({max_price}).",
+        )
+    sort_key = (sort or "newest").strip().lower()
+    if sort_key not in SORT_ORDER_SQL:
+        valid_keys = ", ".join(SORT_ORDER_SQL.keys())
+        raise HTTPException(
+            status_code=400,
+            detail=f"Tham số sort '{sort}' không hợp lệ. Giá trị cho phép: {valid_keys}.",
+        )
+    return sort_key
+
+
+def _get_product_schema_capabilities(cursor) -> Dict[str, bool]:
     """Kiểm tra các cột và bảng liên kết hiện có để câu SQL tương thích mọi phiên bản DB."""
     cursor.execute("SHOW COLUMNS FROM products;")
     cols = {row["Field"].lower() for row in cursor.fetchall()}
     cursor.execute("SHOW TABLES LIKE 'brands';")
     has_brands_table = cursor.fetchone() is not None
+    cursor.execute("SHOW TABLES LIKE 'categories';")
+    has_categories_table = cursor.fetchone() is not None
     return {
         "has_description": "description" in cols,
         "has_brand_col": "brand" in cols,
         "has_brand_id": "brand_id" in cols and has_brands_table,
+        "has_category_id": "category_id" in cols and has_categories_table,
     }
+
+
+def _build_base_select_and_count(caps: Dict[str, bool]) -> Tuple[str, str]:
+    """Tạo phần SELECT và COUNT kèm LEFT JOIN tới categories/brands nếu tồn tại."""
+    select_fields = ["p.*"]
+    joins = []
+    if caps["has_brand_id"]:
+        select_fields.append("b.name AS brand_name")
+        select_fields.append("b.code AS brand_code")
+        joins.append("LEFT JOIN brands b ON p.brand_id = b.id")
+    if caps["has_category_id"]:
+        select_fields.append("c.name AS category_name")
+        select_fields.append("c.code AS category_code")
+        joins.append("LEFT JOIN categories c ON p.category_id = c.id")
+
+    join_sql = (" " + " ".join(joins)) if joins else ""
+    select_sql = f"SELECT {', '.join(select_fields)} FROM products p{join_sql}"
+    count_sql = f"SELECT COUNT(*) AS total FROM products p{join_sql}"
+    return select_sql, count_sql
 
 
 def _build_keyword_where_clause(keyword: str, caps: Dict[str, bool]) -> Tuple[str, List[Any]]:
@@ -50,11 +107,9 @@ def _build_keyword_where_clause(keyword: str, caps: Dict[str, bool]) -> Tuple[st
 
     if caps["has_description"]:
         fields.append("LOWER(COALESCE(p.description, '')) LIKE LOWER(?) ESCAPE '!'")
-        params.append(pattern)
     else:
-        # Fallback tương thích DB cũ chưa chạy migration thêm cột description
         fields.append("LOWER(COALESCE(p.exclusive, '')) LIKE LOWER(?) ESCAPE '!'")
-        params.append(pattern)
+    params.append(pattern)
 
     if caps["has_brand_col"]:
         fields.append("LOWER(COALESCE(p.brand, '')) LIKE LOWER(?) ESCAPE '!'")
@@ -67,13 +122,82 @@ def _build_keyword_where_clause(keyword: str, caps: Dict[str, bool]) -> Tuple[st
     return "(" + " OR ".join(fields) + ")", params
 
 
+def _build_product_filters_sql(
+    caps: Dict[str, bool],
+    category: Optional[str] = None,
+    category_id: Optional[int] = None,
+    brand: Optional[str] = None,
+    brand_id: Optional[int] = None,
+    min_price: Optional[int] = None,
+    max_price: Optional[int] = None,
+    keyword: Optional[str] = None,
+) -> Tuple[str, List[Any]]:
+    """Tổng hợp mệnh đề WHERE động theo danh mục, thương hiệu, khoảng giá và từ khóa."""
+    where_clauses = ["p.status = 'approved'"]
+    params: List[Any] = []
+
+    categories = _parse_multi_values(category)
+    if categories:
+        placeholders = ", ".join(["?"] * len(categories))
+        if caps["has_category_id"]:
+            where_clauses.append(
+                f"(LOWER(COALESCE(p.category, '')) IN ({placeholders}) OR LOWER(COALESCE(c.code, '')) IN ({placeholders}))"
+            )
+            params.extend(categories)
+            params.extend(categories)
+        else:
+            where_clauses.append(f"LOWER(COALESCE(p.category, '')) IN ({placeholders})")
+            params.extend(categories)
+
+    if category_id is not None and caps["has_category_id"]:
+        where_clauses.append("p.category_id = ?")
+        params.append(category_id)
+
+    brands = _parse_multi_values(brand)
+    if brands:
+        placeholders = ", ".join(["?"] * len(brands))
+        brand_parts = []
+        if caps["has_brand_col"]:
+            brand_parts.append(f"LOWER(COALESCE(p.brand, '')) IN ({placeholders})")
+            params.extend(brands)
+        if caps["has_brand_id"]:
+            brand_parts.append(f"LOWER(COALESCE(b.code, '')) IN ({placeholders})")
+            brand_parts.append(f"LOWER(COALESCE(b.name, '')) IN ({placeholders})")
+            params.extend(brands)
+            params.extend(brands)
+        if brand_parts:
+            where_clauses.append("(" + " OR ".join(brand_parts) + ")")
+
+    if brand_id is not None and caps["has_brand_id"]:
+        where_clauses.append("p.brand_id = ?")
+        params.append(brand_id)
+
+    if min_price is not None:
+        where_clauses.append("p.price >= ?")
+        params.append(min_price)
+
+    if max_price is not None:
+        where_clauses.append("p.price <= ?")
+        params.append(max_price)
+
+    if keyword:
+        kw_clause, kw_params = _build_keyword_where_clause(keyword, caps)
+        where_clauses.append(kw_clause)
+        params.extend(kw_params)
+
+    return " WHERE " + " AND ".join(where_clauses), params
+
+
 def _serialize_product_row(r: dict) -> dict:
     """Chuyển đổi bản ghi SQL sản phẩm thành JSON chuẩn API."""
     brand_display = r.get("brand_name") or r.get("brand") or "Khác"
     return {
         "id": r["id"],
         "category": r["category"],
+        "categoryId": r.get("category_id"),
+        "categoryName": r.get("category_name") or r["category"],
         "brand": brand_display,
+        "brandId": r.get("brand_id"),
         "title": r["title"],
         "description": r.get("description") or "",
         "price": r["price"],
@@ -91,16 +215,120 @@ def _serialize_product_row(r: dict) -> dict:
     }
 
 
+def _execute_paginated_query(
+    category: Optional[str],
+    category_id: Optional[int],
+    brand: Optional[str],
+    brand_id: Optional[int],
+    min_price: Optional[int],
+    max_price: Optional[int],
+    sort: str,
+    page: int,
+    page_size: int,
+    keyword: Optional[str],
+) -> Dict[str, Any]:
+    """Thực thi truy vấn lọc, sắp xếp và phân trang chuẩn hóa."""
+    sort_key = _validate_filter_params(min_price, max_price, sort)
+    normalized_kw, is_empty_kw = _normalize_keyword(keyword)
+    offset = (page - 1) * page_size
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        caps = _get_product_schema_capabilities(cursor)
+        select_sql, count_sql = _build_base_select_and_count(caps)
+        where_sql, params = _build_product_filters_sql(
+            caps=caps,
+            category=category,
+            category_id=category_id,
+            brand=brand,
+            brand_id=brand_id,
+            min_price=min_price,
+            max_price=max_price,
+            keyword=None if is_empty_kw else normalized_kw,
+        )
+
+        cursor.execute(count_sql + where_sql, tuple(params))
+        total = int(cursor.fetchone()["total"])
+        total_pages = math.ceil(total / page_size) if total > 0 else 0
+
+        order_by_sql = SORT_ORDER_SQL[sort_key]
+        data_sql = f"{select_sql}{where_sql} ORDER BY {order_by_sql} LIMIT ? OFFSET ?;"
+        cursor.execute(data_sql, tuple(params + [page_size, offset]))
+        rows = cursor.fetchall()
+
+        return {
+            "items": [_serialize_product_row(r) for r in rows],
+            "total": total,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total": total,
+                "total_pages": total_pages,
+                "has_next": page < total_pages,
+                "has_prev": page > 1 and total > 0,
+            },
+            "filters": {
+                "category": category,
+                "category_id": category_id,
+                "brand": brand,
+                "brand_id": brand_id,
+                "min_price": min_price,
+                "max_price": max_price,
+                "sort": sort_key,
+                "q": normalized_kw,
+            },
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/filter")
+def filter_products(
+    category: Optional[str] = Query(None, description="Lọc theo mã danh mục (vd: tech, fashion hoặc tech,watch)"),
+    category_id: Optional[int] = Query(None, ge=1, description="Lọc theo ID danh mục"),
+    brand: Optional[str] = Query(None, description="Lọc theo tên/mã thương hiệu (vd: Apple, Sony)"),
+    brand_id: Optional[int] = Query(None, ge=1, description="Lọc theo ID thương hiệu"),
+    min_price: Optional[int] = Query(None, ge=0, description="Giá tối thiểu (VNĐ)"),
+    max_price: Optional[int] = Query(None, ge=0, description="Giá tối đa (VNĐ)"),
+    sort: str = Query("newest", description="Sắp xếp: newest, price_asc, price_desc, bestselling, rating_desc"),
+    page: int = Query(1, ge=1, description="Số trang hiện tại (bắt đầu từ 1)"),
+    page_size: int = Query(12, ge=1, le=100, description="Số sản phẩm trên mỗi trang"),
+    q: Optional[str] = Query(None, description="Từ khóa tìm kiếm bổ sung"),
+):
+    """API lọc sản phẩm theo danh mục, thương hiệu, khoảng giá; sắp xếp theo giá/mới nhất và phân trang."""
+    return _execute_paginated_query(
+        category=category,
+        category_id=category_id,
+        brand=brand,
+        brand_id=brand_id,
+        min_price=min_price,
+        max_price=max_price,
+        sort=sort,
+        page=page,
+        page_size=page_size,
+        keyword=q,
+    )
+
+
 @router.get("/search")
 def search_products(
     q: Optional[str] = Query(None, description="Từ khóa tìm kiếm theo tên, mô tả, thương hiệu"),
     keyword: Optional[str] = Query(None, description="Alias thay thế cho tham số q"),
     category: Optional[str] = Query(None, description="Lọc thêm theo mã danh mục"),
-    limit: int = Query(20, ge=1, le=100, description="Số kết quả tối đa trên 1 trang"),
-    offset: int = Query(0, ge=0, description="Vị trí bắt đầu phân trang"),
+    brand: Optional[str] = Query(None, description="Lọc thêm theo thương hiệu"),
+    min_price: Optional[int] = Query(None, ge=0, description="Giá tối thiểu (VNĐ)"),
+    max_price: Optional[int] = Query(None, ge=0, description="Giá tối đa (VNĐ)"),
+    sort: str = Query("newest", description="Sắp xếp: newest, price_asc, price_desc, bestselling, rating_desc"),
+    page: int = Query(1, ge=1, description="Số trang hiện tại"),
+    page_size: int = Query(20, ge=1, le=100, description="Số kết quả trên mỗi trang"),
+    limit: Optional[int] = Query(None, ge=1, le=100, description="Alias của page_size"),
+    offset: Optional[int] = Query(None, ge=0, description="Offset thủ công nếu dùng limit/offset"),
     empty_behavior: str = Query("default", description="'default' trả gợi ý mặc định; 'empty' trả mảng rỗng khi từ khóa rỗng"),
 ):
-    """API tìm kiếm sản phẩm theo từ khóa trong tên, mô tả, thương hiệu; xử lý từ khóa rỗng và ký tự đặc biệt."""
+    """API tìm kiếm sản phẩm theo từ khóa kết hợp lọc, sắp xếp và phân trang."""
+    effective_size = limit if limit is not None else page_size
+    effective_page = ((offset // effective_size) + 1) if offset is not None else page
     raw_input = q if q is not None else keyword
     normalized_kw, is_empty = _normalize_keyword(raw_input)
 
@@ -111,100 +339,103 @@ def search_products(
             "is_empty_keyword": True,
             "message": "Từ khóa tìm kiếm rỗng.",
             "total": 0,
+            "pagination": {"page": effective_page, "page_size": effective_size, "total": 0, "total_pages": 0, "has_next": False, "has_prev": False},
             "items": [],
         }
+
+    result = _execute_paginated_query(
+        category=category,
+        category_id=None,
+        brand=brand,
+        brand_id=None,
+        min_price=min_price,
+        max_price=max_price,
+        sort=sort,
+        page=effective_page,
+        page_size=effective_size,
+        keyword=raw_input,
+    )
+    result["keyword"] = normalized_kw
+    result["raw_keyword"] = raw_input or ""
+    result["is_empty_keyword"] = is_empty
+    result["escaped_like_pattern"] = None if is_empty else _escape_like_pattern(normalized_kw)
+    result["message"] = (
+        "Từ khóa rỗng: hiển thị danh sách sản phẩm mặc định."
+        if is_empty
+        else f"Tìm thấy {result['total']} sản phẩm phù hợp với từ khóa '{normalized_kw}'."
+    )
+    return result
+
+
+@router.get("")
+def get_all_products(
+    category: Optional[str] = Query(None, description="Lọc theo mã danh mục"),
+    category_id: Optional[int] = Query(None, ge=1, description="Lọc theo ID danh mục"),
+    brand: Optional[str] = Query(None, description="Lọc theo thương hiệu"),
+    brand_id: Optional[int] = Query(None, ge=1, description="Lọc theo ID thương hiệu"),
+    min_price: Optional[int] = Query(None, ge=0, description="Giá tối thiểu (VNĐ)"),
+    max_price: Optional[int] = Query(None, ge=0, description="Giá tối đa (VNĐ)"),
+    sort: str = Query("newest", description="Sắp xếp: newest, price_asc, price_desc, bestselling, rating_desc"),
+    page: Optional[int] = Query(None, ge=1, description="Số trang (tùy chọn phân trang)"),
+    page_size: int = Query(20, ge=1, le=100, description="Số sản phẩm mỗi trang"),
+    q: Optional[str] = Query(None, description="Từ khóa tìm kiếm"),
+):
+    """Lấy danh sách sản phẩm (hỗ trợ lọc danh mục/thương hiệu/giá, sắp xếp, phân trang & tương thích ngược Flash Sale)."""
+    sort_key = _validate_filter_params(min_price, max_price, sort)
+    normalized_kw, is_empty = _normalize_keyword(q)
 
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        caps = _get_search_capabilities(cursor)
-
-        select_sql = "SELECT p.*, b.name AS brand_name FROM products p LEFT JOIN brands b ON p.brand_id = b.id" if caps["has_brand_id"] else "SELECT p.* FROM products p"
-        count_sql = "SELECT COUNT(*) AS total FROM products p LEFT JOIN brands b ON p.brand_id = b.id" if caps["has_brand_id"] else "SELECT COUNT(*) AS total FROM products p"
-
-        where_clauses = ["p.status = 'approved'"]
-        params: List[Any] = []
-
-        if category and category.strip() and category.strip().lower() != "all":
-            where_clauses.append("LOWER(p.category) = LOWER(?)")
-            params.append(category.strip())
-
-        escaped_pattern = None
-        if not is_empty:
-            kw_clause, kw_params = _build_keyword_where_clause(normalized_kw, caps)
-            where_clauses.append(kw_clause)
-            params.extend(kw_params)
-            escaped_pattern = _escape_like_pattern(normalized_kw)
-
-        where_sql = " WHERE " + " AND ".join(where_clauses)
+        caps = _get_product_schema_capabilities(cursor)
+        select_sql, count_sql = _build_base_select_and_count(caps)
+        where_sql, params = _build_product_filters_sql(
+            caps=caps,
+            category=category,
+            category_id=category_id,
+            brand=brand,
+            brand_id=brand_id,
+            min_price=min_price,
+            max_price=max_price,
+            keyword=None if is_empty else normalized_kw,
+        )
 
         cursor.execute(count_sql + where_sql, tuple(params))
         total = int(cursor.fetchone()["total"])
 
-        data_sql = f"{select_sql}{where_sql} ORDER BY p.sold DESC, p.id DESC LIMIT ? OFFSET ?;"
-        cursor.execute(data_sql, tuple(params + [limit, offset]))
+        order_by_sql = SORT_ORDER_SQL[sort_key]
+        if page is not None:
+            offset = (page - 1) * page_size
+            query = f"{select_sql}{where_sql} ORDER BY {order_by_sql} LIMIT ? OFFSET ?;"
+            cursor.execute(query, tuple(params + [page_size, offset]))
+        else:
+            query = f"{select_sql}{where_sql} ORDER BY {order_by_sql};"
+            cursor.execute(query, tuple(params))
+
         rows = cursor.fetchall()
+        items = [_serialize_product_row(r) for r in rows]
+        flash_products = [item for item, r in zip(items, rows) if r["is_flash_sale"] == 1]
+        recommend_products = [item for item, r in zip(items, rows) if r["is_flash_sale"] != 1]
 
-        return {
-            "keyword": normalized_kw,
-            "raw_keyword": raw_input or "",
-            "is_empty_keyword": is_empty,
-            "escaped_like_pattern": escaped_pattern,
-            "message": (
-                "Từ khóa rỗng: hiển thị danh sách sản phẩm mặc định."
-                if is_empty
-                else f"Tìm thấy {total} sản phẩm phù hợp với từ khóa '{normalized_kw}'."
-            ),
-            "total": total,
-            "limit": limit,
-            "offset": offset,
-            "items": [_serialize_product_row(r) for r in rows],
-        }
-    finally:
-        conn.close()
+        if sort_key == "newest" and page is None:
+            flash_products.sort(key=lambda x: x["id"])
 
-
-@router.get("")
-def get_all_products(category: Optional[str] = Query(None), q: Optional[str] = Query(None)):
-    """Lấy danh sách sản phẩm Flash Sale và Gợi ý hôm nay từ SQL (hỗ trợ tìm theo tên, mô tả, thương hiệu)."""
-    normalized_kw, is_empty = _normalize_keyword(q)
-    conn = get_db_connection()
-    try:
-        cursor = conn.cursor()
-        caps = _get_search_capabilities(cursor)
-
-        select_sql = "SELECT p.*, b.name AS brand_name FROM products p LEFT JOIN brands b ON p.brand_id = b.id" if caps["has_brand_id"] else "SELECT p.* FROM products p"
-        where_clauses = ["p.status = 'approved'"]
-        params: List[Any] = []
-
-        if category and category.strip() and category.strip().lower() != "all":
-            where_clauses.append("LOWER(p.category) = LOWER(?)")
-            params.append(category.strip())
-
-        if not is_empty:
-            kw_clause, kw_params = _build_keyword_where_clause(normalized_kw, caps)
-            where_clauses.append(kw_clause)
-            params.extend(kw_params)
-
-        query = f"{select_sql} WHERE {' AND '.join(where_clauses)} ORDER BY p.id DESC;"
-        cursor.execute(query, tuple(params))
-        rows = cursor.fetchall()
-
-        flash_products = []
-        recommend_products = []
-
-        for r in rows:
-            item = _serialize_product_row(r)
-            if r["is_flash_sale"] == 1:
-                flash_products.append(item)
-            else:
-                recommend_products.append(item)
-
-        flash_products.sort(key=lambda x: x["id"])
+        current_page = page or 1
+        effective_size = page_size if page is not None else max(total, 1)
+        total_pages = math.ceil(total / effective_size) if total > 0 else 0
 
         return {
             "keyword": normalized_kw,
             "is_empty_keyword": is_empty,
+            "items": items,
+            "pagination": {
+                "page": current_page,
+                "page_size": page_size if page is not None else total,
+                "total": total,
+                "total_pages": total_pages,
+                "has_next": page is not None and current_page < total_pages,
+                "has_prev": page is not None and current_page > 1 and total > 0,
+            },
             "flash_products": flash_products,
             "recommend_products": recommend_products,
         }

@@ -2,9 +2,45 @@ import unittest
 from backend.src.modules.product.router import (
     _normalize_keyword,
     _escape_like_pattern,
-    search_products,
-    get_all_products,
+    search_products as _raw_search_products,
+    get_all_products as _raw_get_all_products,
 )
+
+
+def search_products(**kwargs):
+    defaults = {
+        "q": None,
+        "keyword": None,
+        "category": None,
+        "brand": None,
+        "min_price": None,
+        "max_price": None,
+        "sort": "newest",
+        "page": 1,
+        "page_size": 20,
+        "limit": None,
+        "offset": None,
+        "empty_behavior": "default",
+    }
+    defaults.update(kwargs)
+    return _raw_search_products(**defaults)
+
+
+def get_all_products(**kwargs):
+    defaults = {
+        "category": None,
+        "category_id": None,
+        "brand": None,
+        "brand_id": None,
+        "min_price": None,
+        "max_price": None,
+        "sort": "newest",
+        "page": None,
+        "page_size": 20,
+        "q": None,
+    }
+    defaults.update(kwargs)
+    return _raw_get_all_products(**defaults)
 
 
 class TestProductSearchTF16DB5(unittest.TestCase):

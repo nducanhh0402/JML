@@ -13,8 +13,12 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      # Docker chạy các file trong initdb.d theo thứ tự tên (chỉ lần đầu tạo DB)
       - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
-      - ./backend/db/seeds/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+      - ./backend/db/migrations/004_create_catalog_tables_and_seed.sql:/docker-entrypoint-initdb.d/02_catalog.sql
+      - ./backend/db/migrations/002_create_carts_tables.sql:/docker-entrypoint-initdb.d/03_carts.sql
+      - ./backend/db/migrations/003_create_users_and_roles_schema.sql:/docker-entrypoint-initdb.d/04_roles_users_v2.sql
+      - ./backend/db/seeds/seed.sql:/docker-entrypoint-initdb.d/99_seed.sql
     networks:
       - jml_network
 
@@ -44,4 +48,3 @@ volumes:
 networks:
   jml_network:
     driver: bridge
-
