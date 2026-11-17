@@ -789,6 +789,108 @@
         from { transform: translateY(20px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
       }
+
+      /* TF16E55: Brand List, Active Filter Chips, Loading & API Badge */
+      .brand-filter-list {
+        max-height: 185px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .active-filters-bar {
+        display: none;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+        padding: 10px 14px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+      }
+      .active-filters-bar.visible {
+        display: flex;
+      }
+      .active-filters-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-right: 4px;
+      }
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #c2410c;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .filter-chip button {
+        border: none;
+        background: transparent;
+        color: #ea580c;
+        font-weight: 800;
+        cursor: pointer;
+        font-size: 13px;
+        line-height: 1;
+        padding: 0 2px;
+      }
+      .filter-chip button:hover {
+        color: #9a3412;
+      }
+      .btn-clear-all-chips {
+        margin-left: auto;
+        border: none;
+        background: transparent;
+        color: #ef4444;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+      .btn-clear-all-chips:hover {
+        background: #fef2f2;
+      }
+      .products-grid.is-loading {
+        opacity: 0.5;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+      }
+      .api-source-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 99px;
+        background: #f1f5f9;
+        color: #475569;
+        margin-left: 8px;
+      }
+      .api-source-badge.online {
+        background: #ecfdf5;
+        color: #047857;
+      }
+      .api-source-badge.offline {
+        background: #fffbeb;
+        color: #b45309;
+      }
+      .page-ellipsis {
+        padding: 0 6px;
+        color: #94a3b8;
+        font-weight: 700;
+        user-select: none;
+      }
+      .pagination-meta {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-left: 10px;
+      }
     </style>
   </head>
   <body>
@@ -881,27 +983,45 @@
             <div class="filter-group-title">
               <span>Theo Danh Mục</span>
             </div>
-            <div class="category-list">
+            <div class="category-list" id="categoryFilterList">
               <div class="category-item active" data-cat="all" onclick="selectCategory('all', this)">
                 <span>Tất Cả Sản Phẩm</span>
                 <span class="category-count" id="countAll">16</span>
               </div>
               <div class="category-item" data-cat="audio" onclick="selectCategory('audio', this)">
                 <span>🎧 Thiết Bị Âm Thanh</span>
-                <span class="category-count">4</span>
+                <span class="category-count" id="countCat-audio">4</span>
               </div>
               <div class="category-item" data-cat="watch" onclick="selectCategory('watch', this)">
                 <span>⌚ Đồng Hồ Cao Cấp</span>
-                <span class="category-count">4</span>
+                <span class="category-count" id="countCat-watch">4</span>
               </div>
               <div class="category-item" data-cat="fashion" onclick="selectCategory('fashion', this)">
                 <span>👔 Thời Trang & Đồ Da</span>
-                <span class="category-count">4</span>
+                <span class="category-count" id="countCat-fashion">4</span>
               </div>
               <div class="category-item" data-cat="tech" onclick="selectCategory('tech', this)">
                 <span>📱 Thiết Bị Số & PC</span>
-                <span class="category-count">4</span>
+                <span class="category-count" id="countCat-tech">4</span>
               </div>
+              <div class="category-item" data-cat="shoes" onclick="selectCategory('shoes', this)">
+                <span>👟 Giày & Sneakers</span>
+                <span class="category-count" id="countCat-shoes">0</span>
+              </div>
+              <div class="category-item" data-cat="beauty" onclick="selectCategory('beauty', this)">
+                <span>✨ Làm Đẹp & Nước Hoa</span>
+                <span class="category-count" id="countCat-beauty">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhóm 1b: Theo Thương Hiệu (TF16E55) -->
+          <div class="filter-group">
+            <div class="filter-group-title">
+              <span>Thương Hiệu</span>
+            </div>
+            <div class="brand-filter-list" id="brandFilterList">
+              <!-- Populated dynamically by buyer-products.js -->
             </div>
           </div>
 
@@ -1007,21 +1127,31 @@
               </button>
 
               <span class="sort-label">Sắp xếp theo:</span>
-              <button class="sort-tab active" data-sort="popular" onclick="changeSort('popular', this)">Phổ Biến</button>
+              <button class="sort-tab active" data-sort="rating_desc" onclick="changeSort('rating_desc', this)">Phổ Biến</button>
               <button class="sort-tab" data-sort="newest" onclick="changeSort('newest', this)">Mới Nhất</button>
-              <button class="sort-tab" data-sort="bestseller" onclick="changeSort('bestseller', this)">Bán Chạy</button>
-              
-              <select class="sort-select" onchange="handlePriceSortSelect(this.value)">
+              <button class="sort-tab" data-sort="bestselling" onclick="changeSort('bestselling', this)">Bán Chạy</button>
+
+              <select id="priceSortSelect" class="sort-select" onchange="handlePriceSortSelect(this.value)">
                 <option value="default">Giá: Mặc định</option>
-                <option value="price-asc">Giá: Thấp đến Cao ↑</option>
-                <option value="price-desc">Giá: Cao đến Thấp ↓</option>
+                <option value="price_asc">Giá: Thấp đến Cao ↑</option>
+                <option value="price_desc">Giá: Cao đến Thấp ↓</option>
+              </select>
+
+              <select id="pageSizeSelect" class="sort-select" onchange="changePageSize(this.value)" title="Số sản phẩm mỗi trang">
+                <option value="8" selected>8 / trang</option>
+                <option value="12">12 / trang</option>
+                <option value="24">24 / trang</option>
               </select>
             </div>
 
             <div class="sort-right">
               <span>Tìm thấy: <strong class="product-count-badge" id="productCountText">0</strong> sản phẩm</span>
+              <span id="apiSourceBadge" class="api-source-badge">Đang đồng bộ API...</span>
             </div>
           </div>
+
+          <!-- Thanh Chip Trạng Thái Bộ Lọc Đang Bật (TF16E55) -->
+          <div id="activeFiltersBar" class="active-filters-bar"></div>
 
           <!-- Lưới sản phẩm (Product Grid) -->
           <div class="products-grid" id="productsGrid">
@@ -1032,7 +1162,6 @@
           <div class="pagination" id="paginationWrapper">
             <button class="page-btn" id="btnPrevPage" onclick="changePage(currentPage - 1)">‹</button>
             <button class="page-btn active" onclick="changePage(1)">1</button>
-            <button class="page-btn" onclick="changePage(2)">2</button>
             <button class="page-btn" id="btnNextPage" onclick="changePage(currentPage + 1)">›</button>
           </div>
         </main>

@@ -131,6 +131,9 @@ def _build_product_filters_sql(
     min_price: Optional[int] = None,
     max_price: Optional[int] = None,
     keyword: Optional[str] = None,
+    min_rating: Optional[float] = None,
+    flash_sale: Optional[bool] = None,
+    exclusive: Optional[bool] = None,
 ) -> Tuple[str, List[Any]]:
     """Tổng hợp mệnh đề WHERE động theo danh mục, thương hiệu, khoảng giá và từ khóa."""
     where_clauses = ["p.status = 'approved'"]
@@ -180,6 +183,16 @@ def _build_product_filters_sql(
         where_clauses.append("p.price <= ?")
         params.append(max_price)
 
+    if min_rating is not None:
+        where_clauses.append("COALESCE(p.rating, 0) >= ?")
+        params.append(min_rating)
+
+    if flash_sale is True:
+        where_clauses.append("p.is_flash_sale = 1")
+
+    if exclusive is True:
+        where_clauses.append("LOWER(COALESCE(p.exclusive, '')) LIKE '%chính hãng%'")
+
     if keyword:
         kw_clause, kw_params = _build_keyword_where_clause(keyword, caps)
         where_clauses.append(kw_clause)
@@ -226,6 +239,9 @@ def _execute_paginated_query(
     page: int,
     page_size: int,
     keyword: Optional[str],
+    min_rating: Optional[float] = None,
+    flash_sale: Optional[bool] = None,
+    exclusive: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Thực thi truy vấn lọc, sắp xếp và phân trang chuẩn hóa."""
     sort_key = _validate_filter_params(min_price, max_price, sort)
@@ -246,6 +262,9 @@ def _execute_paginated_query(
             min_price=min_price,
             max_price=max_price,
             keyword=None if is_empty_kw else normalized_kw,
+            min_rating=min_rating,
+            flash_sale=flash_sale,
+            exclusive=exclusive,
         )
 
         cursor.execute(count_sql + where_sql, tuple(params))
@@ -275,9 +294,53 @@ def _execute_paginated_query(
                 "brand_id": brand_id,
                 "min_price": min_price,
                 "max_price": max_price,
+                "min_rating": min_rating,
+                "flash_sale": flash_sale,
+                "exclusive": exclusive,
                 "sort": sort_key,
                 "q": normalized_kw,
             },
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/facets")
+def get_product_filter_facets():
+    """Lấy danh sách danh mục kèm số lượng và thương hiệu hiện có phục vụ thanh bộ lọc."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        caps = _get_product_schema_capabilities(cursor)
+
+        cursor.execute(
+            "SELECT LOWER(category) AS cat, COUNT(*) AS cnt FROM products WHERE status = 'approved' GROUP BY LOWER(category);"
+        )
+        cat_counts = {row["cat"]: int(row["cnt"]) for row in cursor.fetchall() if row.get("cat")}
+
+        brands: List[str] = []
+        if caps["has_brand_id"]:
+            cursor.execute(
+                """
+                SELECT DISTINCT COALESCE(NULLIF(b.name, ''), p.brand) AS brand_label
+                FROM products p
+                LEFT JOIN brands b ON p.brand_id = b.id
+                WHERE p.status = 'approved'
+                ORDER BY brand_label ASC;
+                """
+            )
+            brands = [row["brand_label"] for row in cursor.fetchall() if row.get("brand_label")]
+        elif caps["has_brand_col"]:
+            cursor.execute(
+                "SELECT DISTINCT brand AS brand_label FROM products WHERE status = 'approved' AND brand IS NOT NULL AND brand != '' ORDER BY brand ASC;"
+            )
+            brands = [row["brand_label"] for row in cursor.fetchall() if row.get("brand_label")]
+
+        total_approved = sum(cat_counts.values())
+        return {
+            "total": total_approved,
+            "categories": cat_counts,
+            "brands": brands,
         }
     finally:
         conn.close()
@@ -295,8 +358,15 @@ def filter_products(
     page: int = Query(1, ge=1, description="Số trang hiện tại (bắt đầu từ 1)"),
     page_size: int = Query(12, ge=1, le=100, description="Số sản phẩm trên mỗi trang"),
     q: Optional[str] = Query(None, description="Từ khóa tìm kiếm bổ sung"),
+    min_rating: Optional[float] = Query(None, ge=0, le=5, description="Đánh giá tối thiểu (từ 0 đến 5 sao)"),
+    flash_sale: Optional[bool] = Query(None, description="Chỉ lấy sản phẩm Flash Sale"),
+    exclusive: Optional[bool] = Query(None, description="Chỉ lấy hàng Chính Hãng"),
 ):
     """API lọc sản phẩm theo danh mục, thương hiệu, khoảng giá; sắp xếp theo giá/mới nhất và phân trang."""
+    safe_min_rating = float(min_rating) if isinstance(min_rating, (int, float)) and not isinstance(min_rating, bool) else None
+    safe_flash_sale = flash_sale if isinstance(flash_sale, bool) else None
+    safe_exclusive = exclusive if isinstance(exclusive, bool) else None
+
     return _execute_paginated_query(
         category=category,
         category_id=category_id,
@@ -308,6 +378,9 @@ def filter_products(
         page=page,
         page_size=page_size,
         keyword=q,
+        min_rating=safe_min_rating,
+        flash_sale=safe_flash_sale,
+        exclusive=safe_exclusive,
     )
 
 
