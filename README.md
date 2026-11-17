@@ -91,50 +91,52 @@ JML/
 ├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── database.py             # Cấu hình kết nối MySQL (PyMySQL wrapper)
+│   │   │   └── database.py                             # Cấu hình kết nối MySQL (PyMySQL wrapper)
 │   │   ├── middlewares/
-│   │   │   └── auth_middleware.py      # Security headers & middleware xác thực
+│   │   │   └── auth_middleware.py                      # Security headers & middleware xác thực
 │   │   ├── utils/
-│   │   │   └── helpers.py              # Hàm tiện ích dùng chung
-│   │   └── modules/                    # Các router API theo từng nghiệp vụ
-│   │       ├── admin/router.py         # Quản trị Shop, Khách hàng, Duyệt SP, Escrow
-│   │       ├── auth/router.py          # Đăng ký, Đăng nhập đa vai trò
-│   │       ├── cart/router.py          # Kiểm tra giỏ hàng & tồn kho
-│   │       ├── category/router.py      # Danh mục ngành hàng & Thương hiệu
-│   │       ├── order/router.py         # Tạo đơn, theo dõi, cập nhật trạng thái đơn
-│   │       ├── payment/router.py       # Phương thức thanh toán (COD / Ví Escrow)
-│   │       ├── product/router.py       # Danh sách, tìm kiếm, chi tiết, xóa sản phẩm
-│   │       ├── review/router.py        # Đánh giá & nhận xét sản phẩm
-│   │       ├── seller/router.py        # Kênh người bán, đăng SP, quản lý đơn Shop
-│   │       ├── user/router.py          # Hồ sơ người dùng
-│   │       └── voucher/router.py       # Danh sách mã giảm giá (Voucher)
+│   │   │   └── helpers.py                              # Hàm tiện ích dùng chung
+│   │   └── modules/                                    # Các router API theo từng nghiệp vụ
+│   │       ├── admin/router.py                         # Quản trị Shop, Khách hàng, Duyệt SP, Escrow
+│   │       ├── auth/router.py                          # Đăng ký, Đăng nhập đa vai trò
+│   │       ├── cart/router.py                          # Kiểm tra giỏ hàng & tồn kho
+│   │       ├── category/router.py                      # Danh mục ngành hàng & Thương hiệu
+│   │       ├── order/router.py                         # Tạo đơn, theo dõi, cập nhật trạng thái đơn
+│   │       ├── payment/router.py                       # Phương thức thanh toán (COD / Ví Escrow)
+│   │       ├── product/router.py                       # Danh sách, tìm kiếm, lọc, chi tiết sản phẩm
+│   │       ├── review/router.py                        # Đánh giá & nhận xét sản phẩm
+│   │       ├── seller/router.py                        # Kênh người bán, đăng SP, quản lý đơn Shop
+│   │       ├── user/router.py                          # Hồ sơ người dùng
+│   │       └── voucher/router.py                       # Danh sách mã giảm giá (Voucher)
 │   ├── db/
-│   │   ├── schema.sql                  # DDL khởi tạo bảng cốt lõi (shops, products, customers, orders, order_items, users)
+│   │   ├── schema.sql                                  # DDL khởi tạo bảng cốt lõi (shops, products, customers, orders, order_items, users)
 │   │   ├── migrations/
-│   │   │   ├── 001_initial_schema.sql
-│   │   │   └── 004_create_catalog_tables_and_seed.sql  # Bảng categories, brands, product_images & dữ liệu mẫu
+│   │   │   ├── 001_create_orders_tables.sql            # Bảng orders, order_items, payments, order_status_history
+│   │   │   ├── 002_create_carts_tables.sql             # Bảng carts, cart_items
+│   │   │   ├── 003_create_users_and_roles_schema.sql   # Bảng roles, users_v2 & tài khoản mẫu
+│   │   │   └── 004_create_catalog_tables_and_seed.sql  # Bảng categories, brands, product_images & 21 SP mẫu
 │   │   └── seeds/
-│   │       └── seed.sql                # Dữ liệu mẫu Shop và Tài khoản (Admin, Seller, Buyer)
+│   │       └── seed.sql                                # Dữ liệu mẫu Shop và Tài khoản (Admin, Seller, Buyer)
 │   ├── tests/
-│   │   └── test_api.py                 # Bộ kiểm thử API bằng Python unittest
-│   ├── database.py                     # Khởi tạo bảng & tự động đồng bộ MySQL khi startup
-│   ├── schemas.py                      # Pydantic schemas cho request/response
-│   ├── main.py                         # Khởi chạy FastAPI Server (cổng 8000)
-│   ├── requirements.txt                # Các thư viện Python phụ thuộc
-│   └── Dockerfile                      # Dockerfile đóng gói Backend
+│   │   └── test_api.py                                 # Bộ kiểm thử API bằng Python unittest
+│   ├── database.py                                     # Khởi tạo bảng & tự động đồng bộ MySQL khi startup
+│   ├── schemas.py                                      # Pydantic schemas cho request/response
+│   ├── main.py                                         # Khởi chạy FastAPI Server (cổng 8000)
+│   ├── requirements.txt                                # Các thư viện Python phụ thuộc
+│   └── Dockerfile                                      # Dockerfile đóng gói Backend
 ├── frontend/
-│   ├── buyer/                          # Giao diện Khách hàng mua sắm (index.html, products.html, style.css)
-│   ├── user/                           # Giao diện Storefront Người dùng (index.html, products.html, style.css)
-│   ├── seller/                         # Giao diện Kênh Người Bán (index.html)
-│   ├── admin/                          # Giao diện Quản trị Sàn (index.html, script.js, style.css, mobile-responsive.*)
-│   └── shared/                         # Tài nguyên dùng chung
+│   ├── buyer/                                          # Giao diện Khách hàng mua sắm (index.html, products.html, style.css)
+│   ├── user/                                           # Giao diện Storefront Người dùng (index.html, products.html, style.css)
+│   ├── seller/                                         # Giao diện Kênh Người Bán (index.html)
+│   ├── admin/                                          # Giao diện Quản trị Sàn (index.html, script.js, style.css, mobile-responsive.*)
+│   └── shared/                                         # Tài nguyên dùng chung
 │       ├── components/header.html
 │       ├── css/shared.css
-│       └── js/                         # api.js, auth.js
-├── .env.example                        # Mẫu biến môi trường kết nối MySQL & JWT
+│       └── js/                                         # api.js, auth.js
+├── .env.example                                        # Mẫu biến môi trường kết nối MySQL & JWT
 ├── .gitignore
-├── docker-compose.yml                  # Triển khai MySQL 8.0 + FastAPI Backend bằng Docker
-└── README.md                           # Tài liệu hướng dẫn dự án
+├── docker-compose.yml                                  # Triển khai MySQL 8.0 + FastAPI Backend bằng Docker
+└── README.md                                           # Tài liệu hướng dẫn dự án
 ```
 
 ---
@@ -163,10 +165,13 @@ JML/
 
 2. **Khởi tạo cơ sở dữ liệu MySQL 8.0:**
    - Đảm bảo MySQL Server đang chạy trên cổng `3306`.
-   - Import các file SQL theo thứ tự:
-     1. `backend/db/schema.sql` (tạo database `jml_marketplace` và các bảng chính)
-     2. `backend/db/migrations/004_create_catalog_tables_and_seed.sql` (tạo bảng danh mục, thương hiệu, ảnh sản phẩm & 21 sản phẩm mẫu)
-     3. `backend/db/seeds/seed.sql` (nạp các Shop và tài khoản mẫu)
+   - Chạy lần lượt các file SQL theo thứ tự:
+     1. `backend/db/schema.sql`
+     2. `backend/db/migrations/001_create_orders_tables.sql`
+     3. `backend/db/migrations/002_create_carts_tables.sql`
+     4. `backend/db/migrations/003_create_users_and_roles_schema.sql`
+     5. `backend/db/migrations/004_create_catalog_tables_and_seed.sql`
+     6. `backend/db/seeds/seed.sql`
 
 3. **Cài đặt thư viện Python:**
    ```bash
