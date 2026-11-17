@@ -191,7 +191,7 @@ JML/
 ```bash
 docker-compose up -d --build
 ```
-- **MySQL 8.0 Container (`jml_mysql_db`):** cổng `3306` (tự động chạy `schema.sql` và `seed.sql`).
+- **MySQL 8.0 Container (`jml_mysql_db`):** cổng `3306` (tự động chạy lần đầu `schema.sql`, các migration `004`, `002`, `003` và `seed.sql`).
 - **FastAPI Container (`jml_backend_api`):** cổng `8000`.
 
 ---
