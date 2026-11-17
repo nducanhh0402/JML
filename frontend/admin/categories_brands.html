@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-[#F6F7F9]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Danh Mục & Thương Hiệu - JML Store Admin</title>
+    <link rel="icon" type="image/svg+xml" href="jml-store-icon.svg">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#F0F7FF',
+                            100: '#E0EDFF',
+                            200: '#CCE0FF',
+                            500: '#0D6EFD',
+                            600: '#0B5ED7',
+                            700: '#1C2EB0',
+                        },
+                        neutral: {
+                            50: '#F6F7F9',
+                            100: '#EDF0F2',
+                            200: '#DCE0E5',
+                            300: '#CBD3DB',
+                            500: '#929EAA',
+                            600: '#6F7C8E',
+                            700: '#525E6F',
+                            800: '#323C49',
+                            900: '#14181F',
+                        },
+                        success: {
+                            50: '#E8F8EE',
+                            500: '#00B517',
+                        },
+                        warning: {
+                            50: '#FFF0DE',
+                            500: '#FF9017',
+                        },
+                        danger: {
+                            50: '#FFE5E5',
+                            500: '#FA3434',
+                            600: '#D92D20',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-full flex overflow-hidden text-neutral-900 text-sm antialiased">
+
+    <!-- SIDEBAR: QUẢN TRỊ SÀN TRUNG GIAN -->
+    <aside class="w-[280px] bg-white border-r border-neutral-200 flex flex-col flex-shrink-0 z-20 select-none">
+        <!-- Logo Header -->
+        <a href="index.html#dashboard" title="Về trang Tổng quan Sàn" class="h-16 flex items-center px-5 border-b border-neutral-200 gap-3 hover:bg-neutral-50 transition-colors cursor-pointer">
+            <img src="jml-store-icon.svg" alt="JML Store Icon" class="w-10 h-10 object-contain shrink-0">
+            <div class="min-w-0">
+                <span class="text-lg font-bold tracking-tight text-neutral-900 block leading-tight">JML <span class="text-[#ff4d8d]">Store</span></span>
+                <span class="inline-block text-[10px] font-semibold uppercase tracking-wider text-primary-500 bg-primary-50 px-1.5 py-0.5 rounded mt-0.5">Marketplace Admin</span>
+            </div>
+        </a>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+            <div class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Điều hành toàn sàn</div>
+            
+            <a href="index.html#dashboard" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="truncate whitespace-nowrap">Tổng quan Sàn (GMV)</span>
+                </div>
+            </a>
+
+            <a href="index.html#shops" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="store" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="truncate whitespace-nowrap">Quản lý Shop / Sellers</span>
+                </div>
+            </a>
+
+            <!-- Active Menu: Danh mục & Thương hiệu -->
+            <a href="categories_brands.html" class="nav-item active flex items-center justify-between px-3 py-2.5 rounded-lg font-semibold bg-primary-50 text-primary-600 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="folder-tree" class="w-4 h-4 shrink-0 text-primary-600"></i>
+                    <span class="truncate whitespace-nowrap">Danh mục & Thương hiệu</span>
+                </div>
+                <span id="sidebarCatTotalBadge" class="ml-2 px-2 py-0.5 text-[11px] font-bold bg-primary-200 text-primary-700 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <div class="pt-4 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Giao dịch & Tranh chấp</div>
+
+            <a href="index.html#orders" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="shopping-bag" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="whitespace-nowrap">Đơn hàng Trung gian</span>
+                </div>
+            </a>
+
+            <a href="index.html#customers" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="users" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="whitespace-nowrap">Quản lý Khách hàng</span>
+                </div>
+            </a>
+        </nav>
+
+        <!-- Admin Profile Card -->
+        <div class="p-3 border-t border-neutral-200">
+            <div class="flex items-center gap-3 p-2 rounded-lg bg-neutral-50 border border-neutral-200">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80" alt="Super Admin Avatar" class="w-9 h-9 rounded-full object-cover border border-neutral-200 shrink-0">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-neutral-900 truncate">Admin Quản Trị Sàn</p>
+                    <p class="text-[11px] text-neutral-500 truncate">Hệ thống Catalog JML</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- TOP HEADER -->
+        <header class="h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-6 flex-shrink-0 z-10">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-neutral-900 text-sm">Kênh Quản Trị Sàn JML Store</span>
+                <span class="text-neutral-300">/</span>
+                <span class="text-xs font-medium text-neutral-500">Quản Lý Danh Mục & Thương Hiệu</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div id="connectionStatusBadge" class="hidden sm:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="connectionStatusText">FastAPI RESTful API</span>
+                </div>
+
+                <a href="../user/index.html" target="_blank" class="inline-flex items-center gap-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors whitespace-nowrap" title="Mở trang bán hàng khách hàng">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5 text-primary-500"></i>
+                    <span>Xem Cửa Hàng (Storefront)</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+
+            <!-- Title & Quick Stats -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+                        <span>Quản Lý Danh Mục & Thương Hiệu</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-primary-100 text-primary-700 font-semibold">TF170B1</span>
+                    </h1>
+                    <p class="text-xs text-neutral-500 mt-1">
+                        Hệ thống bảng phân loại danh mục hàng hóa và thương hiệu chính hãng. Hỗ trợ thêm/sửa qua Modal, kiểm tra ràng buộc toàn vẹn và xác nhận xóa an toàn.
+                    </p>
+                </div>
+
+                <!-- Add Button (Dynamic per active tab) -->
+                <div class="flex items-center gap-2">
+                    <button id="btnAddNew" onclick="openAddModal()" class="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold px-4 py-2.5 rounded-lg text-xs shadow-sm transition-all whitespace-nowrap">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span id="btnAddNewText">Thêm Danh Mục Mới</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Card 1 -->
+                <div class="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Tổng Danh Mục</p>
+                        <p id="statTotalCategories" class="text-2xl font-bold text-neutral-900 mt-1">0</p>
+                        <p class="text-[11px] text-emerald-600 font-medium mt-0.5">Phân cấp ngành hàng</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-lg bg-blue-50 text-primary-500 flex items-center justify-center">
+                        <i data-lucide="folder-tree" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Tổng Thương Hiệu</p>
+                        <p id="statTotalBrands" class="text-2xl font-bold text-neutral-900 mt-1">0</p>
+                        <p class="text-[11px] text-emerald-600 font-medium mt-0.5">Nhãn hàng chính thức</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <i data-lucide="award" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Sản Phẩm Đã Gắn Thẻ</p>
+                        <p id="statTotalTaggedProducts" class="text-2xl font-bold text-neutral-900 mt-1">0</p>
+                        <p class="text-[11px] text-neutral-500 font-medium mt-0.5">Có category & brand</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <i data-lucide="package-check" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">Kiểm Soát Toàn Vẹn</p>
+                        <p class="text-xs font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i> Đang Kích Hoạt
+                        </p>
+                        <p class="text-[11px] text-neutral-500 font-medium mt-0.5">Chặn xóa khi còn sản phẩm</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB SWITCHER & FILTER TOOLBAR -->
+            <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-4 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <!-- Tab Buttons -->
+                    <div class="inline-flex p-1 bg-neutral-100 rounded-lg text-xs font-semibold">
+                        <button id="tabBtnCategories" onclick="switchCatalogTab('categories')" class="px-4 py-2 rounded-md bg-white text-primary-600 shadow-sm transition-all flex items-center gap-2">
+                            <i data-lucide="folder-tree" class="w-4 h-4"></i>
+                            <span>Bảng Danh Mục</span>
+                            <span id="tabCountCategories" class="px-1.5 py-0.5 text-[10px] rounded-full bg-primary-100 text-primary-700">0</span>
+                        </button>
+                        <button id="tabBtnBrands" onclick="switchCatalogTab('brands')" class="px-4 py-2 rounded-md text-neutral-600 hover:text-neutral-900 transition-all flex items-center gap-2">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                            <span>Bảng Thương Hiệu</span>
+                            <span id="tabCountBrands" class="px-1.5 py-0.5 text-[10px] rounded-full bg-neutral-200 text-neutral-700">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Search Input & Reset -->
+                    <div class="flex items-center gap-2 flex-1 max-w-md ml-auto">
+                        <div class="relative w-full">
+                            <i data-lucide="search" class="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Tìm theo mã code, tên danh mục, thương hiệu..." class="w-full pl-9 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                            <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <button onclick="reloadCatalogData()" title="Làm mới dữ liệu từ máy chủ" class="p-2 border border-neutral-200 rounded-lg text-neutral-600 hover:bg-neutral-50 transition-colors">
+                            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: BẢNG DANH MỤC (CATEGORIES TABLE) -->
+            <div id="sectionCategories" class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50/50">
+                    <div>
+                        <h2 class="text-sm font-bold text-neutral-900 flex items-center gap-2">
+                            <i data-lucide="folder-tree" class="w-4 h-4 text-primary-500"></i>
+                            <span>Danh Sách Danh Mục Ngành Hàng (Categories)</span>
+                        </h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">Danh mục hỗ trợ phân loại hàng hóa trên thanh điều hướng & trang tìm kiếm.</p>
+                    </div>
+                    <span id="catTableSummary" class="text-xs text-neutral-500 font-medium">Đang tải...</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-bold uppercase tracking-wider text-neutral-600">
+                                <th class="py-3 px-4 w-12 text-center">ID</th>
+                                <th class="py-3 px-4 w-16 text-center">Icon</th>
+                                <th class="py-3 px-4">Mã Danh Mục (Code)</th>
+                                <th class="py-3 px-4">Tên Danh Mục (Tiếng Việt)</th>
+                                <th class="py-3 px-4">Mô Tả Tóm Tắt</th>
+                                <th class="py-3 px-4 text-center">Số Sản Phẩm</th>
+                                <th class="py-3 px-4 text-center w-36">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesTableBody" class="divide-y divide-neutral-200 text-xs">
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-neutral-400">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i data-lucide="loader" class="w-5 h-5 animate-spin text-primary-500"></i>
+                                        <span>Đang tải danh mục từ cơ sở dữ liệu...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION 2: BẢNG THƯƠNG HIỆU (BRANDS TABLE) -->
+            <div id="sectionBrands" class="hidden bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50/50">
+                    <div>
+                        <h2 class="text-sm font-bold text-neutral-900 flex items-center gap-2">
+                            <i data-lucide="award" class="w-4 h-4 text-purple-600"></i>
+                            <span>Danh Sách Thương Hiệu / Nhãn Hàng (Brands)</span>
+                        </h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">Thương hiệu phục vụ bộ lọc sản phẩm chính hãng (Apple, Samsung, Aristino...).</p>
+                    </div>
+                    <span id="brandTableSummary" class="text-xs text-neutral-500 font-medium">Đang tải...</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-neutral-50 border-b border-neutral-200 text-[11px] font-bold uppercase tracking-wider text-neutral-600">
+                                <th class="py-3 px-4 w-12 text-center">ID</th>
+                                <th class="py-3 px-4 w-20 text-center">Logo</th>
+                                <th class="py-3 px-4">Mã Thương Hiệu (Code)</th>
+                                <th class="py-3 px-4">Tên Nhãn Hàng</th>
+                                <th class="py-3 px-4">Xuất Xứ</th>
+                                <th class="py-3 px-4 text-center">Số Sản Phẩm</th>
+                                <th class="py-3 px-4 text-center w-36">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="brandsTableBody" class="divide-y divide-neutral-200 text-xs">
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-neutral-400">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i data-lucide="loader" class="w-5 h-5 animate-spin text-primary-500"></i>
+                                        <span>Đang tải danh sách thương hiệu...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- =========================================================================
+         MODAL 1: FORM THÊM / SỬA DANH MỤC (CATEGORY MODAL)
+         ========================================================================= -->
+    <div id="categoryModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center font-bold">
+                        <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 id="categoryModalTitle" class="text-base font-bold text-neutral-900">Thêm Danh Mục Mới</h3>
+                        <p class="text-xs text-neutral-500">Điền thông tin mã và tên ngành hàng sản phẩm</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCategoryModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg hover:bg-neutral-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="categoryForm" onsubmit="handleSaveCategory(event)" class="p-6 space-y-4">
+                <input type="hidden" id="catEditId" value="">
+
+                <!-- Mã code & Icon -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2 space-y-1.5">
+                        <label class="block text-xs font-semibold text-neutral-700">
+                            Mã Danh Mục (Code) <span class="text-danger-500">*</span>
+                        </label>
+                        <input type="text" id="catCode" required placeholder="vd: tech, shoes, beauty..." class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-mono text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                        <p class="text-[10px] text-neutral-400">Viết thường, không dấu, không dấu cách (vd: watch, books)</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-neutral-700">Icon Biểu Tượng</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="catIcon" maxlength="4" placeholder="🛍️" value="🛍️" class="w-full text-center px-2 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                        </div>
+                        <p class="text-[10px] text-neutral-400 text-center">Gợi ý: 📱👔⌚👟✨</p>
+                    </div>
+                </div>
+
+                <!-- Tên hiển thị -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-neutral-700">
+                        Tên Danh Mục (Tiếng Việt) <span class="text-danger-500">*</span>
+                    </label>
+                    <input type="text" id="catName" required placeholder="vd: Công Nghệ & Điện Tử, Giày Dép Thời Trang..." class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                </div>
+
+                <!-- Mô tả -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-neutral-700">Mô Tả Chi Tiết</label>
+                    <textarea id="catDescription" rows="3" placeholder="Mô tả tóm tắt các sản phẩm thuộc danh mục này..." class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all"></textarea>
+                </div>
+
+                <!-- Alert Error Message -->
+                <div id="catFormError" class="hidden p-3 rounded-lg bg-danger-50 border border-danger-200 text-danger-600 text-xs flex items-start gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                    <span id="catFormErrorText"></span>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-3 border-t border-neutral-200 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeCategoryModal()" class="px-4 py-2 border border-neutral-200 rounded-lg text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
+                        Hủy Bỏ
+                    </button>
+                    <button type="submit" id="catSubmitBtn" class="px-5 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span id="catSubmitBtnText">Lưu Danh Mục</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         MODAL 2: FORM THÊM / SỬA THƯƠNG HIỆU (BRAND MODAL)
+         ========================================================================= -->
+    <div id="brandModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 id="brandModalTitle" class="text-base font-bold text-neutral-900">Thêm Thương Hiệu Mới</h3>
+                        <p class="text-xs text-neutral-500">Khai báo nhãn hàng, logo và xuất xứ thương hiệu</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeBrandModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg hover:bg-neutral-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="brandForm" onsubmit="handleSaveBrand(event)" class="p-6 space-y-4">
+                <input type="hidden" id="brandEditId" value="">
+
+                <!-- Mã code & Tên nhãn hàng -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-neutral-700">
+                            Mã Thương Hiệu (Code) <span class="text-danger-500">*</span>
+                        </label>
+                        <input type="text" id="brandCode" required placeholder="vd: apple, samsung..." class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-mono text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                        <p class="text-[10px] text-neutral-400">Viết thường, duy nhất (vd: sony, owen)</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-neutral-700">
+                            Tên Nhãn Hàng <span class="text-danger-500">*</span>
+                        </label>
+                        <input type="text" id="brandName" required placeholder="vd: Apple, Samsung, Aristino..." class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <!-- Xuất xứ -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-neutral-700">Xuất Xứ Thương Hiệu</label>
+                    <input type="text" id="brandOrigin" placeholder="vd: Hoa Kỳ (USA), Hàn Quốc, Việt Nam, Nhật Bản..." class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                </div>
+
+                <!-- Logo URL & Preview -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-neutral-700">Link Ảnh Logo (URL)</label>
+                    <div class="flex items-center gap-3">
+                        <input type="url" id="brandLogoUrl" oninput="updateBrandLogoPreview(this.value)" placeholder="https://cdn.iconscout.com/... hoặc đường dẫn ảnh" class="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                        <!-- Preview Box -->
+                        <div class="w-10 h-10 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-center overflow-hidden shrink-0">
+                            <img id="brandLogoPreviewImg" src="" alt="Preview" class="w-full h-full object-contain hidden" onerror="this.classList.add('hidden'); document.getElementById('brandLogoPreviewFallback').classList.remove('hidden');">
+                            <span id="brandLogoPreviewFallback" class="text-xs text-neutral-400 font-bold">Logo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Error Message -->
+                <div id="brandFormError" class="hidden p-3 rounded-lg bg-danger-50 border border-danger-200 text-danger-600 text-xs flex items-start gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                    <span id="brandFormErrorText"></span>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-3 border-t border-neutral-200 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeBrandModal()" class="px-4 py-2 border border-neutral-200 rounded-lg text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
+                        Hủy Bỏ
+                    </button>
+                    <button type="submit" id="brandSubmitBtn" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span id="brandSubmitBtnText">Lưu Thương Hiệu</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         MODAL 3: MODAL XÁC NHẬN XÓA (CONFIRM DELETE MODAL)
+         ========================================================================= -->
+    <div id="confirmDeleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <div class="p-6 text-center space-y-4">
+                <!-- Icon Cảnh báo Xóa -->
+                <div id="deleteModalIconWrapper" class="w-14 h-14 mx-auto rounded-full bg-danger-50 text-danger-500 border border-danger-200 flex items-center justify-center">
+                    <i data-lucide="trash-2" class="w-7 h-7"></i>
+                </div>
+
+                <div>
+                    <h3 id="deleteModalTitle" class="text-base font-bold text-neutral-900">Xác Nhận Xóa</h3>
+                    <p id="deleteModalDesc" class="text-xs text-neutral-600 mt-2 px-2">
+                        Bạn có chắc chắn muốn xóa mục này khỏi cơ sở dữ liệu hệ thống?
+                    </p>
+                </div>
+
+                <!-- Chặn xóa Warning Box (nếu còn sản phẩm liên kết) -->
+                <div id="deleteConstraintWarning" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-left space-y-1.5">
+                    <div class="flex items-center gap-2 text-amber-800 font-bold text-xs">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                        <span>CẢNH BÁO RÀNG BUỘC TOÀN VẸN (INTEGRITY)</span>
+                    </div>
+                    <p id="deleteConstraintMessage" class="text-xs text-amber-700 leading-relaxed">
+                        Mục này hiện đang có <b>X sản phẩm</b> liên kết trong cơ sở dữ liệu. Theo quy chuẩn bảo vệ dữ liệu Sàn TMĐT, bạn không thể xóa mục này cho đến khi chuyển hoặc xóa các sản phẩm tương ứng!
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-2 flex items-center justify-center gap-2.5">
+                    <button type="button" onclick="closeConfirmDeleteModal()" class="flex-1 px-4 py-2.5 border border-neutral-200 rounded-lg text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition-colors">
+                        Đóng / Hủy Bỏ
+                    </button>
+                    <button type="button" id="confirmDeleteBtn" onclick="executeDeleteAction()" class="flex-1 px-4 py-2.5 bg-danger-500 hover:bg-danger-600 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <span>Xác Nhận Xóa</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- JAVASCRIPT LOGIC CHO TRANG DANH MỤC & THƯƠNG HIỆU -->
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+
+        // Dữ liệu Seed mẫu chuẩn từ database khi không có backend server kết nối
+        const DEFAULT_CATEGORIES = [
+            { id: 1, code: 'tech', name: 'Công Nghệ & Điện Tử', icon: '📱', description: 'Điện thoại, Laptop, Màn hình, Tai nghe và phụ kiện gaming cao cấp', product_count: 5 },
+            { id: 2, code: 'fashion', name: 'Thời Trang Nam Nữ', icon: '👔', description: 'Áo vest, blazer, sơ mi lụa, quần tây chuẩn form may đo thủ công', product_count: 4 },
+            { id: 3, code: 'watch', name: 'Đồng Hồ & Trang Sức', icon: '⌚', description: 'Đồng hồ cơ Thụy Sĩ, đồng hồ thông minh, trang sức đá quý cao cấp', product_count: 3 },
+            { id: 4, code: 'shoes', name: 'Giày Dép Thời Trang', icon: '👟', description: 'Giày Oxford da bò Ý, sneaker thể thao, running shoes thoáng khí', product_count: 0 },
+            { id: 5, code: 'beauty', name: 'Mỹ Phẩm & Chăm Sóc Sắc Đẹp', icon: '✨', description: 'Nước hoa Pháp, serum chống lão hóa, kem dưỡng ẩm tế bào gốc', product_count: 0 }
+        ];
+
+        const DEFAULT_BRANDS = [
+            { id: 1, code: 'apple', name: 'Apple', origin: 'Hoa Kỳ (USA)', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/apple-131-432549.png', product_count: 4 },
+            { id: 2, code: 'samsung', name: 'Samsung', origin: 'Hàn Quốc', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/samsung-226432.png', product_count: 3 },
+            { id: 3, code: 'sony', name: 'Sony', origin: 'Nhật Bản', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/sony-logo-icon-download-in-svg-png-gif-file-formats--technology-brand-pack-logos-icons-2738734.png', product_count: 2 },
+            { id: 4, code: 'aristino', name: 'Aristino', origin: 'Việt Nam / Phong cách Ý', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/fashion-brand-logo-icon.png', product_count: 2 },
+            { id: 5, code: 'owen', name: 'Owen', origin: 'Việt Nam', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/clothes-hanger-icon.png', product_count: 1 },
+            { id: 6, code: 'casio', name: 'Casio', origin: 'Nhật Bản', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/watch-clock-time-accessory-smartwatch-30472.png', product_count: 0 },
+            { id: 7, code: 'rolex', name: 'Rolex', origin: 'Thụy Sĩ', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/crown-diadem-royalty-king-queen-winner-30462.png', product_count: 0 },
+            { id: 8, code: 'dior', name: 'Dior', origin: 'Pháp (France)', logo_url: 'https://cdn.iconscout.com/icon/free/png-256/perfume-scent-fragrance-bottle-cosmetic-beauty-30452.png', product_count: 0 }
+        ];
+
+        // State quản lý danh sách
+        let currentTab = 'categories'; // 'categories' | 'brands'
+        let categoriesList = [];
+        let brandsList = [];
+        let isBackendLive = false;
+
+        // Pending delete target: { type: 'category' | 'brand', id: number, item: object }
+        let deleteTarget = null;
+
+        // =====================================================================
+        // KHỞI CHẠY TRANG
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            initLucide();
+            await reloadCatalogData();
+        });
+
+        function initLucide() {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+
+        // Tải dữ liệu từ Backend FastAPI (với fallback LocalStorage / Seed)
+        async function reloadCatalogData() {
+            try {
+                const [catRes, brandRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/categories`).catch(() => null),
+                    fetch(`${API_BASE}/api/brands`).catch(() => null)
+                ]);
+
+                if (catRes && catRes.ok && brandRes && brandRes.ok) {
+                    const catData = await catRes.json();
+                    const brandData = await brandRes.json();
+                    categoriesList = catData.categories || [];
+                    brandsList = brandData.brands || [];
+                    isBackendLive = true;
+                    updateConnectionBadge(true);
+                } else {
+                    throw new Error('Backend offline');
+                }
+            } catch (err) {
+                // Fallback LocalStorage hoặc Mẫu mặc định
+                isBackendLive = false;
+                updateConnectionBadge(false);
+                const localCats = localStorage.getItem('JML_LOCAL_CATEGORIES');
+                const localBrands = localStorage.getItem('JML_LOCAL_BRANDS');
+
+                categoriesList = localCats ? JSON.parse(localCats) : [...DEFAULT_CATEGORIES];
+                brandsList = localBrands ? JSON.parse(localBrands) : [...DEFAULT_BRANDS];
+                persistLocal();
+            }
+
+            renderAll();
+        }
+
+        function persistLocal() {
+            localStorage.setItem('JML_LOCAL_CATEGORIES', JSON.stringify(categoriesList));
+            localStorage.setItem('JML_LOCAL_BRANDS', JSON.stringify(brandsList));
+        }
+
+        function updateConnectionBadge(live) {
+            const badge = document.getElementById('connectionStatusBadge');
+            const text = document.getElementById('connectionStatusText');
+            if (!badge || !text) return;
+
+            if (live) {
+                badge.className = 'hidden sm:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap';
+                text.textContent = 'API MySQL Kết Nối';
+            } else {
+                badge.className = 'hidden sm:flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap';
+                text.textContent = 'Chế độ Demo LocalStorage (Sẵn sàng API)';
+            }
+        }
+
+        // =====================================================================
+        // RENDER GIAO DIỆN VÀ THỐNG KÊ
+        // =====================================================================
+        function renderAll() {
+            renderCategoriesTable();
+            renderBrandsTable();
+            updateStats();
+            initLucide();
+        }
+
+        function updateStats() {
+            const totalCats = categoriesList.length;
+            const totalBrands = brandsList.length;
+            const totalCatProducts = categoriesList.reduce((acc, c) => acc + (c.product_count || 0), 0);
+            const totalBrandProducts = brandsList.reduce((acc, b) => acc + (b.product_count || 0), 0);
+            const tagged = Math.max(totalCatProducts, totalBrandProducts);
+
+            document.getElementById('statTotalCategories').textContent = totalCats;
+            document.getElementById('statTotalBrands').textContent = totalBrands;
+            document.getElementById('statTotalTaggedProducts').textContent = tagged;
+
+            document.getElementById('tabCountCategories').textContent = totalCats;
+            document.getElementById('tabCountBrands').textContent = totalBrands;
+            document.getElementById('sidebarCatTotalBadge').textContent = totalCats + totalBrands;
+        }
+
+        // Switch Tab giữa Danh mục và Thương hiệu
+        function switchCatalogTab(tab) {
+            currentTab = tab;
+            const btnCats = document.getElementById('tabBtnCategories');
+            const btnBrands = document.getElementById('tabBtnBrands');
+            const secCats = document.getElementById('sectionCategories');
+            const secBrands = document.getElementById('sectionBrands');
+            const btnAddText = document.getElementById('btnAddNewText');
+
+            if (tab === 'categories') {
+                btnCats.className = 'px-4 py-2 rounded-md bg-white text-primary-600 shadow-sm transition-all flex items-center gap-2 font-semibold';
+                btnBrands.className = 'px-4 py-2 rounded-md text-neutral-600 hover:text-neutral-900 transition-all flex items-center gap-2';
+                secCats.classList.remove('hidden');
+                secBrands.classList.add('hidden');
+                btnAddText.textContent = 'Thêm Danh Mục Mới';
+            } else {
+                btnBrands.className = 'px-4 py-2 rounded-md bg-white text-purple-600 shadow-sm transition-all flex items-center gap-2 font-semibold';
+                btnCats.className = 'px-4 py-2 rounded-md text-neutral-600 hover:text-neutral-900 transition-all flex items-center gap-2';
+                secCats.classList.add('hidden');
+                secBrands.classList.remove('hidden');
+                btnAddText.textContent = 'Thêm Thương Hiệu Mới';
+            }
+
+            handleSearch();
+            initLucide();
+        }
+
+        // =====================================================================
+        // RENDER BẢNG DANH MỤC (CATEGORIES)
+        // =====================================================================
+        function renderCategoriesTable(filterQuery = '') {
+            const tbody = document.getElementById('categoriesTableBody');
+            const summary = document.getElementById('catTableSummary');
+            if (!tbody) return;
+
+            const q = filterQuery.trim().toLowerCase();
+            const list = q ? categoriesList.filter(c => 
+                (c.code && c.code.toLowerCase().includes(q)) || 
+                (c.name && c.name.toLowerCase().includes(q)) ||
+                (c.description && c.description.toLowerCase().includes(q))
+            ) : categoriesList;
+
+            summary.textContent = `Hiển thị ${list.length} / ${categoriesList.length} danh mục`;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-neutral-400">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <i data-lucide="inbox" class="w-8 h-8 text-neutral-300"></i>
+                                <span class="font-medium">Không tìm thấy danh mục nào phù hợp</span>
+                                ${q ? `<button onclick="clearSearch()" class="text-xs text-primary-500 hover:underline">Xóa bộ lọc tìm kiếm</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                initLucide();
+                return;
+            }
+
+            tbody.innerHTML = list.map((item, index) => {
+                const icon = item.icon || '🛍️';
+                const pCount = item.product_count || 0;
+                const canDelete = pCount === 0;
+
+                return `
+                    <tr class="hover:bg-neutral-50/70 transition-colors group">
+                        <td class="py-3.5 px-4 text-center font-mono text-neutral-500 font-semibold">${item.id}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="w-9 h-9 inline-flex items-center justify-center rounded-lg bg-neutral-100 text-lg border border-neutral-200">
+                                ${icon}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-primary-600">
+                            <span class="bg-primary-50 px-2 py-1 rounded border border-primary-100">${escapeHtml(item.code)}</span>
+                        </td>
+                        <td class="py-3.5 px-4 font-semibold text-neutral-900">${escapeHtml(item.name)}</td>
+                        <td class="py-3.5 px-4 text-neutral-600 max-w-xs truncate" title="${escapeHtml(item.description || 'Chưa có mô tả')}">
+                            ${item.description ? escapeHtml(item.description) : '<span class="text-neutral-400 italic">Không có mô tả</span>'}
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${pCount > 0 ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-neutral-100 text-neutral-500'}">
+                                <i data-lucide="package" class="w-3 h-3"></i>
+                                ${pCount} SP
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button type="button" onclick="openEditCategoryModal(${item.id})" title="Chỉnh sửa danh mục" class="p-1.5 rounded-lg text-neutral-600 hover:text-primary-600 hover:bg-primary-50 transition-colors">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" onclick="promptDeleteCategory(${item.id})" title="${canDelete ? 'Xóa danh mục' : 'Không thể xóa (Đang có sản phẩm)'}" class="p-1.5 rounded-lg ${canDelete ? 'text-neutral-600 hover:text-danger-500 hover:bg-danger-50' : 'text-neutral-300 hover:text-amber-600 hover:bg-amber-50'} transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            initLucide();
+        }
+
+        // =====================================================================
+        // RENDER BẢNG THƯƠNG HIỆU (BRANDS)
+        // =====================================================================
+        function renderBrandsTable(filterQuery = '') {
+            const tbody = document.getElementById('brandsTableBody');
+            const summary = document.getElementById('brandTableSummary');
+            if (!tbody) return;
+
+            const q = filterQuery.trim().toLowerCase();
+            const list = q ? brandsList.filter(b => 
+                (b.code && b.code.toLowerCase().includes(q)) || 
+                (b.name && b.name.toLowerCase().includes(q)) ||
+                (b.origin && b.origin.toLowerCase().includes(q))
+            ) : brandsList;
+
+            summary.textContent = `Hiển thị ${list.length} / ${brandsList.length} thương hiệu`;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-neutral-400">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <i data-lucide="award" class="w-8 h-8 text-neutral-300"></i>
+                                <span class="font-medium">Không tìm thấy thương hiệu nào phù hợp</span>
+                                ${q ? `<button onclick="clearSearch()" class="text-xs text-primary-500 hover:underline">Xóa bộ lọc tìm kiếm</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                initLucide();
+                return;
+            }
+
+            tbody.innerHTML = list.map((item) => {
+                const pCount = item.product_count || 0;
+                const canDelete = pCount === 0;
+                const logo = item.logo_url;
+
+                return `
+                    <tr class="hover:bg-neutral-50/70 transition-colors group">
+                        <td class="py-3.5 px-4 text-center font-mono text-neutral-500 font-semibold">${item.id}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            <div class="w-10 h-10 mx-auto rounded-lg bg-neutral-50 border border-neutral-200 p-1 flex items-center justify-center overflow-hidden">
+                                ${logo ? `<img src="${escapeHtml(logo)}" alt="${escapeHtml(item.name)}" class="w-full h-full object-contain" onerror="this.outerHTML='<span class=\\'text-xs font-bold text-neutral-400\\'>${escapeHtml(item.name.substring(0,2).toUpperCase())}</span>'">` : `<span class="text-xs font-bold text-neutral-400">${escapeHtml(item.name.substring(0,2).toUpperCase())}</span>`}
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-purple-600">
+                            <span class="bg-purple-50 px-2 py-1 rounded border border-purple-100">${escapeHtml(item.code)}</span>
+                        </td>
+                        <td class="py-3.5 px-4 font-semibold text-neutral-900">${escapeHtml(item.name)}</td>
+                        <td class="py-3.5 px-4 text-neutral-600">
+                            <span class="inline-flex items-center gap-1.5">
+                                <i data-lucide="globe" class="w-3.5 h-3.5 text-neutral-400"></i>
+                                ${item.origin ? escapeHtml(item.origin) : '<span class="text-neutral-400 italic">Quốc tế</span>'}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${pCount > 0 ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-neutral-100 text-neutral-500'}">
+                                <i data-lucide="package" class="w-3 h-3"></i>
+                                ${pCount} SP
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button type="button" onclick="openEditBrandModal(${item.id})" title="Chỉnh sửa thương hiệu" class="p-1.5 rounded-lg text-neutral-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                </button>
+                                <button type="button" onclick="promptDeleteBrand(${item.id})" title="${canDelete ? 'Xóa thương hiệu' : 'Không thể xóa (Đang có sản phẩm)'}" class="p-1.5 rounded-lg ${canDelete ? 'text-neutral-600 hover:text-danger-500 hover:bg-danger-50' : 'text-neutral-300 hover:text-amber-600 hover:bg-amber-50'} transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            initLucide();
+        }
+
+        // =====================================================================
+        // TÌM KIẾM & LỌC
+        // =====================================================================
+        function handleSearch() {
+            const val = document.getElementById('searchInput').value;
+            const clearBtn = document.getElementById('clearSearchBtn');
+            clearBtn.classList.toggle('hidden', !val);
+
+            if (currentTab === 'categories') {
+                renderCategoriesTable(val);
+            } else {
+                renderBrandsTable(val);
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            if (currentTab === 'categories') {
+                renderCategoriesTable('');
+            } else {
+                renderBrandsTable('');
+            }
+        }
+
+        // =====================================================================
+        // MODAL ACTIONS: THÊM / SỬA DANH MỤC
+        // =====================================================================
+        function openAddModal() {
+            if (currentTab === 'categories') {
+                openAddCategoryModal();
+            } else {
+                openAddBrandModal();
+            }
+        }
+
+        function openAddCategoryModal() {
+            document.getElementById('catEditId').value = '';
+            document.getElementById('categoryModalTitle').textContent = 'Thêm Danh Mục Mới';
+            document.getElementById('catSubmitBtnText').textContent = 'Tạo Danh Mục';
+            document.getElementById('catCode').value = '';
+            document.getElementById('catCode').disabled = false;
+            document.getElementById('catName').value = '';
+            document.getElementById('catIcon').value = '🛍️';
+            document.getElementById('catDescription').value = '';
+            document.getElementById('catFormError').classList.add('hidden');
+
+            document.getElementById('categoryModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('catCode').focus(), 100);
+            initLucide();
+        }
+
+        function openEditCategoryModal(id) {
+            const cat = categoriesList.find(c => c.id === id);
+            if (!cat) return;
+
+            document.getElementById('catEditId').value = cat.id;
+            document.getElementById('categoryModalTitle').textContent = `Chỉnh Sửa Danh Mục: ${cat.name}`;
+            document.getElementById('catSubmitBtnText').textContent = 'Lưu Thay Đổi';
+            document.getElementById('catCode').value = cat.code;
+            document.getElementById('catCode').disabled = false;
+            document.getElementById('catName').value = cat.name;
+            document.getElementById('catIcon').value = cat.icon || '🛍️';
+            document.getElementById('catDescription').value = cat.description || '';
+            document.getElementById('catFormError').classList.add('hidden');
+
+            document.getElementById('categoryModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('catName').focus(), 100);
+            initLucide();
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        async function handleSaveCategory(e) {
+            e.preventDefault();
+            const editId = document.getElementById('catEditId').value;
+            const code = document.getElementById('catCode').value.trim().toLowerCase();
+            const name = document.getElementById('catName').value.trim();
+            const icon = document.getElementById('catIcon').value.trim() || '🛍️';
+            const description = document.getElementById('catDescription').value.trim();
+
+            const errorBox = document.getElementById('catFormError');
+            const errorText = document.getElementById('catFormErrorText');
+
+            if (!code || !name) {
+                errorText.textContent = 'Vui lòng nhập đầy đủ mã và tên danh mục!';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // Kiểm tra trùng mã code ở phía Client
+            const isDuplicate = categoriesList.some(c => 
+                c.code.toLowerCase() === code && (!editId || c.id !== Number(editId))
+            );
+            if (isDuplicate) {
+                errorText.textContent = `Mã danh mục '${code}' đã tồn tại trong hệ thống!`;
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            const payload = { code, name, description };
+
+            if (isBackendLive) {
+                try {
+                    const url = editId ? `${API_BASE}/api/categories/${editId}` : `${API_BASE}/api/categories`;
+                    const method = editId ? 'PUT' : 'POST';
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.detail || 'Không thể lưu danh mục vào cơ sở dữ liệu!');
+                    }
+
+                    showToast(editId ? 'Cập nhật danh mục thành công!' : 'Tạo mới danh mục thành công!', 'success');
+                    closeCategoryModal();
+                    await reloadCatalogData();
+                    return;
+                } catch (err) {
+                    errorText.textContent = err.message;
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Fallback lưu local
+            if (editId) {
+                const idx = categoriesList.findIndex(c => c.id === Number(editId));
+                if (idx !== -1) {
+                    categoriesList[idx] = { ...categoriesList[idx], code, name, icon, description };
+                }
+                showToast('Đã cập nhật danh mục thành công!', 'success');
+            } else {
+                const newId = categoriesList.length ? Math.max(...categoriesList.map(c => c.id)) + 1 : 1;
+                categoriesList.push({ id: newId, code, name, icon, description, product_count: 0 });
+                showToast('Đã thêm danh mục mới thành công!', 'success');
+            }
+
+            persistLocal();
+            closeCategoryModal();
+            renderAll();
+        }
+
+        // =====================================================================
+        // MODAL ACTIONS: THÊM / SỬA THƯƠNG HIỆU
+        // =====================================================================
+        function openAddBrandModal() {
+            document.getElementById('brandEditId').value = '';
+            document.getElementById('brandModalTitle').textContent = 'Thêm Thương Hiệu Mới';
+            document.getElementById('brandSubmitBtnText').textContent = 'Tạo Thương Hiệu';
+            document.getElementById('brandCode').value = '';
+            document.getElementById('brandCode').disabled = false;
+            document.getElementById('brandName').value = '';
+            document.getElementById('brandOrigin').value = '';
+            document.getElementById('brandLogoUrl').value = '';
+            updateBrandLogoPreview('');
+            document.getElementById('brandFormError').classList.add('hidden');
+
+            document.getElementById('brandModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('brandCode').focus(), 100);
+            initLucide();
+        }
+
+        function openEditBrandModal(id) {
+            const brand = brandsList.find(b => b.id === id);
+            if (!brand) return;
+
+            document.getElementById('brandEditId').value = brand.id;
+            document.getElementById('brandModalTitle').textContent = `Chỉnh Sửa Thương Hiệu: ${brand.name}`;
+            document.getElementById('brandSubmitBtnText').textContent = 'Lưu Thay Đổi';
+            document.getElementById('brandCode').value = brand.code;
+            document.getElementById('brandCode').disabled = false;
+            document.getElementById('brandName').value = brand.name;
+            document.getElementById('brandOrigin').value = brand.origin || '';
+            document.getElementById('brandLogoUrl').value = brand.logo_url || '';
+            updateBrandLogoPreview(brand.logo_url || '');
+            document.getElementById('brandFormError').classList.add('hidden');
+
+            document.getElementById('brandModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('brandName').focus(), 100);
+            initLucide();
+        }
+
+        function closeBrandModal() {
+            document.getElementById('brandModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function updateBrandLogoPreview(url) {
+            const img = document.getElementById('brandLogoPreviewImg');
+            const fallback = document.getElementById('brandLogoPreviewFallback');
+            if (url && url.trim().length > 5) {
+                img.src = url.trim();
+                img.classList.remove('hidden');
+                fallback.classList.add('hidden');
+            } else {
+                img.classList.add('hidden');
+                fallback.classList.remove('hidden');
+            }
+        }
+
+        async function handleSaveBrand(e) {
+            e.preventDefault();
+            const editId = document.getElementById('brandEditId').value;
+            const code = document.getElementById('brandCode').value.trim().toLowerCase();
+            const name = document.getElementById('brandName').value.trim();
+            const origin = document.getElementById('brandOrigin').value.trim();
+            const logo_url = document.getElementById('brandLogoUrl').value.trim();
+
+            const errorBox = document.getElementById('brandFormError');
+            const errorText = document.getElementById('brandFormErrorText');
+
+            if (!code || !name) {
+                errorText.textContent = 'Vui lòng nhập đầy đủ mã và tên thương hiệu!';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // Kiểm tra trùng mã code ở phía Client
+            const isDuplicate = brandsList.some(b => 
+                b.code.toLowerCase() === code && (!editId || b.id !== Number(editId))
+            );
+            if (isDuplicate) {
+                errorText.textContent = `Mã thương hiệu '${code}' đã tồn tại trong hệ thống!`;
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            const payload = { code, name, origin: origin || null, logo_url: logo_url || null };
+
+            if (isBackendLive) {
+                try {
+                    const url = editId ? `${API_BASE}/api/brands/${editId}` : `${API_BASE}/api/brands`;
+                    const method = editId ? 'PUT' : 'POST';
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.detail || 'Không thể lưu thương hiệu vào cơ sở dữ liệu!');
+                    }
+
+                    showToast(editId ? 'Cập nhật thương hiệu thành công!' : 'Tạo mới thương hiệu thành công!', 'success');
+                    closeBrandModal();
+                    await reloadCatalogData();
+                    return;
+                } catch (err) {
+                    errorText.textContent = err.message;
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Fallback lưu local
+            if (editId) {
+                const idx = brandsList.findIndex(b => b.id === Number(editId));
+                if (idx !== -1) {
+                    brandsList[idx] = { ...brandsList[idx], code, name, origin, logo_url };
+                }
+                showToast('Đã cập nhật thương hiệu thành công!', 'success');
+            } else {
+                const newId = brandsList.length ? Math.max(...brandsList.map(b => b.id)) + 1 : 1;
+                brandsList.push({ id: newId, code, name, origin, logo_url, product_count: 0 });
+                showToast('Đã thêm thương hiệu mới thành công!', 'success');
+            }
+
+            persistLocal();
+            closeBrandModal();
+            renderAll();
+        }
+
+        // =====================================================================
+        // XÓA CÓ XÁC NHẬN VÀ KIỂM TRA RÀNG BUỘC SẢN PHẨM (DELETE WITH CONFIRM)
+        // =====================================================================
+        function promptDeleteCategory(id) {
+            const cat = categoriesList.find(c => c.id === id);
+            if (!cat) return;
+
+            deleteTarget = { type: 'category', id, item: cat };
+
+            const modal = document.getElementById('confirmDeleteModal');
+            const title = document.getElementById('deleteModalTitle');
+            const desc = document.getElementById('deleteModalDesc');
+            const warningBox = document.getElementById('deleteConstraintWarning');
+            const warningMsg = document.getElementById('deleteConstraintMessage');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const iconWrapper = document.getElementById('deleteModalIconWrapper');
+
+            title.textContent = 'Xác Nhận Xóa Danh Mục';
+            desc.innerHTML = `Bạn có chắc chắn muốn xóa danh mục <b>"${escapeHtml(cat.name)}"</b> (Mã: <code class="text-primary-600 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">${escapeHtml(cat.code)}</code>) không?`;
+
+            const pCount = cat.product_count || 0;
+            if (pCount > 0) {
+                // RÀNG BUỘC TOÀN VẸN: KHÔNG CHO PHÉP XÓA VÌ CÒN SẢN PHẨM
+                warningBox.classList.remove('hidden');
+                warningMsg.innerHTML = `Danh mục <b>"${escapeHtml(cat.name)}"</b> hiện đang liên kết với <b>${pCount} sản phẩm</b> trong hệ thống. Quy chuẩn Backend <code>TF170B1</code> chặn xóa để tránh dữ liệu mồ côi!`;
+                confirmBtn.classList.add('hidden');
+                iconWrapper.className = 'w-14 h-14 mx-auto rounded-full bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center';
+            } else {
+                warningBox.classList.add('hidden');
+                confirmBtn.classList.remove('hidden');
+                iconWrapper.className = 'w-14 h-14 mx-auto rounded-full bg-danger-50 text-danger-500 border border-danger-200 flex items-center justify-center';
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            initLucide();
+        }
+
+        function promptDeleteBrand(id) {
+            const brand = brandsList.find(b => b.id === id);
+            if (!brand) return;
+
+            deleteTarget = { type: 'brand', id, item: brand };
+
+            const modal = document.getElementById('confirmDeleteModal');
+            const title = document.getElementById('deleteModalTitle');
+            const desc = document.getElementById('deleteModalDesc');
+            const warningBox = document.getElementById('deleteConstraintWarning');
+            const warningMsg = document.getElementById('deleteConstraintMessage');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const iconWrapper = document.getElementById('deleteModalIconWrapper');
+
+            title.textContent = 'Xác Nhận Xóa Thương Hiệu';
+            desc.innerHTML = `Bạn có chắc chắn muốn xóa nhãn hàng <b>"${escapeHtml(brand.name)}"</b> (Mã: <code class="text-purple-600 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">${escapeHtml(brand.code)}</code>) không?`;
+
+            const pCount = brand.product_count || 0;
+            if (pCount > 0) {
+                // RÀNG BUỘC TOÀN VẸN: KHÔNG CHO PHÉP XÓA VÌ CÒN SẢN PHẨM
+                warningBox.classList.remove('hidden');
+                warningMsg.innerHTML = `Thương hiệu <b>"${escapeHtml(brand.name)}"</b> hiện đang liên kết với <b>${pCount} sản phẩm</b> trong hệ thống. Quy chuẩn Backend <code>TF170B1</code> chặn xóa để tránh dữ liệu mồ côi!`;
+                confirmBtn.classList.add('hidden');
+                iconWrapper.className = 'w-14 h-14 mx-auto rounded-full bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center';
+            } else {
+                warningBox.classList.add('hidden');
+                confirmBtn.classList.remove('hidden');
+                iconWrapper.className = 'w-14 h-14 mx-auto rounded-full bg-danger-50 text-danger-500 border border-danger-200 flex items-center justify-center';
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            initLucide();
+        }
+
+        function closeConfirmDeleteModal() {
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+            document.body.style.overflow = '';
+            deleteTarget = null;
+        }
+
+        async function executeDeleteAction() {
+            if (!deleteTarget) return;
+
+            const { type, id, item } = deleteTarget;
+
+            if (isBackendLive) {
+                try {
+                    const endpoint = type === 'category' ? `/api/categories/${id}` : `/api/brands/${id}`;
+                    const res = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE' });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.detail || 'Không thể xóa mục này khỏi cơ sở dữ liệu!');
+                    }
+
+                    showToast(`Đã xóa ${type === 'category' ? 'danh mục' : 'thương hiệu'} "${item.name}" thành công!`, 'success');
+                    closeConfirmDeleteModal();
+                    await reloadCatalogData();
+                    return;
+                } catch (err) {
+                    showToast(err.message, 'danger');
+                    closeConfirmDeleteModal();
+                    return;
+                }
+            }
+
+            // Fallback Local
+            if (type === 'category') {
+                categoriesList = categoriesList.filter(c => c.id !== id);
+                showToast(`Đã xóa danh mục "${item.name}" thành công!`, 'success');
+            } else {
+                brandsList = brandsList.filter(b => b.id !== id);
+                showToast(`Đã xóa thương hiệu "${item.name}" thành công!`, 'success');
+            }
+
+            persistLocal();
+            closeConfirmDeleteModal();
+            renderAll();
+        }
+
+        // =====================================================================
+        // TOAST NOTIFICATION VÀ TIỆN ÍCH
+        // =====================================================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const isSuccess = type === 'success';
+            toast.className = `p-3.5 rounded-xl border shadow-lg text-xs font-medium flex items-center gap-2.5 transition-all transform duration-200 animate-in slide-in-from-bottom-2 ${isSuccess ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-danger-50 text-danger-800 border-danger-200'}`;
+
+            toast.innerHTML = `
+                <i data-lucide="${isSuccess ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 ${isSuccess ? 'text-emerald-600' : 'text-danger-600'} shrink-0"></i>
+                <span class="flex-1">${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(toast);
+            initLucide();
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 250);
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
