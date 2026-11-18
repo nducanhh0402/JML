@@ -5,7 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 
 from backend.database import init_db
-from backend.src.middlewares.auth_middleware import SecurityHeadersMiddleware
+from backend.src.middlewares.auth_middleware import (
+    SecurityHeadersMiddleware,
+    RoleAuthMiddleware,
+)
 
 # Import modular routers
 from backend.src.modules.auth.router import router as auth_router
@@ -26,7 +29,8 @@ app = FastAPI(
     version="2.0.0",
 )
 
-# Cấu hình Middleware bảo mật và CORS cho phép Frontend truy cập
+# Cấu hình Middleware bảo mật, phân quyền RBAC và CORS
+app.add_middleware(RoleAuthMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
