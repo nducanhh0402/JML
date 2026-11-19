@@ -69,6 +69,16 @@ class ConnectionWrapper:
     def cursor(self):
         return CursorWrapper(self.conn.cursor(pymysql.cursors.DictCursor))
 
+    def begin(self):
+        """Bắt đầu một Transaction mới."""
+        if hasattr(self.conn, "begin"):
+            self.conn.begin()
+
+    def autocommit(self, value: bool):
+        """Bật/tắt chế độ tự động commit để quản lý Transaction thủ công."""
+        if hasattr(self.conn, "autocommit"):
+            self.conn.autocommit(value)
+
     def commit(self):
         self.conn.commit()
 
