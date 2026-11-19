@@ -87,6 +87,8 @@ def _build_base_select_and_count(caps: Dict[str, bool]) -> Tuple[str, str]:
     if caps["has_brand_id"]:
         select_fields.append("b.name AS brand_name")
         select_fields.append("b.code AS brand_code")
+        select_fields.append("b.origin AS brand_origin")
+        select_fields.append("b.logo_url AS brand_logo_url")
         joins.append("LEFT JOIN brands b ON p.brand_id = b.id")
     if caps["has_category_id"]:
         select_fields.append("c.name AS category_name")
@@ -443,22 +445,187 @@ def get_all_products(
         conn.close()
 
 
+KNOWN_BRANDS = (
+    "Sony",
+    "Apple",
+    "Samsung",
+    "Logitech",
+    "Marshall",
+    "Harman Kardon",
+    "Tissot",
+    "Seiko",
+    "Canon",
+    "Fujifilm",
+    "NuPhy",
+    "Ray-Ban",
+    "Nike",
+    "Adidas",
+    "Zara",
+)
+
+
+def _infer_brand(title: str, shop_name: str, explicit_brand: Optional[str]) -> str:
+    """Xác định tên thương hiệu từ cột brand/join hoặc suy luận từ tên sản phẩm/shop."""
+    if explicit_brand and str(explicit_brand).strip() and str(explicit_brand).strip() != "Khác":
+        return str(explicit_brand).strip()
+    title_lower = (title or "").lower()
+    for brand in KNOWN_BRANDS:
+        if brand.lower() in title_lower:
+            return brand
+    if any(k in title_lower for k in ("ipad", "iphone", "macbook", "airpods")):
+        return "Apple"
+    if shop_name and str(shop_name).strip():
+        return str(shop_name).strip()
+    return "JML Official"
+
+
+def _compute_inventory(r: Dict[str, Any]) -> Dict[str, Any]:
+    """Tính toán tồn kho khả dụng và trạng thái còn hàng / sắp hết / hết hàng."""
+    total_stock = int(r.get("total_stock") or 0)
+    sold = int(r.get("sold") or 0)
+    raw_stock = r.get("stock")
+    available = max(0, int(raw_stock)) if raw_stock is not None else max(0, total_stock - sold)
+
+    if available <= 0:
+        status_code, label = "out_of_stock", "Hết hàng"
+    elif available <= 10:
+        status_code, label = "low_stock", f"Sắp hết hàng (còn {available})"
+    else:
+        status_code, label = "in_stock", "Còn hàng"
+
+    return {
+        "available": available,
+        "total": total_stock,
+        "sold": sold,
+        "inStock": available > 0,
+        "status": status_code,
+        "label": label,
+    }
+
+
+def _compute_pricing(r: Dict[str, Any]) -> Dict[str, Any]:
+    """Tổng hợp giá bán, giá gốc, mức giảm giá và đơn vị tiền tệ."""
+    price = int(r.get("price") or 0)
+    original_price = max(price, int(r.get("original_price") or price))
+    discount_amount = max(0, original_price - price)
+    discount_str = r.get("discount") or ""
+    if not discount_str and original_price > price > 0:
+        pct = round((discount_amount / original_price) * 100)
+        discount_str = f"-{pct}%" if pct > 0 else "0%"
+
+    return {
+        "price": price,
+        "originalPrice": original_price,
+        "discount": discount_str or "0%",
+        "discountAmount": discount_amount,
+        "currency": "VND",
+    }
+
+
+def _load_product_images(cursor, product_id: int) -> List[Dict[str, Any]]:
+    """Truy vấn danh sách ảnh từ bảng product_images nếu tồn tại."""
+    try:
+        cursor.execute("SHOW TABLES LIKE 'product_images';")
+        if not cursor.fetchone():
+            return []
+        cursor.execute(
+            "SELECT image_url, angle_name, is_primary FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, display_order ASC, id ASC;",
+            (product_id,),
+        )
+        return [
+            {
+                "url": img["image_url"],
+                "angle": img.get("angle_name") or "Góc chụp",
+                "isPrimary": bool(img.get("is_primary")),
+            }
+            for img in cursor.fetchall()
+        ]
+    except Exception:
+        return []
+
+
 @router.get("/{product_id}")
 def get_product_by_id(product_id: int):
-    """Xem chi tiết sản phẩm theo ID."""
+    """
+    API chi tiết sản phẩm theo ID (TF17478).
+    Trả về đầy đủ: ảnh, mô tả, thương hiệu, tồn kho, giá và sản phẩm liên quan.
+    """
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM products WHERE id = ?;", (product_id,))
+        caps = _get_product_schema_capabilities(cursor)
+        select_sql, _ = _build_base_select_and_count(caps)
+        cursor.execute(f"{select_sql} WHERE p.id = ?;", (product_id,))
         r = cursor.fetchone()
+
+        if not r:
+            raise HTTPException(status_code=404, detail="Sản phẩm không tồn tại!")
+
+        extra_images = _load_product_images(cursor, product_id)
+        cursor.execute(
+            f"{select_sql} WHERE p.status = 'approved' AND p.category = ? AND p.id != ? ORDER BY p.sold DESC, p.id DESC LIMIT 4;",
+            (r["category"], product_id),
+        )
+        related_rows = cursor.fetchall()
     finally:
         conn.close()
 
-    if not r:
-        raise HTTPException(status_code=404, detail="Sản phẩm không tồn tại!")
-
     item = _serialize_product_row(r)
-    item["status"] = r["status"]
+    images = [img["url"] for img in extra_images] if extra_images else item["images"]
+    angles = item["angles"]
+    image_details = (
+        extra_images
+        if extra_images
+        else [
+            {
+                "url": url,
+                "angle": angles[idx] if idx < len(angles) else f"Góc chụp {idx + 1}",
+                "isPrimary": idx == 0,
+            }
+            for idx, url in enumerate(images)
+        ]
+    )
+
+    brand_name = _infer_brand(r.get("title", ""), r.get("shop_name", ""), r.get("brand_name") or r.get("brand"))
+    brand_info = {
+        "id": r.get("brand_id"),
+        "code": r.get("brand_code") or brand_name.lower().replace(" ", "-"),
+        "name": brand_name,
+        "origin": r.get("brand_origin") or "",
+        "logoUrl": r.get("brand_logo_url") or "",
+    }
+
+    inventory = _compute_inventory(r)
+    pricing = _compute_pricing(r)
+    raw_desc = (r.get("description") or "").strip()
+    description = raw_desc or (
+        f"{item['title']} - Sản phẩm chính hãng thương hiệu {brand_name}, "
+        f"thuộc ngành hàng {item['categoryName']}, phân phối bởi {item['shopName']}. "
+        f"Hỗ trợ bảo hành chính hãng và đổi trả trong 30 ngày."
+    )
+
+    item.update({
+        "brand": brand_name,
+        "brandInfo": brand_info,
+        "description": description,
+        "thumbnail": images[0] if images else "",
+        "images": images,
+        "imageDetails": image_details,
+        "price": pricing["price"],
+        "originalPrice": pricing["originalPrice"],
+        "discount": pricing["discount"],
+        "discountAmount": pricing["discountAmount"],
+        "currency": pricing["currency"],
+        "pricing": pricing,
+        "stock": inventory["available"],
+        "totalStock": inventory["total"],
+        "sold": inventory["sold"],
+        "inStock": inventory["inStock"],
+        "stockStatus": inventory["status"],
+        "inventory": inventory,
+        "status": r.get("status") or "approved",
+        "relatedProducts": [_serialize_product_row(rel) for rel in related_rows],
+    })
     return item
 
 

@@ -147,12 +147,15 @@ def init_db(seed=False):
     CREATE TABLE IF NOT EXISTS products (
         id INT AUTO_INCREMENT PRIMARY KEY,
         category VARCHAR(100) NOT NULL,
+        brand VARCHAR(100) DEFAULT '',
         title VARCHAR(255) NOT NULL,
+        description TEXT,
         price BIGINT NOT NULL,
         original_price BIGINT NOT NULL,
         discount VARCHAR(20) NOT NULL,
         rating FLOAT DEFAULT 5.0,
         sold INT DEFAULT 0,
+        stock INT DEFAULT NULL,
         total_stock INT DEFAULT 100,
         images_json TEXT NOT NULL,
         angles_json TEXT NOT NULL,
@@ -162,6 +165,19 @@ def init_db(seed=False):
         status VARCHAR(50) DEFAULT 'approved'
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
+
+    # Đảm bảo bổ sung cột brand, description, stock nếu bảng products đã tạo từ bản cũ (TF17478)
+    try:
+        cursor.execute("SHOW COLUMNS FROM products;")
+        existing_cols = {row["Field"].lower() for row in cursor.fetchall()}
+        if "brand" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN brand VARCHAR(100) DEFAULT '' AFTER category;")
+        if "description" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN description TEXT AFTER title;")
+        if "stock" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN stock INT DEFAULT NULL AFTER sold;")
+    except Exception:
+        pass
 
     # 3. Bảng USERS (Tài khoản Đăng nhập cho Khách hàng, Chủ Shop, Admin)
     cursor.execute("""
