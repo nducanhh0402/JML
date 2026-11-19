@@ -1,4 +1,5 @@
 <!-- =============================================================== -->
+<!-- Trần Gia Huy task TF17314 html/css checkout ngày 16/11/2026 -->
 <!-- Trần Gia Huy task TF1737E [FE] Trang checkout nối API: form đặt hàng, chọn COD -->
 <!-- =============================================================== -->
 <!doctype html>
@@ -186,6 +187,7 @@
         display: grid;
         grid-template-columns: 1fr 420px;
         gap: 28px;
+        align-items: start;
         padding: 32px 0 60px;
       }
       .checkout-left {
@@ -217,6 +219,14 @@
         gap: 10px;
       }
       .card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--primary-light);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 18px;
       }
 
@@ -249,6 +259,7 @@
       .preset-badge {
         font-size: 11px;
         font-weight: 800;
+        text-transform: uppercase;
         color: #fff;
         background: var(--primary);
         padding: 2px 7px;
@@ -288,6 +299,10 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
       }
       .form-group.full { grid-column: 1 / -1; }
       .form-label {
@@ -335,7 +350,6 @@
         resize: vertical;
         min-height: 70px;
       }
-
       .save-address-label {
         display: flex;
         align-items: center;
@@ -805,6 +819,7 @@
         transition: var(--transition);
       }
       .btn-secondary-modal:hover { background: #e2e8f0; }
+
       .btn-primary-modal {
         background: var(--primary);
         color: #fff;
@@ -1081,7 +1096,7 @@
                     <div class="radio-title">
                       <span>Ví Điện Tử MoMo / ZaloPay / VNPay</span>
                     </div>
-                    <div class="radio-sub">Thanh toán một chạm qua ví điện tử trên điện thoại</div>
+                    <div class="radio-sub">Thanh toán một chạm qua ứng dụng ví điện tử trên điện thoại</div>
                   </div>
                 </div>
               </label>
@@ -1265,7 +1280,7 @@
       let checkoutItems = [];
       let shippingFee = 30000;
       let shippingLabel = "Giao Hàng Tiêu Chuẩn (JML Express)";
-      let paymentMethod = "COD"; // Mặc định là COD theo yêu cầu task
+      let paymentMethod = "COD";
       let discountAmount = 0;
       let appliedCode = "";
 
@@ -1293,7 +1308,6 @@
         }
         renderSavedAddresses();
 
-        // Tự động chọn địa chỉ đầu tiên
         if (savedAddresses.length > 0) {
           fillAddressForm(savedAddresses[0]);
         }
@@ -1311,7 +1325,6 @@
           </div>
         `).join("");
 
-        // Tùy chọn nhập địa chỉ mới
         html += `
           <div class="address-preset btn-new-address ${currentAddressIndex === -1 ? 'active' : ''}" onclick="setNewAddressMode(this)">
             <span style="font-size: 20px;">+</span>
@@ -1341,7 +1354,6 @@
         document.querySelectorAll("#savedAddressesContainer .address-preset").forEach(c => c.classList.remove("active"));
         if (el) el.classList.add("active");
 
-        // Làm trống form để người dùng tự nhập
         document.getElementById("fullName").value = "";
         document.getElementById("phone").value = "";
         document.getElementById("district").value = "";
@@ -1358,8 +1370,7 @@
         document.getElementById("district").value = addr.district || "";
         document.getElementById("streetAddress").value = addr.street || "";
         if (addr.city) {
-          const citySelect = document.getElementById("city");
-          citySelect.value = addr.city;
+          document.getElementById("city").value = addr.city;
         }
       }
 
@@ -1377,7 +1388,6 @@
             image: it.image || "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80"
           }));
         } else {
-          // Nếu không có sản phẩm trong giỏ, dùng mẫu để kiểm thử thuận tiện
           checkoutItems = MOCK_CHECKOUT_ITEMS;
         }
         renderOrderSummary();
@@ -1395,11 +1405,12 @@
               <div style="font-size: 32px; margin-bottom: 8px;">🛒</div>
               <div style="font-weight: 700; color: var(--secondary);">Giỏ hàng đang trống</div>
               <p style="font-size: 12px; margin: 4px 0 12px;">Chưa có sản phẩm nào để tiến hành thanh toán.</p>
-              <button onclick="loadSampleCart()" style="background: none; border: 1px dashed var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+              <button type="button" onclick="loadSampleCart()" style="background: none; border: 1px dashed var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
                 + Nạp sản phẩm mẫu để thử nghiệm
               </button>
             </div>
           `;
+          updateTotals();
           return;
         }
 
@@ -1452,7 +1463,6 @@
         shippingFee = fee;
         shippingLabel = labels[type] || labels.standard;
 
-        // Nếu đang áp dụng mã FREESHIP thì tự động giảm bằng phí ship
         if (appliedCode === "FREESHIP") {
           discountAmount = shippingFee;
         }
@@ -1468,7 +1478,6 @@
         }
         paymentMethod = method;
 
-        // Hiển thị hoặc ẩn thông báo COD
         const codBox = document.getElementById("codNoticeBox");
         const btnText = document.getElementById("btnPlaceOrderText");
 
@@ -1510,7 +1519,6 @@
         btn.textContent = "...";
         btn.disabled = true;
 
-        // Thử kết nối API voucher Backend trước
         try {
           const res = await fetch(`${API_BASE}/api/vouchers/apply`, {
             method: "POST",
@@ -1540,7 +1548,6 @@
           // Backend offline -> chạy fallback
         }
 
-        // Fallback offline vouchers
         if (code === "FREESHIP") {
           discountAmount = shippingFee;
           appliedCode = code;
@@ -1592,7 +1599,6 @@
         document.getElementById("discountText").textContent = "- " + formatCurrency(discountAmount);
         document.getElementById("grandTotalText").textContent = formatCurrency(grandTotal);
 
-        // Cập nhật số tiền trong thông báo COD
         const codAmountEl = document.getElementById("codAmountNotice");
         if (codAmountEl) {
           codAmountEl.textContent = formatCurrency(grandTotal);
@@ -1641,20 +1647,17 @@
         const district = document.getElementById("district").value.trim();
         const street = document.getElementById("streetAddress").value.trim();
 
-        // 1. Kiểm tra giỏ hàng
         if (checkoutItems.length === 0) {
           showToast("⚠️ Giỏ hàng đang trống! Vui lòng thêm sản phẩm trước khi đặt.", true);
           return false;
         }
 
-        // 2. Validate Họ tên
         if (!fullName || fullName.length < 2) {
           markInvalid("fullName", "error_fullName", "Vui lòng nhập đầy đủ họ và tên người nhận (tối thiểu 2 ký tự)");
           isValid = false;
           if (!firstInvalidEl) firstInvalidEl = document.getElementById("fullName");
         }
 
-        // 3. Validate Số điện thoại (chuẩn regex VN: 10 số bắt đầu bằng 03, 05, 07, 08, 09)
         const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
         if (!phone) {
           markInvalid("phone", "error_phone", "Vui lòng nhập số điện thoại người nhận");
@@ -1666,21 +1669,18 @@
           if (!firstInvalidEl) firstInvalidEl = document.getElementById("phone");
         }
 
-        // 4. Validate Tỉnh/Thành phố
         if (!city) {
           markInvalid("city", "error_city", "Vui lòng chọn Tỉnh / Thành phố nhận hàng");
           isValid = false;
           if (!firstInvalidEl) firstInvalidEl = document.getElementById("city");
         }
 
-        // 5. Validate Quận/Huyện
         if (!district || district.length < 2) {
           markInvalid("district", "error_district", "Vui lòng nhập Quận / Huyện giao hàng");
           isValid = false;
           if (!firstInvalidEl) firstInvalidEl = document.getElementById("district");
         }
 
-        // 6. Validate Số nhà / Đường
         if (!street || street.length < 5) {
           markInvalid("streetAddress", "error_streetAddress", "Vui lòng nhập địa chỉ chi tiết cụ thể (số nhà, tên đường, phường/xã)");
           isValid = false;
@@ -1710,7 +1710,6 @@
       // NỐI API TẠO ĐƠN HÀNG (POST /api/orders)
       // =========================================================================
       async function submitOrder() {
-        // 1. Chạy validate toàn bộ form
         if (!validateCheckoutForm()) {
           return;
         }
@@ -1726,10 +1725,8 @@
         const subtotal = checkoutItems.reduce((sum, item) => sum + item.price * item.qty, 0);
         const grandTotal = Math.max(0, subtotal + shippingFee - discountAmount);
 
-        // 2. Chuyển nút sang trạng thái loading
         setSubmitButtonLoading(true);
 
-        // 3. Chuẩn bị payload chuẩn theo backend schema OrderCreate
         const payload = {
           buyer_name: fullName,
           buyer_phone: phone,
@@ -1743,7 +1740,7 @@
           shipping_fee: shippingFee,
           discount_code: appliedCode || "",
           discount_amount: discountAmount || 0,
-          payment_method: paymentMethod.toLowerCase(), // 'cod', 'bank_qr', ...
+          payment_method: paymentMethod.toLowerCase(),
           items: checkoutItems.map(item => ({
             name: item.title,
             variant: item.variant || "Tiêu chuẩn",
@@ -1755,7 +1752,6 @@
         };
 
         try {
-          // 4. Gửi request đến FastAPI Backend
           const response = await fetch(`${API_BASE}/api/orders`, {
             method: "POST",
             headers: {
@@ -1767,21 +1763,17 @@
           const data = await response.json().catch(() => ({}));
 
           if (!response.ok) {
-            // Xử lý lỗi trả về từ Backend (400, 403, 500...)
             const errorMsg = data.detail || data.message || `Lỗi máy chủ (${response.status})`;
             showToast(`❌ ${errorMsg}`, true);
             setSubmitButtonLoading(false);
             return;
           }
 
-          // 5. Đặt hàng thành công! Nhận mã đơn thực từ Backend
           const orderId = data.order_id || `#MP-${data.order_key || Math.floor(1000 + Math.random() * 9000)}`;
           const orderKey = data.order_key || orderId.replace("#", "");
 
-          // Xóa giỏ hàng trong LocalStorage
           localStorage.removeItem("JML_CART_ITEMS");
 
-          // Lưu địa chỉ mới vào danh bạ nếu checkbox được chọn
           if (document.getElementById("saveAddressCheck")?.checked) {
             saveNewAddressPreset({
               fullName,
@@ -1793,7 +1785,6 @@
             });
           }
 
-          // Hiển thị modal đặt hàng thành công với thông tin thật
           showSuccessModal({
             orderId,
             orderKey,
@@ -1813,8 +1804,6 @@
         } catch (networkError) {
           console.warn("Backend API không thể kết nối:", networkError);
 
-          // Fallback khi backend chưa chạy hoặc lỗi mạng cục bộ:
-          // Vẫn sinh mã đơn hợp lệ theo chuẩn #MP-XXXX và hiển thị màn hình thành công kèm cảnh báo nhẹ
           const fallbackOrderKey = `MP-${Math.floor(1000 + Math.random() * 9000)}`;
           const fallbackOrderId = `#${fallbackOrderKey}`;
 
@@ -1936,16 +1925,15 @@
         `;
 
         document.getElementById("successModal").classList.add("active");
-      }
 
-      function closeSuccessModal() {
-        document.getElementById("successModal").classList.remove("active");
-        // Reset lại giỏ hàng và render
         checkoutItems = [];
         renderOrderSummary();
       }
 
-      // Lưu địa chỉ vào danh bạ
+      function closeSuccessModal() {
+        document.getElementById("successModal").classList.remove("active");
+      }
+
       function saveNewAddressPreset(newAddr) {
         savedAddresses.push(newAddr);
         localStorage.setItem("JML_SAVED_ADDRESSES", JSON.stringify(savedAddresses));
