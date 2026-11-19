@@ -266,6 +266,21 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
+    # 9. Bảng BANNERS (Banner hiển thị trang chủ) - TF17398
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS banners (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL DEFAULT '',
+        image_url TEXT NOT NULL,
+        link_url VARCHAR(500) DEFAULT '',
+        description TEXT DEFAULT '',
+        sort_order INT DEFAULT 0,
+        is_active TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
     # Tạo sẵn tài khoản Super Admin mặc định nếu chưa có (admin / 123456)
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin';")
     if cursor.fetchone()[0] == 0:
