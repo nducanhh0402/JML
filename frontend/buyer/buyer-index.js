@@ -352,38 +352,499 @@
       // --------------------------------------------------------------------------
       // Äá»’NG Bá»˜ Dá»® LIá»†U Sáº¢N PHáº¨M Tá»ª FASTAPI + SQL DATABASE
       // --------------------------------------------------------------------------
-      let FLASH_PRODUCTS =
-        JSON.parse(localStorage.getItem("JML_FLASH_PRODUCTS") || "null") ||
-        DEFAULT_FLASH_PRODUCTS;
-      let RECOMMEND_PRODUCTS =
-        JSON.parse(localStorage.getItem("JML_RECOMMEND_PRODUCTS") || "null") ||
-        DEFAULT_RECOMMEND_PRODUCTS;
+      // --------------------------------------------------------------------------
+      // ĐỒNG BỘ DỮ LIỆU TRANG CHỦ TỪ FASTAPI + TRẠNG THÁI LOADING / ERROR / EMPTY (TF1745E)
+      // --------------------------------------------------------------------------
+      let FLASH_PRODUCTS = [];
+      let RECOMMEND_PRODUCTS = [];
+      let LATEST_PRODUCTS = [];
+      let HOMEPAGE_CATEGORIES = [];
+      let HOMEPAGE_BANNERS = [];
+      let activeRecommendCategory = "all";
+
+      function escapeHomepageHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      async function fetchHomepageJson(url, timeoutMs = 8000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
+          });
+          if (!res.ok) {
+            const err = new Error(`Máy chủ trả về mã lỗi HTTP ${res.status}`);
+            err.status = res.status;
+            throw err;
+          }
+          return await res.json();
+        } catch (err) {
+          if (err.name === "AbortError") {
+            throw new Error("Kết nối API quá thời gian chờ (Timeout)");
+          }
+          throw err;
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+
+      function renderSectionLoadingState(section) {
+        if (section === "banners") {
+          const slidesEl = document.getElementById("bannerSlidesContainer");
+          const sideEl = document.getElementById("sideBannersContainer");
+          const arrowsEl = document.getElementById("sliderArrows");
+          const dotsEl = document.getElementById("sliderDots");
+          if (arrowsEl) arrowsEl.style.display = "none";
+          if (dotsEl) dotsEl.innerHTML = "";
+          if (slidesEl) {
+            slidesEl.innerHTML = `
+              <div class="section-state-box is-dark is-loading" style="border-radius: 0; border: none;">
+                <div class="spinner-ring"></div>
+                <div class="state-title">Đang tải banner trang chủ...</div>
+                <div class="state-desc">Vui lòng đợi trong giây lát.</div>
+              </div>`;
+          }
+          if (sideEl) {
+            sideEl.innerHTML = `
+              <div class="side-banner skeleton-block" style="background-image: none; min-height: 185px;"></div>
+              <div class="side-banner skeleton-block" style="background-image: none; min-height: 185px;"></div>`;
+          }
+          return;
+        }
+
+        if (section === "categories") {
+          const grid = document.getElementById("categoriesGrid");
+          if (!grid) return;
+          grid.innerHTML = Array.from({ length: 4 })
+            .map(
+              () => `
+              <div class="skeleton-card" style="align-items: center;">
+                <div class="skeleton-block" style="width: 48px; height: 48px; border-radius: 50%;"></div>
+                <div class="skeleton-block" style="width: 75%; height: 14px;"></div>
+              </div>`
+            )
+            .join("");
+          return;
+        }
+
+        const containerMap = {
+          flash: "flashProductsContainer",
+          recommend: "recommendProductsContainer",
+          latest: "latestProductsContainer",
+        };
+        const el = document.getElementById(containerMap[section]);
+        if (!el) return;
+        el.innerHTML = Array.from({ length: 4 })
+          .map(
+            () => `
+            <div class="skeleton-card">
+              <div class="skeleton-block" style="width: 100%; height: 190px;"></div>
+              <div class="skeleton-block" style="width: 88%; height: 16px;"></div>
+              <div class="skeleton-block" style="width: 55%; height: 14px;"></div>
+              <div class="skeleton-block" style="width: 100%; height: 34px; margin-top: 6px;"></div>
+            </div>`
+          )
+          .join("");
+      }
+
+      function renderSectionErrorState(section, errorMsg) {
+        const safeMsg = escapeHomepageHtml(errorMsg || "Không thể kết nối máy chủ API.");
+        if (section === "banners") {
+          const slidesEl = document.getElementById("bannerSlidesContainer");
+          const sideEl = document.getElementById("sideBannersContainer");
+          const arrowsEl = document.getElementById("sliderArrows");
+          const dotsEl = document.getElementById("sliderDots");
+          if (arrowsEl) arrowsEl.style.display = "none";
+          if (dotsEl) dotsEl.innerHTML = "";
+          if (slidesEl) {
+            slidesEl.innerHTML = `
+              <div class="section-state-box is-dark is-error" style="border-radius: 0; border: none;">
+                <div class="state-icon">⚠️</div>
+                <div class="state-title">Không tải được banner trang chủ</div>
+                <div class="state-desc">${safeMsg}</div>
+                <button class="btn-retry" onclick="retryHomepageSection('banners')">↻ Thử lại</button>
+              </div>`;
+          }
+          if (sideEl) {
+            sideEl.innerHTML = `
+              <div class="section-state-box is-error" style="min-height: 185px; padding: 18px;">
+                <div class="state-title" style="font-size: 14px;">Banner phụ chưa sẵn sàng</div>
+                <div class="state-desc" style="font-size: 12px;">${safeMsg}</div>
+              </div>`;
+          }
+          return;
+        }
+
+        const cfg = {
+          categories: { id: "categoriesGrid", title: "Không tải được danh mục nổi bật" },
+          flash: { id: "flashProductsContainer", title: "Không tải được sản phẩm Flash Sale" },
+          recommend: { id: "recommendProductsContainer", title: "Không tải được sản phẩm gợi ý / nổi bật" },
+          latest: { id: "latestProductsContainer", title: "Không tải được sản phẩm mới nhất" },
+        }[section];
+        const el = cfg && document.getElementById(cfg.id);
+        if (!el) return;
+        el.innerHTML = `
+          <div class="section-state-box is-error">
+            <div class="state-icon">⚠️</div>
+            <div class="state-title">${cfg.title}</div>
+            <div class="state-desc">${safeMsg}</div>
+            <button class="btn-retry" onclick="retryHomepageSection('${section}')">↻ Thử lại</button>
+          </div>`;
+      }
+
+      function renderSectionEmptyState(section, customTitle, customDesc) {
+        if (section === "banners") {
+          const slidesEl = document.getElementById("bannerSlidesContainer");
+          const sideEl = document.getElementById("sideBannersContainer");
+          const arrowsEl = document.getElementById("sliderArrows");
+          const dotsEl = document.getElementById("sliderDots");
+          if (arrowsEl) arrowsEl.style.display = "none";
+          if (dotsEl) dotsEl.innerHTML = "";
+          if (slidesEl) {
+            slidesEl.innerHTML = `
+              <div class="section-state-box is-dark is-empty" style="border-radius: 0; border: none;">
+                <div class="state-icon">🖼️</div>
+                <div class="state-title">${escapeHomepageHtml(customTitle || "Chưa có banner nào đang hoạt động")}</div>
+                <div class="state-desc">${escapeHomepageHtml(customDesc || "Các chương trình khuyến mãi sẽ sớm được cập nhật.")}</div>
+              </div>`;
+          }
+          if (sideEl) {
+            sideEl.innerHTML = `
+              <div class="section-state-box is-empty" style="min-height: 185px; padding: 18px;">
+                <div class="state-icon" style="width: 38px; height: 38px; font-size: 18px;">📢</div>
+                <div class="state-title" style="font-size: 14px;">Chưa có banner phụ</div>
+              </div>`;
+          }
+          return;
+        }
+
+        const defaults = {
+          categories: {
+            id: "categoriesGrid",
+            icon: "🗂️",
+            title: "Chưa có danh mục hiển thị",
+            desc: "Hiện chưa có danh mục sản phẩm nào được kích hoạt.",
+          },
+          flash: {
+            id: "flashProductsContainer",
+            icon: "⚡",
+            title: "Chưa có sản phẩm Flash Sale nào đang chạy",
+            desc: "Vui lòng quay lại sau để săn các deal giảm giá sốc.",
+          },
+          recommend: {
+            id: "recommendProductsContainer",
+            icon: "📦",
+            title: "Hiện chưa có sản phẩm nào trên kệ",
+            desc: "Không có sản phẩm phù hợp để hiển thị ở khu vực này.",
+          },
+          latest: {
+            id: "latestProductsContainer",
+            icon: "✨",
+            title: "Chưa có sản phẩm mới nhất",
+            desc: "Hiện chưa có sản phẩm mới nào vừa được đăng bán.",
+          },
+        }[section];
+        const el = defaults && document.getElementById(defaults.id);
+        if (!el) return;
+        el.innerHTML = `
+          <div class="section-state-box is-empty">
+            <div class="state-icon">${defaults.icon}</div>
+            <div class="state-title">${escapeHomepageHtml(customTitle || defaults.title)}</div>
+            <div class="state-desc">${escapeHomepageHtml(customDesc || defaults.desc)}</div>
+          </div>`;
+      }
+
+      function renderHomepageBanners(banners) {
+        HOMEPAGE_BANNERS = Array.isArray(banners) ? banners : [];
+        const slidesEl = document.getElementById("bannerSlidesContainer");
+        const sideEl = document.getElementById("sideBannersContainer");
+        const arrowsEl = document.getElementById("sliderArrows");
+        const dotsEl = document.getElementById("sliderDots");
+
+        if (HOMEPAGE_BANNERS.length === 0) {
+          renderSectionEmptyState("banners");
+          return;
+        }
+
+        const heroBanners = HOMEPAGE_BANNERS.slice(0, Math.max(1, HOMEPAGE_BANNERS.length - 2));
+        const subBanners = HOMEPAGE_BANNERS.length > 2 ? HOMEPAGE_BANNERS.slice(-2) : [];
+
+        if (slidesEl) {
+          slidesEl.innerHTML = heroBanners
+            .map((b, idx) => {
+              const title = escapeHomepageHtml(b.title || "Ưu đãi JML Store");
+              const desc = escapeHomepageHtml(b.description || "Khám phá các sản phẩm chính hãng trên JML Store.");
+              const imgUrl = escapeHomepageHtml(
+                b.imageUrl ||
+                  b.image_url ||
+                  "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80"
+              );
+              const Tag = idx === 0 ? "h1" : "h2";
+              return `
+                <div class="slide ${idx === 0 ? "active" : ""}" style="background-image: url('${imgUrl}');">
+                  <div class="slide-content">
+                    <span class="slide-tag">✨ JML Banner #${idx + 1}</span>
+                    <${Tag} class="slide-title">${title}</${Tag}>
+                    <p class="slide-desc">${desc}</p>
+                    <button class="btn-hero" onclick="scrollToFlashSale()">
+                      Khám Phá Ngay
+                      <svg fill="none" height="16" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="16">
+                        <path d="M5 12h14M12 5l7 7-7 7"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>`;
+            })
+            .join("");
+        }
+
+        const hasMulti = heroBanners.length > 1;
+        if (arrowsEl) arrowsEl.style.display = hasMulti ? "flex" : "none";
+        if (dotsEl) {
+          dotsEl.innerHTML = hasMulti
+            ? heroBanners
+                .map((_, idx) => `<div class="slider-dot ${idx === 0 ? "active" : ""}" data-index="${idx}"></div>`)
+                .join("")
+            : "";
+          dotsEl.querySelectorAll(".slider-dot").forEach((dot) => {
+            dot.addEventListener("click", (e) => {
+              const idx = parseInt(e.target.dataset.index, 10);
+              showSlide(idx);
+              resetSliderTimer();
+            });
+          });
+        }
+
+        if (sideEl) {
+          if (subBanners.length === 0) {
+            sideEl.innerHTML = `
+              <div class="section-state-box is-empty" style="min-height: 185px; padding: 18px;">
+                <div class="state-icon" style="width: 38px; height: 38px; font-size: 18px;">📢</div>
+                <div class="state-title" style="font-size: 14px;">Chưa có banner phụ</div>
+              </div>`;
+          } else {
+            sideEl.innerHTML = subBanners
+              .map((b, idx) => {
+                const title = escapeHomepageHtml(b.title || "Ưu đãi nổi bật");
+                const desc = escapeHomepageHtml(b.description || "Khám phá ngay");
+                return `
+                  <div class="side-banner side-banner-${idx === 0 ? "1" : "2"}">
+                    <span style="font-size: 11px; font-weight: 700; color: #fed7aa; text-transform: uppercase;">${desc}</span>
+                    <h3 class="side-banner-title">${title}</h3>
+                    <a class="side-banner-link" href="#flashSaleSection" onclick="scrollToFlashSale(); return false;">Khám phá chi tiết →</a>
+                  </div>`;
+              })
+              .join("");
+          }
+        }
+
+        currentSlide = 0;
+        if (hasMulti) startSliderAutoPlay();
+        else clearInterval(sliderInterval);
+      }
+
+      function renderHomepageCategories(categories) {
+        HOMEPAGE_CATEGORIES = Array.isArray(categories) ? categories : [];
+        const grid = document.getElementById("categoriesGrid");
+        const tabsEl = document.getElementById("recommendTabs");
+
+        if (tabsEl) {
+          const catTabs = HOMEPAGE_CATEGORIES.map((c) => {
+            const id = escapeHomepageHtml(c.id);
+            const name = escapeHomepageHtml(c.name || c.id);
+            return `<button class="tab-btn ${activeRecommendCategory === c.id ? "active" : ""}" onclick="filterCategory('${id}', this)">${name}</button>`;
+          }).join("");
+          tabsEl.innerHTML = `<button class="tab-btn ${activeRecommendCategory === "all" ? "active" : ""}" onclick="filterCategory('all', this)">Tất Cả</button>${catTabs}`;
+        }
+
+        if (!grid) return;
+        if (HOMEPAGE_CATEGORIES.length === 0) {
+          renderSectionEmptyState("categories");
+          return;
+        }
+
+        grid.innerHTML = HOMEPAGE_CATEGORIES.map((c) => {
+          const id = escapeHomepageHtml(c.id);
+          const name = escapeHomepageHtml(c.name || c.id);
+          const icon = escapeHomepageHtml(c.icon || "🛍️");
+          return `
+            <div class="category-card" onclick="filterCategory('${id}'); scrollToRecommend();">
+              <div class="category-icon">${icon}</div>
+              <div class="category-name">${name}</div>
+            </div>`;
+        }).join("");
+      }
+
+      function renderLatestProducts(items) {
+        LATEST_PRODUCTS = Array.isArray(items) ? items : [];
+        const container = document.getElementById("latestProductsContainer");
+        if (!container) return;
+
+        if (LATEST_PRODUCTS.length === 0) {
+          renderSectionEmptyState("latest");
+          return;
+        }
+
+        container.innerHTML = LATEST_PRODUCTS.map((product) => {
+          const mainImg = product.images ? product.images[0] : product.image;
+          return `
+          <div class="product-card" onclick="openProductDetail(${product.id})">
+            ${createCarouselMarkup(product)}
+            <div class="product-body">
+              <h3 class="product-title" title="${escapeHomepageHtml(product.title)}">${escapeHomepageHtml(product.title)}</h3>
+              <div class="product-meta">
+                <span class="rating-stars">★ ${product.rating}</span>
+                <span>• Đã bán ${product.soldCount ?? product.sold ?? 0}</span>
+              </div>
+              <div class="price-row">
+                <span class="current-price">${formatCurrency(product.price)}</span>
+                <span class="original-price">${formatCurrency(product.originalPrice)}</span>
+              </div>
+              <div style="margin-top: auto;">
+                <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${String(product.title || "").replace(/'/g, "\'")}', ${product.price}, '${mainImg}', '${String(product.shopName || "").replace(/'/g, "\'")}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                  Thêm Vào Giỏ
+                </button>
+              </div>
+            </div>
+          </div>`;
+        }).join("");
+        attachHoverCarouselListeners(container);
+      }
 
       async function loadProductsFromFastAPI() {
+        const params = new URLSearchParams(window.location.search);
+        const forcedState = params.get("state");
+        if (forcedState === "loading") {
+          ["banners", "categories", "flash", "recommend", "latest"].forEach(renderSectionLoadingState);
+          return;
+        }
+        if (forcedState === "empty") {
+          ["banners", "categories", "flash", "recommend", "latest"].forEach((s) => renderSectionEmptyState(s));
+          return;
+        }
+        if (forcedState === "error") {
+          ["banners", "categories", "flash", "recommend", "latest"].forEach((s) =>
+            renderSectionErrorState(s, "Chế độ kiểm thử trạng thái lỗi API.")
+          );
+          return;
+        }
+
+        ["banners", "categories", "flash", "recommend", "latest"].forEach(renderSectionLoadingState);
+
         try {
-          const res = await fetch(`${API_BASE_URL}/api/products`);
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data.flash_products)) {
-              FLASH_PRODUCTS = data.flash_products;
-            }
-            if (Array.isArray(data.recommend_products)) {
-              RECOMMEND_PRODUCTS = data.recommend_products;
-            }
+          const homeData = await fetchHomepageJson(`${API_BASE_URL}/api/homepage`);
+          HOMEPAGE_BANNERS = homeData.banners || [];
+          HOMEPAGE_CATEGORIES = homeData.categories || [];
+          RECOMMEND_PRODUCTS = homeData.featured_products || [];
+          LATEST_PRODUCTS = homeData.latest_products || [];
+
+          renderHomepageBanners(HOMEPAGE_BANNERS);
+          renderHomepageCategories(HOMEPAGE_CATEGORIES);
+          renderRecommendProducts(activeRecommendCategory);
+          renderLatestProducts(LATEST_PRODUCTS);
+
+          try {
+            const prodData = await fetchHomepageJson(`${API_BASE_URL}/api/products`);
+            FLASH_PRODUCTS = prodData.flash_products || [];
             renderFlashSaleProducts();
-            renderRecommendProducts("all");
+          } catch (flashErr) {
+            renderSectionErrorState("flash", flashErr.message);
           }
         } catch (err) {
-          // Cháº¡y á»Ÿ cháº¿ Ä‘á»™ Local náº¿u chÆ°a báº­t server FastAPI
-          FLASH_PRODUCTS =
-            JSON.parse(localStorage.getItem("JML_FLASH_PRODUCTS") || "null") ||
-            DEFAULT_FLASH_PRODUCTS;
-          RECOMMEND_PRODUCTS =
-            JSON.parse(
-              localStorage.getItem("JML_RECOMMEND_PRODUCTS") || "null",
-            ) || DEFAULT_RECOMMEND_PRODUCTS;
+          if (err.status === 404) {
+            await Promise.all([
+              retryHomepageSection("banners"),
+              retryHomepageSection("categories"),
+              loadProductsFallbackFromAPI(),
+            ]);
+          } else {
+            ["banners", "categories", "flash", "recommend", "latest"].forEach((s) =>
+              renderSectionErrorState(s, err.message)
+            );
+          }
+        }
+      }
+
+      async function loadProductsFallbackFromAPI() {
+        try {
+          const data = await fetchHomepageJson(`${API_BASE_URL}/api/products`);
+          FLASH_PRODUCTS = Array.isArray(data.flash_products) ? data.flash_products : [];
+          RECOMMEND_PRODUCTS = Array.isArray(data.recommend_products) ? data.recommend_products : [];
+          LATEST_PRODUCTS = [...RECOMMEND_PRODUCTS, ...FLASH_PRODUCTS].sort((a, b) => (b.id || 0) - (a.id || 0));
           renderFlashSaleProducts();
-          renderRecommendProducts("all");
+          renderRecommendProducts(activeRecommendCategory);
+          renderLatestProducts(LATEST_PRODUCTS);
+        } catch (err) {
+          renderSectionErrorState("flash", err.message);
+          renderSectionErrorState("recommend", err.message);
+          renderSectionErrorState("latest", err.message);
+        }
+      }
+
+      async function retryHomepageSection(section) {
+        renderSectionLoadingState(section);
+        try {
+          if (section === "banners") {
+            const data = await fetchHomepageJson(`${API_BASE_URL}/api/homepage/banners`);
+            renderHomepageBanners(data.banners || []);
+          } else if (section === "categories") {
+            try {
+              const data = await fetchHomepageJson(`${API_BASE_URL}/api/homepage/categories`);
+              renderHomepageCategories(data.categories || []);
+            } catch (e) {
+              if (e.status === 404) {
+                const catData = await fetchHomepageJson(`${API_BASE_URL}/api/categories`);
+                renderHomepageCategories(catData.categories || []);
+              } else {
+                throw e;
+              }
+            }
+          } else if (section === "flash") {
+            const data = await fetchHomepageJson(`${API_BASE_URL}/api/products`);
+            FLASH_PRODUCTS = data.flash_products || [];
+            renderFlashSaleProducts();
+          } else if (section === "recommend") {
+            try {
+              const data = await fetchHomepageJson(`${API_BASE_URL}/api/homepage/featured-products`);
+              RECOMMEND_PRODUCTS = data.featured_products || [];
+              renderRecommendProducts(activeRecommendCategory);
+            } catch (e) {
+              if (e.status === 404) {
+                const data = await fetchHomepageJson(`${API_BASE_URL}/api/products`);
+                RECOMMEND_PRODUCTS = data.recommend_products || [];
+                renderRecommendProducts(activeRecommendCategory);
+              } else {
+                throw e;
+              }
+            }
+          } else if (section === "latest") {
+            try {
+              const data = await fetchHomepageJson(`${API_BASE_URL}/api/homepage/latest-products`);
+              LATEST_PRODUCTS = data.latest_products || [];
+              renderLatestProducts(LATEST_PRODUCTS);
+            } catch (e) {
+              if (e.status === 404) {
+                const data = await fetchHomepageJson(`${API_BASE_URL}/api/products`);
+                LATEST_PRODUCTS = [...(data.recommend_products || []), ...(data.flash_products || [])].sort(
+                  (a, b) => (b.id || 0) - (a.id || 0)
+                );
+                renderLatestProducts(LATEST_PRODUCTS);
+              } else {
+                throw e;
+              }
+            }
+          }
+        } catch (err) {
+          renderSectionErrorState(section, err.message);
         }
       }
 
@@ -394,7 +855,6 @@
         if (!document.hidden) loadProductsFromFastAPI();
       });
 
-      // Dá»¯ liá»‡u mÃ´ táº£ chi tiáº¿t & thÃ´ng sá»‘ ká»¹ thuáº­t bá»• sung cho trang chi tiáº¿t
       const PRODUCT_EXTRA_INFO = {
         101: {
           brand: "Sony",
@@ -1216,6 +1676,7 @@
       window.addEventListener("hashchange", checkUrlHash);
 
       function filterCategory(cat, element) {
+        activeRecommendCategory = cat;
         document.querySelectorAll(".recommend-tabs .tab-btn").forEach((btn) => {
           const btnCat = btn.getAttribute("onclick");
           if (element) {
@@ -1245,27 +1706,39 @@
       // 3. HERO SLIDER BANNER INTERACTION (AUTOPLAY + NAVIGATION)
       // --------------------------------------------------------------------------
       let currentSlide = 0;
-      const slides = document.querySelectorAll(".slide");
-      const dots = document.querySelectorAll(".slider-dot");
       let sliderInterval;
 
+      function getSliderSlides() {
+        return document.querySelectorAll("#bannerSlidesContainer .slide");
+      }
+
+      function getSliderDots() {
+        return document.querySelectorAll("#sliderDots .slider-dot");
+      }
+
       function showSlide(index) {
+        const slides = getSliderSlides();
+        const dots = getSliderDots();
+        if (!slides.length) return;
+        const safeIndex = ((index % slides.length) + slides.length) % slides.length;
         slides.forEach((s, i) => {
-          s.classList.toggle("active", i === index);
+          s.classList.toggle("active", i === safeIndex);
         });
         dots.forEach((d, i) => {
-          d.classList.toggle("active", i === index);
+          d.classList.toggle("active", i === safeIndex);
         });
-        currentSlide = index;
+        currentSlide = safeIndex;
       }
 
       function nextSlide() {
+        const slides = getSliderSlides();
         if (!slides.length) return;
         const next = (currentSlide + 1) % slides.length;
         showSlide(next);
       }
 
       function prevSlide() {
+        const slides = getSliderSlides();
         if (!slides.length) return;
         const prev = (currentSlide - 1 + slides.length) % slides.length;
         showSlide(prev);
@@ -1273,6 +1746,7 @@
 
       function startSliderAutoPlay() {
         clearInterval(sliderInterval);
+        if (getSliderSlides().length <= 1) return;
         sliderInterval = setInterval(nextSlide, 5000);
       }
 
@@ -1296,16 +1770,6 @@
           resetSliderTimer();
         });
       }
-
-      dots.forEach((dot) => {
-        dot.addEventListener("click", (e) => {
-          const idx = parseInt(e.target.dataset.index, 10);
-          showSlide(idx);
-          resetSliderTimer();
-        });
-      });
-
-      startSliderAutoPlay();
 
       // --------------------------------------------------------------------------
       // 4. FLASH SALE REALTIME COUNTDOWN TIMER
@@ -2402,8 +2866,6 @@
       }
 
       // Khá»Ÿi cháº¡y render ban Ä‘áº§u vÃ  Ä‘á»“ng bá»™ dá»¯ liá»‡u tá»« FastAPI + SQL
-      renderFlashSaleProducts();
-      renderRecommendProducts("all");
       loadProductsFromFastAPI();
 
       // Kiá»ƒm tra URL hash khi má»Ÿ trang láº§n Ä‘áº§u
