@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Auth & RBAC Controller (TF16DCF) -->
+    <script src="../shared/js/auth.js"></script>
 <script>
 tailwind.config = {
             theme: {
@@ -690,13 +692,19 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
         }
 
         function handleSellerLogout() {
-            localStorage.removeItem('JML_SELLER_USER');
-            localStorage.removeItem('JML_AUTH_USER');
-            currentSellerUser = null;
-            currentShopData = null;
-            loadSellerSession();
-            syncSellerDashboard();
-            openSellerAuthModal('login');
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi Kênh Người Bán?')) {
+                if (window.Auth) {
+                    Auth.logout(false);
+                } else {
+                    localStorage.removeItem('JML_SELLER_USER');
+                    localStorage.removeItem('JML_AUTH_USER');
+                }
+                currentSellerUser = null;
+                currentShopData = null;
+                loadSellerSession();
+                syncSellerDashboard();
+                openSellerAuthModal('login');
+            }
         }
 
         function formatVND(val) {
