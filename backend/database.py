@@ -69,6 +69,16 @@ class ConnectionWrapper:
     def cursor(self):
         return CursorWrapper(self.conn.cursor(pymysql.cursors.DictCursor))
 
+    def begin(self):
+        """Bắt đầu một Transaction mới."""
+        if hasattr(self.conn, "begin"):
+            self.conn.begin()
+
+    def autocommit(self, value: bool):
+        """Bật/tắt chế độ tự động commit để quản lý Transaction thủ công."""
+        if hasattr(self.conn, "autocommit"):
+            self.conn.autocommit(value)
+
     def commit(self):
         self.conn.commit()
 
@@ -263,6 +273,21 @@ def init_db(seed=False):
         qty VARCHAR(50) NOT NULL,
         subtotal VARCHAR(50) NOT NULL,
         FOREIGN KEY (order_key) REFERENCES orders (order_key) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
+    # 9. Bảng BANNERS (Banner hiển thị trang chủ) - TF17398
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS banners (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL DEFAULT '',
+        image_url TEXT NOT NULL,
+        link_url VARCHAR(500) DEFAULT '',
+        description TEXT DEFAULT '',
+        sort_order INT DEFAULT 0,
+        is_active TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
