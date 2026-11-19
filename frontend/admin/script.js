@@ -15,6 +15,15 @@ let CUSTOMERS_DATABASE = {};
 let currentViewingCustId = null;
 let PRODUCTS_LIST = [];
 
+function getAdminAuthHeaders(extraHeaders = {}) {
+    const token = (window.Auth && Auth.getToken()) || localStorage.getItem('JML_ACCESS_TOKEN') || localStorage.getItem('access_token');
+    const headers = { ...extraHeaders };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
 // =============================================================================
 // ĐỒNG BỘ DỮ LIỆU TỪ FASTAPI DATABASE VÀ TÍNH TOÁN CHỈ SỐ DASHBOARD
 // =============================================================================
@@ -23,10 +32,10 @@ async function syncWithFastAPI() {
     let serverMetrics = null;
 
     // Hiển thị tên Admin đang đăng nhập nếu có
-    const rawAdmin = localStorage.getItem('JML_ADMIN_USER') || localStorage.getItem('JML_AUTH_USER');
+    const rawAdmin = (window.Auth && Auth.getUser()) || localStorage.getItem('JML_ADMIN_USER') || localStorage.getItem('JML_AUTH_USER');
     if (rawAdmin) {
         try {
-            const parsedAdmin = JSON.parse(rawAdmin);
+            const parsedAdmin = typeof rawAdmin === 'object' ? rawAdmin : JSON.parse(rawAdmin);
             const nameEl = document.getElementById('adminProfileName');
             if (nameEl && parsedAdmin.role === 'admin' && parsedAdmin.full_name) {
                 nameEl.textContent = parsedAdmin.full_name;
@@ -35,14 +44,30 @@ async function syncWithFastAPI() {
     }
 
     try {
+        const authHdrs = getAdminAuthHeaders();
         const [ordersRes, custRes, prodsRes, metricsRes, shopsRes, pendingRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/api/admin/orders`),
-            fetch(`${API_BASE_URL}/api/admin/customers`),
+            fetch(`${API_BASE_URL}/api/admin/orders`, { headers: authHdrs }),
+            fetch(`${API_BASE_URL}/api/admin/customers`, { headers: authHdrs }),
             fetch(`${API_BASE_URL}/api/products`),
-            fetch(`${API_BASE_URL}/api/admin/metrics`),
-            fetch(`${API_BASE_URL}/api/admin/shops`),
-            fetch(`${API_BASE_URL}/api/admin/products/pending`)
+            fetch(`${API_BASE_URL}/api/admin/metrics`, { headers: authHdrs }),
+            fetch(`${API_BASE_URL}/api/admin/shops`, { headers: authHdrs }),
+            fetch(`${API_BASE_URL}/api/admin/products/pending`, { headers: authHdrs })
         ]);
+
+        // Nếu token hết hạn hoặc thiếu quyền -> chuyển về trang đăng nhập
+        if (ordersRes.status === 401 || custRes.status === 401 || shopsRes.status === 401) {
+            console.warn('Token Admin hết hạn hoặc không hợp lệ. Đang chuyển về trang đăng nhập...');
+            if (window.Auth) {
+                Auth.logout('../auth/index.html?redirect=admin&error=unauthorized');
+            }
+            return;
+        }
+
+        if (ordersRes.status === 403 || custRes.status === 403 || shopsRes.status === 403) {
+            alert('⛔ Truy cập bị từ chối! Tài khoản không có vai trò Quản trị viên (Admin).');
+            window.location.href = '../user/index.html?error=forbidden';
+            return;
+        }
 
         if (ordersRes.ok && custRes.ok) {
             const ordersData = await ordersRes.json();
@@ -391,22 +416,29 @@ function handleHashRouting() {
 // XÁC THỰC QUẢN TRỊ VIÊN TRỰC TIẾP TRÊN TRANG ADMIN (IN-PAGE ADMIN AUTH)
 // =============================================================================
 function checkAdminAuthSession() {
-    const rawAdmin = localStorage.getItem('JML_ADMIN_USER') || localStorage.getItem('JML_AUTH_USER');
-    if (rawAdmin) {
-        try {
-            const parsed = JSON.parse(rawAdmin);
-            if (parsed && parsed.role === 'admin') {
-                const nameEl = document.getElementById('adminProfileName');
-                if (nameEl && parsed.full_name) {
-                    nameEl.textContent = parsed.full_name;
-                }
-                const lockModal = document.getElementById('adminLockModal');
-                if (lockModal) lockModal.classList.add('hidden');
-                return true;
-            }
-        } catch (e) {}
+    // 1. Kiểm tra qua module Auth RBAC (TF16DCF)
+    if (window.Auth) {
+        if (!Auth.requireAdmin({ loginUrl: '../auth/index.html', forbiddenRedirect: '../user/index.html' })) {
+            return false;
+        }
+    } else {
+        const rawAdmin = localStorage.getItem('JML_ADMIN_USER') || localStorage.getItem('JML_AUTH_USER');
+        if (!rawAdmin) {
+            window.location.href = '../auth/index.html?redirect=admin&error=unauthorized';
+            return false;
+        }
     }
-    openAdminLockModal();
+
+    const adminUser = (window.Auth && Auth.getUser()) || JSON.parse(localStorage.getItem('JML_ADMIN_USER') || localStorage.getItem('JML_AUTH_USER') || '{}');
+    if (adminUser) {
+        const nameEl = document.getElementById('adminProfileName');
+        if (nameEl && adminUser.full_name) {
+            nameEl.textContent = adminUser.full_name;
+        }
+        const lockModal = document.getElementById('adminLockModal');
+        if (lockModal) lockModal.classList.add('hidden');
+        return true;
+    }
     return false;
 }
 
@@ -439,7 +471,15 @@ async function handleAdminLoginSubmit(e) {
             return;
         }
 
-        localStorage.setItem('JML_ADMIN_USER', JSON.stringify(data.user));
+        if (window.Auth) {
+            Auth.setSession(data.user, data.access_token);
+        } else {
+            localStorage.setItem('JML_ADMIN_USER', JSON.stringify(data.user));
+            if (data.access_token) {
+                localStorage.setItem('JML_ACCESS_TOKEN', data.access_token);
+            }
+        }
+
         const nameEl = document.getElementById('adminProfileName');
         if (nameEl && data.user.full_name) {
             nameEl.textContent = data.user.full_name;
@@ -451,7 +491,11 @@ async function handleAdminLoginSubmit(e) {
         // Fallback dự phòng nếu mất kết nối
         if (username === 'admin' && password === '123456') {
             const fallbackAdmin = { username: 'admin', role: 'admin', full_name: 'Hoàng Nam (Super Admin)' };
-            localStorage.setItem('JML_ADMIN_USER', JSON.stringify(fallbackAdmin));
+            if (window.Auth) {
+                Auth.setSession(fallbackAdmin, 'mock_token_admin');
+            } else {
+                localStorage.setItem('JML_ADMIN_USER', JSON.stringify(fallbackAdmin));
+            }
             const lockModal = document.getElementById('adminLockModal');
             if (lockModal) lockModal.classList.add('hidden');
             await syncWithFastAPI();
@@ -463,9 +507,14 @@ async function handleAdminLoginSubmit(e) {
 }
 
 function handleAdminLogout() {
-    localStorage.removeItem('JML_ADMIN_USER');
-    localStorage.removeItem('JML_AUTH_USER');
-    openAdminLockModal();
+    if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi Bảng Điều Khiển Quản Trị?')) {
+        if (window.Auth) {
+            Auth.logout('../auth/index.html?message=logged_out');
+        } else {
+            localStorage.clear();
+            window.location.href = '../auth/index.html?message=logged_out';
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
