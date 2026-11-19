@@ -22,6 +22,7 @@ from backend.src.modules.cart.router import router as cart_router
 from backend.src.modules.payment.router import router as payment_router
 from backend.src.modules.review.router import router as review_router
 from backend.src.modules.admin.router import router as admin_router
+from backend.src.modules.homepage.router import router as homepage_router
 
 app = FastAPI(
     title="JML Store Multi-Vendor Marketplace API",
@@ -57,6 +58,7 @@ app.include_router(cart_router)
 app.include_router(payment_router)
 app.include_router(review_router)
 app.include_router(admin_router)
+app.include_router(homepage_router)
 
 @app.get("/", include_in_schema=False)
 def root():
