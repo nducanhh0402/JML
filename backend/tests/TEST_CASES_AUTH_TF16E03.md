@@ -61,3 +61,4 @@
 | JWT Token | 4 | Kiểm tra token hợp lệ, thiếu, hết hạn, giả mạo |
 | Phân quyền RBAC | 6 | Kiểm tra Admin/Customer/Seller truy cập API admin |
 | **Tổng cộng** | **22** | |
+
