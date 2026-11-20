@@ -4,6 +4,7 @@ from backend.src.modules.product.router import (
     router as product_router,
     filter_products,
     get_all_products,
+    get_product_filter_facets,
 )
 
 
@@ -153,6 +154,35 @@ class TestProductFilterSortPaginationTF16DE9(unittest.TestCase):
         self.assertLessEqual(len(res_all["items"]), 6)
         prices = [item["price"] for item in res_all["items"]]
         self.assertEqual(prices, sorted(prices, reverse=True))
+
+    def test_08_facets_and_rating_flash_sale_filters(self):
+        paths = [r.path for r in product_router.routes if hasattr(r, "methods")]
+        self.assertLess(paths.index("/api/products/facets"), paths.index("/api/products/{product_id}"))
+
+        facets = get_product_filter_facets()
+        self.assertGreater(facets["total"], 0)
+        self.assertIsInstance(facets["categories"], dict)
+        self.assertIsInstance(facets["brands"], list)
+
+        res = filter_products(
+            category=None,
+            category_id=None,
+            brand=None,
+            brand_id=None,
+            min_price=None,
+            max_price=None,
+            sort="rating_desc",
+            page=1,
+            page_size=20,
+            q=None,
+            min_rating=4.9,
+            flash_sale=True,
+            exclusive=None,
+        )
+        self.assertGreaterEqual(res["total"], 1)
+        for item in res["items"]:
+            self.assertGreaterEqual(item["rating"], 4.9)
+            self.assertEqual(item["isFlashSale"], 1)
 
 
 if __name__ == "__main__":
