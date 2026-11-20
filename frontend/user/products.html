@@ -11,6 +11,8 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <!-- Auth & RBAC Controller (TF16DCF) -->
+    <script src="../shared/js/auth.js"></script>
     <style>
       /* ==========================================================================
          1. RESET & CSS VARIABLES
@@ -1106,12 +1108,12 @@
     <div class="top-bar">
       <div class="container top-bar-inner">
         <div>Kênh Mua Sắm Trực Tuyến Chính Thức • JML Store Official Mall</div>
-        <div class="top-links">
+        <div class="top-links" id="topAuthLinks">
           <span>Hotline: <strong style="color: #fff;">1900 8888</strong></span>
           <span style="opacity: 0.3;">|</span>
           <a href="#" onclick="showToast('Chăm sóc khách hàng 24/7 luôn sẵn sàng hỗ trợ bạn!'); return false;">Trợ Giúp</a>
           <span style="opacity: 0.3;">|</span>
-          <a href="#" onclick="openUserAuthModal(); return false;">Đăng Nhập / Đăng Ký</a>
+          <a href="../auth/index.html">Đăng Nhập / Đăng Ký</a>
         </div>
       </div>
     </div>
@@ -2108,21 +2110,51 @@
       function checkoutNow() {
         const cart = JSON.parse(localStorage.getItem("JML_CART_ITEMS") || "[]");
         if (cart.length === 0) {
+<<<<<<< HEAD
           showToast("Giỏ hàng đang trống!");
+=======
+
+          showToast("Giỏ hàng đang trống! Đang chuyển đến trang đặt hàng...");
+          setTimeout(() => { window.location.href = "checkout.html"; }, 500);
+          return;
+        }
+        window.location.href = "checkout.html";
+
+          showToast("Giá» hÃ ng Ä‘ang trá»‘ng!");
+>>>>>>> adffc00143d5523b3f1a0afe58a30fbe242ee7b5
           return;
         }
         localStorage.removeItem("JML_CART_ITEMS");
         renderCartDrawer();
         updateCartBadge();
         closeCartDrawer();
+<<<<<<< HEAD
         showToast("🎉 Đặt hàng thành công! Đơn hàng đang được đóng gói.");
+=======
+        showToast("ðŸŽ‰ Äáº·t hÃ ng thÃ nh cÃ´ng! ÄÆ¡n hÃ ng Ä‘ang Ä‘Æ°á»£c Ä‘Ã³ng gÃ³i.");
+
+>>>>>>> adffc00143d5523b3f1a0afe58a30fbe242ee7b5
       }
 
       // =========================================================================
       // USER AUTH MODAL & DRAWER HELPERS
       // =========================================================================
       function openUserAuthModal() {
+<<<<<<< HEAD
         showToast("Đang kết nối tài khoản khách hàng...");
+=======
+        if (window.Auth && Auth.isAuthenticated()) {
+          Auth.openAccountDropdownMenu(Auth.getRole(), '../admin/index.html', '../seller/index.html', '../auth/index.html');
+        } else {
+          window.location.href = '../auth/index.html';
+        }
+      }
+
+      function handleUserLogout() {
+        if (confirm('Bạn có chắc chắn muốn đăng xuất tài khoản?')) {
+          Auth.logout('../auth/index.html?message=logged_out');
+        }
+>>>>>>> adffc00143d5523b3f1a0afe58a30fbe242ee7b5
       }
 
       function openFilterDrawer() {

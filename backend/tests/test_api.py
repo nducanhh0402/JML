@@ -1,6 +1,8 @@
 import unittest
 import urllib.request
+import urllib.error
 import json
+from backend.src.middlewares.auth_middleware import create_access_token
 
 BASE_URL = "http://127.0.0.1:8000"
 
@@ -37,13 +39,26 @@ class TestMarketplaceAPI(unittest.TestCase):
             self.skipTest(f"Server offline: {e}")
 
     def test_04_get_admin_shops(self):
-        """Kiểm tra API quản lý cửa hàng cho Admin."""
+        """Kiểm tra API quản lý cửa hàng cho Admin yêu cầu Bearer Token."""
         try:
-            res = urllib.request.urlopen(f"{BASE_URL}/api/admin/shops")
+            # 1. Gọi khi không có token -> phải trả về lỗi 401 Unauthorized
+            with self.assertRaises(urllib.error.HTTPError) as ctx:
+                urllib.request.urlopen(f"{BASE_URL}/api/admin/shops")
+            self.assertEqual(ctx.exception.code, 401)
+            ctx.exception.close()
+
+            # 2. Gọi với Bearer token của Admin -> trả về 200 OK
+            admin_token = create_access_token({"sub": "1", "username": "admin", "role": "admin"})
+            req = urllib.request.Request(
+                f"{BASE_URL}/api/admin/shops",
+                headers={"Authorization": f"Bearer {admin_token}"}
+            )
+            res = urllib.request.urlopen(req)
             data = json.loads(res.read().decode())
+            res.close()
             self.assertEqual(res.status, 200)
             self.assertIn("shops", data)
-        except Exception as e:
+        except urllib.error.URLError as e:
             self.skipTest(f"Server offline: {e}")
 
 if __name__ == "__main__":

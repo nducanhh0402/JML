@@ -12,6 +12,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="index.css" />
+    <!-- Auth & RBAC Controller (TF16DCF) -->
+    <script src="../shared/js/auth.js"></script>
   </head>
   <body>
     <!-- Top Utilities Bar -->
@@ -28,7 +30,7 @@
             <strong style="color: #fff">cskh@jmlstore.vn</strong></span
           >
         </div>
-        <div class="top-links">
+        <div class="top-links" id="topAuthLinks">
           <a href="products.html" style="color: #fb923c; font-weight: 700"
             >🛍️ Tất Cả Sản Phẩm (Bộ Lọc)</a
           >
@@ -551,100 +553,18 @@
         <!-- Hero Banner Slider -->
         <section class="hero-section reveal-on-scroll revealed">
           <div class="hero-grid">
-            <!-- Main Interactive Slider -->
+            <!-- Main Interactive Slider (Nạp từ API /api/homepage/banners) -->
             <div class="main-slider" id="mainSlider">
-              <!-- Slide 1 -->
-              <div
-                class="slide active"
-                style="
-                  background-image: url(&quot;https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80&quot;);
-                "
-              >
-                <div class="slide-content">
-                  <span class="slide-tag">Bộ Sưu Tập Âm Thanh 2025</span>
-                  <h1 class="slide-title">Trải Nghiệm Đẳng Cấp Studio</h1>
-                  <p class="slide-desc">
-                    Thưởng thức âm thanh chuẩn Hi-Res Audio với tai nghe chống
-                    ồn chủ động cao cấp giảm tới 35%.
-                  </p>
-                  <button class="btn-hero" onclick="scrollToFlashSale()">
-                    Khám Phá Ngay
-                    <svg
-                      fill="none"
-                      height="16"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      viewBox="0 0 24 24"
-                      width="16"
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <!-- Slide 2 -->
-              <div
-                class="slide"
-                style="
-                  background-image: url(&quot;https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80&quot;);
-                "
-              >
-                <div class="slide-content">
-                  <span class="slide-tag">Đồng Hồ Tinh Hoa</span>
-                  <h2 class="slide-title">
-                    Thời Khắc Sang Trọng &amp; Hoàn Mỹ
-                  </h2>
-                  <p class="slide-desc">
-                    Dòng đồng hồ cơ tự động Chronograph phiên bản giới hạn dành
-                    riêng cho quý ông hiện đại.
-                  </p>
-                  <button class="btn-hero" onclick="scrollToFlashSale()">
-                    Xem Bộ Sưu Tập
-                    <svg
-                      fill="none"
-                      height="16"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      viewBox="0 0 24 24"
-                      width="16"
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <!-- Slide 3 -->
-              <div
-                class="slide"
-                style="
-                  background-image: url(&quot;https://images.unsplash.com/photo-1508615039623-a25605d2b022?auto=format&fit=crop&w=1200&q=80&quot;);
-                "
-              >
-                <div class="slide-content">
-                  <span class="slide-tag">Công Nghệ Tương Lai</span>
-                  <h2 class="slide-title">Smartwatch Series Pro Ultra</h2>
-                  <p class="slide-desc">
-                    Khung vỏ Titanium hàng không, đo chỉ số sinh học tức thời,
-                    pin kéo dài 14 ngày bền bỉ.
-                  </p>
-                  <button class="btn-hero" onclick="scrollToFlashSale()">
-                    Mua Với Giá Ưu Đãi
-                    <svg
-                      fill="none"
-                      height="16"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      viewBox="0 0 24 24"
-                      width="16"
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7"></path>
-                    </svg>
-                  </button>
+              <div id="bannerSlidesContainer" style="position: relative; width: 100%; height: 100%">
+                <div class="section-state-box is-dark is-loading" style="border-radius: 0; border: none">
+                  <div class="spinner-ring"></div>
+                  <div class="state-title">Đang tải banner trang chủ...</div>
+                  <div class="state-desc">Đang kết nối máy chủ để tải các chương trình ưu đãi.</div>
                 </div>
               </div>
 
               <!-- Controls -->
-              <div class="slider-arrows">
+              <div class="slider-arrows" id="sliderArrows" style="display: none">
                 <button
                   aria-label="Slide trước"
                   class="slider-arrow-btn"
@@ -660,63 +580,13 @@
                   ❯
                 </button>
               </div>
-              <div class="slider-nav" id="sliderDots">
-                <div class="slider-dot active" data-index="0"></div>
-                <div class="slider-dot" data-index="1"></div>
-                <div class="slider-dot" data-index="2"></div>
-              </div>
+              <div class="slider-nav" id="sliderDots"></div>
             </div>
 
-            <!-- 2 Side Banners -->
-            <div class="side-banners">
-              <div class="side-banner side-banner-1">
-                <span
-                  style="
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #a5b4fc;
-                    text-transform: uppercase;
-                  "
-                >
-                  Bộ Sưu Tập Giới Hạn
-                </span>
-                <h3 class="side-banner-title">Nước Hoa Trầm Hương Pháp</h3>
-                <p class="side-banner-sub">Hương thơm tinh tế, lưu hương 24h</p>
-                <a
-                  class="side-banner-link"
-                  href="#"
-                  onclick="
-                    applyQuickSearch('Nước hoa');
-                    return false;
-                  "
-                  >Khám phá chi tiết →</a
-                >
-              </div>
-              <div class="side-banner side-banner-2">
-                <span
-                  style="
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #fed7aa;
-                    text-transform: uppercase;
-                  "
-                >
-                  Ưu Đãi Hôm Nay
-                </span>
-                <h3 class="side-banner-title">Phụ Kiện Da Thuần Chay</h3>
-                <p class="side-banner-sub">
-                  Túi xách &amp; Ví cầm tay thủ công
-                </p>
-                <a
-                  class="side-banner-link"
-                  href="#"
-                  onclick="
-                    applyQuickSearch('Ví Da');
-                    return false;
-                  "
-                  >Nhận Voucher 200K →</a
-                >
-              </div>
+            <!-- 2 Side Banners (Nạp từ API banner) -->
+            <div class="side-banners" id="sideBannersContainer">
+              <div class="side-banner skeleton-block" style="background-image: none; min-height: 185px"></div>
+              <div class="side-banner skeleton-block" style="background-image: none; min-height: 185px"></div>
             </div>
           </div>
         </section>
@@ -740,88 +610,7 @@
               >Xem Tất Cả →</a
             >
           </div>
-          <div class="categories-grid">
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('audio');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">🎧</div>
-              <div class="category-name">Thiết Bị Âm Thanh</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('watch');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">⌚</div>
-              <div class="category-name">Đồng Hồ Hiệu</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('tech');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">📱</div>
-              <div class="category-name">Điện Thoại &amp; Tablet</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('tech');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">💻</div>
-              <div class="category-name">Laptop Siêu Mỏng</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('fashion');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">👔</div>
-              <div class="category-name">Thời Trang Quý Ông</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('fashion');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">👜</div>
-              <div class="category-name">Túi Xách Hàng Hiệu</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('fashion');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">✨</div>
-              <div class="category-name">Mỹ Phẩm Cao Cấp</div>
-            </div>
-            <div
-              class="category-card"
-              onclick="
-                filterCategory('tech');
-                scrollToRecommend();
-              "
-            >
-              <div class="category-icon">🛋️</div>
-              <div class="category-name">Nội Thất &amp; Phụ Kiện</div>
-            </div>
-          </div>
+          <div class="categories-grid" id="categoriesGrid"></div>
         </section>
 
         <!-- Flash Sale Section -->
@@ -911,29 +700,40 @@
               Xem Bố Cục Lưới 2 Cột &amp; Bộ Lọc →
             </a>
           </div>
-          <!-- Category Filter Tabs -->
-          <div class="recommend-tabs">
+          <!-- Category Filter Tabs (Nạp từ API) -->
+          <div class="recommend-tabs" id="recommendTabs">
             <button
               class="tab-btn active"
               onclick="filterCategory('all', this)"
             >
               Tất Cả
             </button>
-            <button class="tab-btn" onclick="filterCategory('audio', this)">
-              Âm Thanh &amp; Phụ Kiện
-            </button>
-            <button class="tab-btn" onclick="filterCategory('watch', this)">
-              Đồng Hồ Cao Cấp
-            </button>
-            <button class="tab-btn" onclick="filterCategory('fashion', this)">
-              Thời Trang &amp; Đồ Da
-            </button>
-            <button class="tab-btn" onclick="filterCategory('tech', this)">
-              Thiết Bị Số
-            </button>
           </div>
           <!-- Products Grid (Rendered by JS) -->
           <div class="recommend-grid" id="recommendProductsContainer"></div>
+        </section>
+
+        <!-- Latest Products Section (Sản Phẩm Mới Nhất - API /api/homepage) -->
+        <section class="recommend-section reveal-on-scroll revealed" id="latestProductsSection">
+          <div
+            class="section-title-wrap"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              flex-wrap: wrap;
+              gap: 10px;
+            "
+          >
+            <div>
+              <h2 class="section-title">Sản Phẩm Mới Nhất</h2>
+              <p class="section-subtitle">
+                Các sản phẩm vừa lên kệ trên sàn JML Store
+              </p>
+            </div>
+            <a href="products.html" class="view-all-link">Xem Tất Cả Hàng Mới →</a>
+          </div>
+          <div class="recommend-grid" id="latestProductsContainer"></div>
         </section>
       </div>
 

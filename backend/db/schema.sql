@@ -138,3 +138,32 @@ CREATE TABLE IF NOT EXISTS `order_status_history` (
   INDEX `idx_history_order_key` (`order_key`),
   INDEX `idx_history_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================================
+-- BO SUNG BOI VU DUNG (TASK: TF17398)
+-- [BE] API trang chu: san pham noi bat, moi nhat, banner
+-- ============================================================================
+
+-- BANG BANNER TRANG CHU (BANNERS)
+CREATE TABLE IF NOT EXISTS `banners` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL DEFAULT '',
+    `image_url` TEXT NOT NULL,
+    `link_url` VARCHAR(500) DEFAULT '',
+    `description` TEXT DEFAULT '',
+    `sort_order` INT DEFAULT 0,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_banner_active` (`is_active`),
+    INDEX `idx_banner_sort` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Du lieu mau banner trang chu
+INSERT INTO `banners` (`title`, `image_url`, `link_url`, `description`, `sort_order`, `is_active`) VALUES
+('Khuyen Mai Mua Dong 2026', 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=80', '/products?category=fashion', 'Giam den 50% cac san pham thoi trang mua dong', 1, 1),
+('Flash Sale Cong Nghe', 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?auto=format&fit=crop&w=1200&q=80', '/products?category=tech', 'Dien thoai, Tablet giam soc chi trong 24h', 2, 1),
+('Bo Suu Tap Dong Ho Cao Cap', 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80', '/products?category=watch', 'Dong ho chinh hang - Bao hanh 5 nam', 3, 1),
+('Am Thanh Dinh Cao', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80', '/products?category=audio', 'Tai nghe, Loa bluetooth giam 30%', 4, 1),
+('Mien Phi Van Chuyen', 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80', '/products', 'Mien phi ship cho don hang tu 500.000d', 5, 1);
