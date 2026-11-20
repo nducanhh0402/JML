@@ -260,12 +260,79 @@
       let currentPage = 1;
       const pageSize = 8;
 
+      const CATEGORY_LABELS = {
+        all: "Tất cả ngành hàng",
+        audio: "Thiết Bị Âm Thanh",
+        watch: "Đồng Hồ Cao Cấp",
+        fashion: "Thời Trang & Đồ Da",
+        tech: "Thiết Bị Số & PC",
+        shoes: "Giày & Sneakers",
+        beauty: "Mỹ Phẩm & Nước Hoa"
+      };
+
+      const PRICE_RANGE_LABELS = {
+        "under-1m": "Dưới 1.000.000 ₫",
+        "1m-5m": "1.000.000 ₫ - 5.000.000 ₫",
+        "5m-15m": "5.000.000 ₫ - 15.000.000 ₫",
+        "above-15m": "Trên 15.000.000 ₫"
+      };
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
       // Khởi tạo trang
       document.addEventListener("DOMContentLoaded", () => {
+        hydrateFiltersFromUrl();
+        updateCategoryCounts();
         // Cố gắng fetch từ API nếu backend đang chạy
         fetchProductsFromAPI();
         updateCartBadge();
       });
+
+      function hydrateFiltersFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const q = (params.get("q") || "").trim();
+        const cat = (params.get("category") || "").trim().toLowerCase();
+        const flash = params.get("flash");
+
+        if (q) {
+          searchQuery = q.toLowerCase();
+          const input = document.getElementById("searchInput");
+          if (input) input.value = q;
+        }
+        if (cat && CATEGORY_LABELS[cat]) {
+          currentCategory = cat;
+          document.querySelectorAll(".category-item").forEach(item => {
+            item.classList.toggle("active", item.getAttribute("data-cat") === cat);
+          });
+          const bc = document.getElementById("breadcrumbCurrentCategory");
+          if (bc) bc.textContent = CATEGORY_LABELS[cat];
+        }
+        if (flash === "1" || flash === "true") {
+          const chk = document.getElementById("chkFlashSale");
+          if (chk) chk.checked = true;
+        }
+      }
+
+      function updateCategoryCounts() {
+        const counts = {};
+        allProducts.forEach(p => {
+          const c = (p.category || "").toLowerCase();
+          counts[c] = (counts[c] || 0) + 1;
+        });
+        document.querySelectorAll(".category-item[data-cat]").forEach(item => {
+          const cat = item.getAttribute("data-cat");
+          const badge = item.querySelector(".category-count");
+          if (!badge) return;
+          badge.textContent = cat === "all" ? allProducts.length : (counts[cat] || 0);
+        });
+      }
 
       async function fetchProductsFromAPI() {
         try {
@@ -287,12 +354,13 @@
                 image: (p.images && p.images[0]) ? p.images[0] : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
                 shopName: p.shopName || "JML Official Store",
                 exclusive: p.exclusive || "Chính Hãng",
-                isFlashSale: Boolean(p.is_flash_sale)
+                isFlashSale: Boolean(p.isFlashSale || p.is_flash_sale)
               }));
+              updateCategoryCounts();
             }
           }
         } catch (e) {
-          console.log("Sử dụng bộ dữ liệu Mock tĩnh đầy đủ 16 sản phẩm.");
+          console.log("Sử dụng bộ dữ liệu Mock tĩnh.");
         }
         applyAllFilters();
       }
@@ -305,14 +373,7 @@
         document.querySelectorAll(".category-item").forEach(item => item.classList.remove("active"));
         if (el) el.classList.add("active");
 
-        const catNames = {
-          "all": "Tất cả ngành hàng",
-          "audio": "Thiết Bị Âm Thanh",
-          "watch": "Đồng Hồ Cao Cấp",
-          "fashion": "Thời Trang & Đồ Da",
-          "tech": "Thiết Bị Số & PC"
-        };
-        document.getElementById("breadcrumbCurrentCategory").textContent = catNames[cat] || cat;
+        document.getElementById("breadcrumbCurrentCategory").textContent = CATEGORY_LABELS[cat] || cat;
         applyAllFilters();
 
         // Tự động đóng drawer trên mobile sau khi chọn
@@ -419,21 +480,155 @@
         // Áp dụng sắp xếp
         sortProducts();
 
-        // Cập nhật số lượng
+        // Cập nhật số lượng & thanh chip bộ lọc
         document.getElementById("productCountText").textContent = filteredProducts.length;
         document.getElementById("countAll").textContent = allProducts.length;
 
-        // Đếm bộ lọc đang kích hoạt
-        let activeCount = 0;
-        if (currentCategory !== "all") activeCount++;
-        if (currentPriceRange !== "all") activeCount++;
-        if (currentRating !== "all") activeCount++;
-        if (isFlashOnly) activeCount++;
-        if (isExclusiveOnly) activeCount++;
-        document.getElementById("mobileActiveCount").textContent = activeCount;
+        const activeChips = getActiveFilterChips();
+        document.getElementById("mobileActiveCount").textContent = activeChips.length;
+        renderActiveFilterChips(activeChips);
 
         currentPage = 1;
         renderProducts();
+      }
+
+      // Lấy danh sách chip bộ lọc đang áp dụng (TF16EBF)
+      function getActiveFilterChips() {
+        const chips = [];
+        const rawInput = (document.getElementById("searchInput")?.value || "").trim();
+        const isFlashOnly = document.getElementById("chkFlashSale")?.checked;
+        const isExclusiveOnly = document.getElementById("chkExclusive")?.checked;
+
+        if (searchQuery) {
+          chips.push({
+            type: "search",
+            label: `Từ khóa: "${rawInput || searchQuery}"`
+          });
+        }
+        if (currentCategory !== "all") {
+          chips.push({
+            type: "category",
+            label: `Danh mục: ${CATEGORY_LABELS[currentCategory] || currentCategory}`
+          });
+        }
+        if (currentPriceRange !== "all") {
+          let priceText = PRICE_RANGE_LABELS[currentPriceRange] || "";
+          if (typeof currentPriceRange === "object" && currentPriceRange.custom) {
+            const minText = formatCurrency(currentPriceRange.min);
+            const maxText = currentPriceRange.max === Infinity ? "Trở lên" : formatCurrency(currentPriceRange.max);
+            priceText = `${minText} - ${maxText}`;
+          }
+          if (priceText) {
+            chips.push({
+              type: "price",
+              label: `Giá: ${priceText}`
+            });
+          }
+        }
+        if (currentRating !== "all") {
+          const ratingLabel = currentRating === "5" ? "5 sao" : `Từ ${currentRating} sao`;
+          chips.push({
+            type: "rating",
+            label: `Đánh giá: ${ratingLabel}`
+          });
+        }
+        if (isFlashOnly) {
+          chips.push({
+            type: "flash",
+            label: "⚡ Đang Giảm Giá Sốc"
+          });
+        }
+        if (isExclusiveOnly) {
+          chips.push({
+            type: "exclusive",
+            label: "🛡️ Hàng Chính Hãng 100%"
+          });
+        }
+        return chips;
+      }
+
+      // Render thanh chip bộ lọc đang áp dụng & nút Xóa tất cả (TF16EBF)
+      function renderActiveFilterChips(chips = getActiveFilterChips()) {
+        const bar = document.getElementById("activeFiltersBar");
+        if (!bar) return;
+
+        if (!chips || chips.length === 0) {
+          bar.style.display = "none";
+          bar.innerHTML = "";
+          return;
+        }
+
+        const chipsHtml = chips.map(chip => `
+          <span class="filter-chip" data-filter-type="${chip.type}">
+            <span>${escapeHtml(chip.label)}</span>
+            <button
+              type="button"
+              class="filter-chip-remove"
+              aria-label="Xóa ${escapeHtml(chip.label)}"
+              title="Xóa bộ lọc này"
+              onclick="removeFilterChip('${chip.type}')"
+            >×</button>
+          </span>
+        `).join("");
+
+        bar.innerHTML = `
+          <span class="active-filters-label">
+            <span>Đang lọc</span>
+            <span class="active-filters-count">${chips.length}</span>
+          </span>
+          ${chipsHtml}
+          <button type="button" class="btn-clear-all-chips" onclick="resetAllFilters()">
+            ✕ Xóa tất cả
+          </button>
+        `;
+        bar.style.display = "flex";
+      }
+
+      // Xóa từng chip bộ lọc riêng lẻ (TF16EBF)
+      function removeFilterChip(type) {
+        if (type === "category") {
+          currentCategory = "all";
+          document.querySelectorAll(".category-item").forEach(item => {
+            item.classList.toggle("active", item.getAttribute("data-cat") === "all");
+          });
+          const bc = document.getElementById("breadcrumbCurrentCategory");
+          if (bc) bc.textContent = CATEGORY_LABELS.all;
+        } else if (type === "search") {
+          searchQuery = "";
+          const searchEl = document.getElementById("searchInput");
+          if (searchEl) searchEl.value = "";
+        } else if (type === "price") {
+          currentPriceRange = "all";
+          const minEl = document.getElementById("minPriceInput");
+          const maxEl = document.getElementById("maxPriceInput");
+          if (minEl) minEl.value = "";
+          if (maxEl) maxEl.value = "";
+          const allPriceRadio = document.querySelector('input[name="priceRange"][value="all"]');
+          if (allPriceRadio) allPriceRadio.checked = true;
+        } else if (type === "rating") {
+          currentRating = "all";
+          const allRatingRadio = document.querySelector('input[name="ratingFilter"][value="all"]');
+          if (allRatingRadio) allRatingRadio.checked = true;
+        } else if (type === "flash") {
+          const chkFlash = document.getElementById("chkFlashSale");
+          if (chkFlash) chkFlash.checked = false;
+        } else if (type === "exclusive") {
+          const chkEx = document.getElementById("chkExclusive");
+          if (chkEx) chkEx.checked = false;
+        }
+        applyAllFilters();
+      }
+
+      function applyQuickRecoveryFilter(preset) {
+        resetAllFilters();
+        if (preset === "flash") {
+          const chkFlash = document.getElementById("chkFlashSale");
+          if (chkFlash) chkFlash.checked = true;
+          applyAllFilters();
+        } else if (preset === "audio") {
+          const audioItem = document.querySelector('.category-item[data-cat="audio"]');
+          selectCategory("audio", audioItem);
+        }
       }
 
       // =========================================================================
@@ -482,12 +677,45 @@
         if (!grid) return;
 
         if (filteredProducts.length === 0) {
+          const activeChips = getActiveFilterChips();
+          const summaryPills = activeChips.map(chip => `
+            <span class="filter-chip" style="font-size: 11.5px;">
+              <span>${escapeHtml(chip.label)}</span>
+              <button
+                type="button"
+                class="filter-chip-remove"
+                aria-label="Xóa ${escapeHtml(chip.label)}"
+                onclick="removeFilterChip('${chip.type}')"
+              >×</button>
+            </span>
+          `).join("");
+
           grid.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">🔍</div>
+            <div class="empty-state" id="emptyStateContainer">
+              <div class="empty-state-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+              </div>
               <div class="empty-state-title">Không tìm thấy sản phẩm phù hợp</div>
-              <p class="empty-state-desc">Hãy thử thay đổi danh mục hoặc mở rộng khoảng giá tìm kiếm của bạn.</p>
-              <button class="btn-apply-price" style="width: auto; padding: 8px 20px; display: inline-block;" onclick="resetAllFilters()">Xóa Tất Cả Bộ Lọc</button>
+              <p class="empty-state-desc">
+                ${searchQuery
+                  ? `Không có sản phẩm nào khớp với từ khóa <strong>"${escapeHtml(document.getElementById("searchInput")?.value.trim() || searchQuery)}"</strong> và các điều kiện lọc hiện tại.`
+                  : "Không có sản phẩm nào đáp ứng toàn bộ bộ lọc bạn đang chọn. Hãy thử bớt một vài tiêu chí."}
+              </p>
+              ${activeChips.length > 0 ? `<div class="empty-state-summary">${summaryPills}</div>` : ""}
+              <div class="empty-state-actions">
+                <button type="button" class="btn-empty-primary" onclick="resetAllFilters()">✕ Xóa Tất Cả Bộ Lọc</button>
+                ${searchQuery ? `<button type="button" class="btn-empty-secondary" onclick="removeFilterChip('search')">Xóa từ khóa tìm kiếm</button>` : ""}
+              </div>
+              <div class="empty-state-suggestions">
+                <span>Gợi ý nhanh:</span>
+                <button type="button" class="empty-suggest-pill" onclick="applyQuickRecoveryFilter('all')">Xem tất cả sản phẩm</button>
+                <button type="button" class="empty-suggest-pill" onclick="applyQuickRecoveryFilter('flash')">⚡ Đang giảm giá sốc</button>
+                <button type="button" class="empty-suggest-pill" onclick="applyQuickRecoveryFilter('audio')">🎧 Thiết bị âm thanh</button>
+              </div>
             </div>
           `;
           document.getElementById("paginationWrapper").style.display = "none";

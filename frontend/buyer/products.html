@@ -497,6 +497,97 @@
         cursor: pointer;
       }
 
+      /* Active Filter Chips Bar (TF16EBF) */
+      .active-filters-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow-sm);
+      }
+      .active-filters-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 2px;
+      }
+      .active-filters-count {
+        background: var(--primary);
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 1px 6px;
+        border-radius: 99px;
+      }
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 8px 5px 12px;
+        border-radius: 99px;
+        background: var(--primary-light);
+        border: 1px solid #fed7aa;
+        color: #c2410c;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+        transition: var(--transition);
+      }
+      .filter-chip:hover {
+        border-color: var(--primary);
+        background: #ffedd5;
+      }
+      .filter-chip-remove {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(234, 88, 12, 0.14);
+        color: #c2410c;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        padding: 0;
+      }
+      .filter-chip-remove:hover {
+        background: var(--primary);
+        color: #ffffff;
+        transform: scale(1.08);
+      }
+      .btn-clear-all-chips {
+        margin-left: auto;
+        padding: 5px 12px;
+        border-radius: 99px;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: var(--transition);
+      }
+      .btn-clear-all-chips:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+      }
+
       /* Products Grid */
       .products-grid {
         display: grid;
@@ -635,29 +726,115 @@
         color: #fff;
       }
 
-      /* Empty State */
+      /* Empty State (TF16EBF) */
       .empty-state {
         grid-column: 1 / -1;
-        background: #fff;
-        border: 1px dashed var(--border);
-        border-radius: var(--radius-md);
-        padding: 48px 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1.5px dashed #cbd5e1;
+        border-radius: var(--radius-lg);
+        padding: 52px 24px;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
       .empty-state-icon {
-        font-size: 40px;
-        margin-bottom: 12px;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        border: 1px solid #fed7aa;
+        box-shadow: 0 8px 20px -6px rgba(234, 88, 12, 0.22);
       }
       .empty-state-title {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 18px;
+        font-weight: 800;
         color: var(--secondary);
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
       .empty-state-desc {
-        font-size: 13px;
+        font-size: 13.5px;
         color: var(--text-muted);
-        margin-bottom: 16px;
+        max-width: 460px;
+        line-height: 1.55;
+        margin-bottom: 14px;
+      }
+      .empty-state-summary {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 20px;
+      }
+      .empty-state-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .btn-empty-primary {
+        padding: 10px 22px;
+        border-radius: 99px;
+        border: none;
+        background: linear-gradient(135deg, var(--primary), #f97316);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(234, 88, 12, 0.25);
+        transition: var(--transition);
+      }
+      .btn-empty-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(234, 88, 12, 0.35);
+      }
+      .btn-empty-secondary {
+        padding: 10px 18px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        background: #ffffff;
+        color: var(--secondary);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-empty-secondary:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .empty-state-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--border);
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .empty-suggest-pill {
+        padding: 4px 12px;
+        border-radius: 99px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .empty-suggest-pill:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--primary-light);
       }
 
       /* Pagination */
@@ -889,6 +1066,14 @@
                 <span>📱 Thiết Bị Số & PC</span>
                 <span class="category-count">4</span>
               </div>
+              <div class="category-item" data-cat="shoes" onclick="selectCategory('shoes', this)">
+                <span>👟 Giày &amp; Sneakers</span>
+                <span class="category-count">0</span>
+              </div>
+              <div class="category-item" data-cat="beauty" onclick="selectCategory('beauty', this)">
+                <span>✨ Mỹ Phẩm &amp; Nước Hoa</span>
+                <span class="category-count">0</span>
+              </div>
             </div>
           </div>
 
@@ -997,6 +1182,11 @@
             <div class="sort-right">
               <span>Tìm thấy: <strong class="product-count-badge" id="productCountText">0</strong> sản phẩm</span>
             </div>
+          </div>
+
+          <!-- Thanh Chip Bộ Lọc Đang Áp Dụng (TF16EBF) -->
+          <div class="active-filters-bar" id="activeFiltersBar" style="display: none;" aria-live="polite">
+            <!-- Rendered by JavaScript -->
           </div>
 
           <!-- Lưới sản phẩm (Product Grid) -->
