@@ -200,6 +200,22 @@ class TestAuthRBACMiddleware(unittest.TestCase):
         self.assertEqual(res_auth.status_code, 200)
         self.assertEqual(res_auth.json()["user"]["username"], "admin")
 
+    def test_10_admin_order_schema_validation(self):
+        """Schema Pydantic chặn trạng thái đơn không hợp lệ và lý do khóa rỗng."""
+        status_res = self.client.put(
+            "/api/admin/orders/MP-9999/status",
+            json={"status": "invalid", "note": "Test"},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(status_res.status_code, 422)
+
+        freeze_res = self.client.put(
+            "/api/admin/orders/MP-9999/freeze",
+            json={"reason": ""},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(freeze_res.status_code, 422)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,7 +3,14 @@ import random
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
-from backend.schemas import ProductCreate, CustomerCreate, FreezeOrderRequest, OrderStatusUpdate
+from backend.schemas import (
+    ProductCreate,
+    CustomerCreate,
+    FreezeOrderRequest,
+    OrderStatusUpdate,
+    AdminOrderResponse,
+    AdminOrderStatusHistoryResponse,
+)
 from backend.src.middlewares.auth_middleware import require_admin
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"], dependencies=[Depends(require_admin)])
@@ -26,6 +33,39 @@ def record_order_status_change(cursor, order_key: str, old_status: str | None, n
             INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
             VALUES (?, ?, ?, ?, ?);
         """, (order_key, old_status, new_status, changed_by, note))
+
+def build_admin_order(cursor, order_row):
+    cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (order_row["order_key"],))
+    item_rows = cursor.fetchall()
+    items = [
+        {
+            "name": item["name"],
+            "variant": item["variant"] or "",
+            "price": item["price"] or "",
+            "qty": item["qty"] or "",
+            "subtotal": item["subtotal"] or "",
+        }
+        for item in item_rows
+    ]
+    return AdminOrderResponse(
+        id=order_row["id_display"],
+        key=order_row["order_key"],
+        escrowBadge=order_row["escrow_badge"],
+        escrowClass=order_row["escrow_class"],
+        time=order_row["time_info"],
+        shopName=order_row["shop_name"],
+        shopAddress=order_row["shop_address"],
+        buyerName=order_row["buyer_name"],
+        buyerPhone=order_row["buyer_phone"] or "",
+        buyerAddress=order_row["buyer_address"],
+        total=order_row["total"],
+        numericTotal=int(order_row["numeric_total"] or 0),
+        fee=order_row["fee"],
+        net=order_row["net"],
+        status=order_row["status"],
+        createdAt=order_row["created_at"] if "created_at" in order_row else "",
+        items=items,
+    )
 
 @router.get("/shops")
 def get_all_shops():
@@ -187,47 +227,17 @@ def create_or_approve_product(payload: ProductCreate):
 
     return {"message": f"Đã thêm sản phẩm '{payload.title}' vào sàn thành công!", "id": new_id}
 
-@router.get("/orders")
+@router.get("/orders", response_model=dict[str, dict[str, AdminOrderResponse]])
 def get_admin_orders():
-    """Tra cứu toàn bộ đơn hàng trong hệ thống phục vụ quản lý Escrow."""
+    """Tra cứu toàn bộ đơn hàng theo schema Pydantic admin."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM orders ORDER BY order_key DESC;")
     orders_rows = cursor.fetchall()
-    orders_dict = {}
-
-    for o in orders_rows:
-        cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (o["order_key"],))
-        items_rows = cursor.fetchall()
-        items = [
-            {
-                "name": item["name"],
-                "variant": item["variant"],
-                "price": item["price"],
-                "qty": item["qty"],
-                "subtotal": item["subtotal"],
-            }
-            for item in items_rows
-        ]
-        orders_dict[o["order_key"]] = {
-            "id": o["id_display"],
-            "key": o["order_key"],
-            "escrowBadge": o["escrow_badge"],
-            "escrowClass": o["escrow_class"],
-            "time": o["time_info"],
-            "shopName": o["shop_name"],
-            "shopAddress": o["shop_address"],
-            "buyerName": o["buyer_name"],
-            "buyerPhone": o["buyer_phone"],
-            "buyerAddress": o["buyer_address"],
-            "total": o["total"],
-            "numericTotal": o["numeric_total"],
-            "fee": o["fee"],
-            "net": o["net"],
-            "status": o["status"],
-            "items": items,
-        }
-
+    orders_dict = {
+        row["order_key"]: build_admin_order(cursor, row).model_dump(by_alias=False)
+        for row in orders_rows
+    }
     conn.close()
     return {"orders": orders_dict}
 
