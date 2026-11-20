@@ -119,6 +119,47 @@ def get_db_connection():
     return ConnectionWrapper(conn)
 
 
+def ensure_users_constraints(cursor):
+    """TF16EA5: Đảm bảo bảng users có UNIQUE index cho email và index cho số điện thoại.
+
+    Idempotent - chạy nhiều lần an toàn. Các bước giống migrations/006_users_email_unique_index.sql:
+      1. email cho phép NULL; email rỗng được chuyển thành NULL.
+      2. Email trùng từ dữ liệu cũ: giữ tài khoản có id nhỏ nhất, các tài khoản còn lại đặt NULL.
+      3. Tạo UNIQUE INDEX uq_users_email và INDEX idx_users_phone.
+    """
+    try:
+        cursor.execute("ALTER TABLE users MODIFY email VARCHAR(255) NULL DEFAULT NULL;")
+        cursor.execute("UPDATE users SET email = NULL WHERE email IS NOT NULL AND TRIM(email) = '';")
+        cleared = cursor.execute(
+            """
+            UPDATE users u
+            JOIN (
+                SELECT email, MIN(id) AS keep_id
+                FROM users
+                WHERE email IS NOT NULL
+                GROUP BY email
+                HAVING COUNT(*) > 1
+            ) d ON u.email = d.email AND u.id <> d.keep_id
+            SET u.email = NULL;
+            """
+        )
+        if cleared:
+            print(f"[users] Đã xoá email trùng lặp của {cleared} tài khoản cũ để tạo UNIQUE index.")
+
+        cursor.execute("SHOW INDEX FROM users;")
+        rows = cursor.fetchall()
+        index_names = {row["Key_name"] for row in rows}
+        has_unique_email = any(
+            row["Column_name"] == "email" and int(row["Non_unique"]) == 0 for row in rows
+        )
+        if not has_unique_email:
+            cursor.execute("CREATE UNIQUE INDEX uq_users_email ON users (email);")
+        if "idx_users_phone" not in index_names:
+            cursor.execute("CREATE INDEX idx_users_phone ON users (phone);")
+    except Exception as exc:  # không làm hỏng quá trình khởi động ứng dụng
+        print(f"[users] Cảnh báo: không áp dụng được ràng buộc email duy nhất: {exc}")
+
+
 def init_db(seed=False):
     """Khởi tạo các bảng MySQL (products, customers, orders, order_items, shops)."""
     conn = get_db_connection()
@@ -314,7 +355,7 @@ def init_db(seed=False):
         title VARCHAR(255) NOT NULL DEFAULT '',
         image_url TEXT NOT NULL,
         link_url VARCHAR(500) DEFAULT '',
-        description TEXT DEFAULT '',
+        description TEXT DEFAULT (''),
         sort_order INT DEFAULT 0,
         is_active TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -333,6 +374,9 @@ def init_db(seed=False):
             cursor.execute(index_sql)
         except Exception:
             pass
+
+    # Index email (UNIQUE) + index phone cho bảng users (TF16EA5)
+    ensure_users_constraints(cursor)
 
     # Tạo sẵn tài khoản Super Admin mặc định nếu chưa có (admin / 123456)
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin';")
