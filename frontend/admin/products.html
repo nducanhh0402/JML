@@ -1,0 +1,213 @@
+<!-- products.html - Admin Product Management Page -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>Quản lý Sản phẩm</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">Quản lý Sản phẩm</h1>
+        <button id="addProductBtn" class="px-4 py-2 bg-primary-600 text-white rounded mb-4">Thêm sản phẩm</button>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white shadow rounded">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-4 py-2">ID</th>
+                        <th class="px-4 py-2">Hình</th>
+                        <th class="px-4 py-2">Tên</th>
+                        <th class="px-4 py-2">Danh mục</th>
+                        <th class="px-4 py-2">Thương hiệu</th>
+                        <th class="px-4 py-2">Giá</th>
+                        <th class="px-4 py-2">Tồn kho</th>
+                        <th class="px-4 py-2">Trạng thái</th>
+                        <th class="px-4 py-2">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="productModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg w-11/12 md:w-2/3 lg:w-1/2 p-6">
+            <h2 id="modalTitle" class="text-xl font-semibold mb-4">Thêm sản phẩm</h2>
+            <form id="productForm" class="space-y-4">
+                <input type="hidden" id="productId" />
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium">Tiêu đề</label>
+                        <input type="text" id="title" class="w-full border rounded p-1" required />
+                    </div>
+                    <div>
+                        <label class="block font-medium">Danh mục</label>
+                        <select id="category" class="w-full border rounded p-1" required></select>
+                    </div>
+                    <div>
+                        <label class="block font-medium">Thương hiệu</label>
+                        <input type="text" id="brand" class="w-full border rounded p-1" />
+                    </div>
+                    <div>
+                        <label class="block font-medium">Giá (VND)</label>
+                        <input type="number" id="price" class="w-full border rounded p-1" required />
+                    </div>
+                    <div>
+                        <label class="block font-medium">Tồn kho</label>
+                        <input type="number" id="stock" class="w-full border rounded p-1" required />
+                    </div>
+                    <div>
+                        <label class="block font-medium">Trạng thái</label>
+                        <select id="status" class="w-full border rounded p-1">
+                            <option value="approved">Đã duyệt</option>
+                            <option value="pending">Chờ duyệt</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Ảnh (chọn nhiều)</label>
+                    <input type="file" id="images" multiple accept="image/*" class="w-full" />
+                    <div id="imagePreview" class="flex flex-wrap mt-2 gap-2"></div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-300 rounded">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Populate category select from existing API
+        async function loadCategories() {
+            const res = await fetch(`${API_BASE_URL}/api/categories`, { headers: getAdminAuthHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                const select = document.getElementById('category');
+                select.innerHTML = data.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            }
+        }
+
+        // Load and render product table
+        async function loadProducts() {
+            const res = await fetch(`${API_BASE_URL}/api/admin/products?limit=100`, { headers: getAdminAuthHeaders() });
+            if (!res.ok) return;
+            const data = await res.json();
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = data.products.map(p => {
+                const img = p.images && p.images.length ? p.images[0] : '';
+                const imgTag = img ? `<img src="${img}" alt="thumb" class="h-12 w-12 object-cover"/>` : '';
+                return `
+                    <tr class="border-b">
+                        <td class="px-4 py-2">${p.id}</td>
+                        <td class="px-4 py-2">${imgTag}</td>
+                        <td class="px-4 py-2">${p.title}</td>
+                        <td class="px-4 py-2">${p.category}</td>
+                        <td class="px-4 py-2">${p.brand || ''}</td>
+                        <td class="px-4 py-2">${p.price_formatted || p.price}</td>
+                        <td class="px-4 py-2">${p.total_stock}</td>
+                        <td class="px-4 py-2 capitalize">${p.status}</td>
+                        <td class="px-4 py-2">
+                            <button class="px-2 py-1 bg-yellow-500 text-white rounded" onclick="openEditModal(${p.id})">Sửa</button>
+                            <button class="px-2 py-1 bg-red-600 text-white rounded" onclick="confirmDelete(${p.id})">Xóa</button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        // Open modal for add or edit
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm sản phẩm';
+            document.getElementById('productId').value = '';
+            document.getElementById('productForm').reset();
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        async function openEditModal(id) {
+            const res = await fetch(`${API_BASE_URL}/api/admin/products/${id}`, { headers: getAdminAuthHeaders() });
+            if (!res.ok) return;
+            const p = await res.json();
+            document.getElementById('modalTitle').textContent = 'Sửa sản phẩm';
+            document.getElementById('productId').value = p.id;
+            document.getElementById('title').value = p.title;
+            document.getElementById('category').value = p.category;
+            document.getElementById('brand').value = p.brand || '';
+            document.getElementById('price').value = p.price;
+            document.getElementById('stock').value = p.total_stock;
+            document.getElementById('status').value = p.status;
+            // preview existing images
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = (p.images || []).map(url => `<img src="${url}" class="h-12 w-12 object-cover"/>`).join('');
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        // Image preview handling
+        document.getElementById('images').addEventListener('change', function (e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.className = 'h-12 w-12 object-cover';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Submit add/edit form
+        document.getElementById('productForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('productId').value;
+            const payload = {
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                brand: document.getElementById('brand').value,
+                price: Number(document.getElementById('price').value),
+                stock: Number(document.getElementById('stock').value),
+                status: document.getElementById('status').value,
+                // For simplicity, we send first selected image as placeholder URL
+                image: (document.getElementById('images').files[0]) ? URL.createObjectURL(document.getElementById('images').files[0]) : undefined
+            };
+            const method = id ? 'PUT' : 'POST';
+            const endpoint = id ? `${API_BASE_URL}/api/admin/products/${id}` : `${API_BASE_URL}/api/admin/products`;
+            const res = await fetch(endpoint, {
+                method,
+                headers: { ...getAdminAuthHeaders({ 'Content-Type': 'application/json' }) },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                document.getElementById('productModal').classList.add('hidden');
+                await loadProducts();
+            } else {
+                alert('Lỗi lưu sản phẩm');
+            }
+        });
+
+        // Delete with confirmation
+        async function confirmDelete(id) {
+            if (confirm('Bạn có chắc muốn xóa sản phẩm #' + id + '?')) {
+                const res = await fetch(`${API_BASE_URL}/api/admin/products/${id}`, {
+                    method: 'DELETE',
+                    headers: getAdminAuthHeaders()
+                });
+                if (res.ok) await loadProducts();
+                else alert('Xóa thất bại');
+            }
+        }
+
+        // Init
+        document.getElementById('addProductBtn').addEventListener('click', openAddModal);
+        document.getElementById('cancelBtn').addEventListener('click', () => document.getElementById('productModal').classList.add('hidden'));
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadCategories();
+            await loadProducts();
+        });
+    </script>
+</body>
+</html>
