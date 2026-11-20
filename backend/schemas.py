@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, Field
+from typing import List, Literal, Optional
 
 
 class ProductCreate(BaseModel):
@@ -103,6 +103,52 @@ class ShopUpdateRequest(BaseModel):
     name: str
     badge: str = "TIÊU CHUẨN"
     address: str = ""
+
+
+class AdminOrderStatusUpdate(BaseModel):
+    status: Literal["preparing", "shipping", "delivered", "released", "dispute", "cancelled"]
+    note: str = Field(default="", max_length=255)
+
+
+class AdminOrderFreezeRequest(BaseModel):
+    reason: str = Field(default="Khách khiếu nại sản phẩm lỗi", min_length=1, max_length=255)
+
+
+class AdminOrderItemResponse(BaseModel):
+    name: str
+    variant: str = ""
+    price: str = ""
+    qty: str = ""
+    subtotal: str = ""
+
+
+class AdminOrderStatusHistoryResponse(BaseModel):
+    id: int
+    old_status: Optional[str] = None
+    new_status: str
+    changed_by: Optional[int] = None
+    note: str = ""
+    created_at: str
+
+
+class AdminOrderResponse(BaseModel):
+    id: str
+    key: str
+    escrowBadge: str
+    escrowClass: str
+    time: str
+    shopName: str
+    shopAddress: str
+    buyerName: str
+    buyerPhone: str = ""
+    buyerAddress: str
+    total: str
+    numericTotal: int = 0
+    fee: str
+    net: str
+    status: str
+    createdAt: str = ""
+    items: List[AdminOrderItemResponse] = []
 
 
 

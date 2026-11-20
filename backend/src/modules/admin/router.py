@@ -3,10 +3,28 @@ import random
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
-from backend.schemas import ProductCreate, CustomerCreate, FreezeOrderRequest
+from backend.schemas import (
+    ProductCreate,
+    CustomerCreate,
+    FreezeOrderRequest,
+    AdminOrderResponse,
+    AdminOrderStatusHistoryResponse,
+    AdminOrderStatusUpdate,
+    AdminOrderFreezeRequest,
+)
 from backend.src.middlewares.auth_middleware import require_admin
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"], dependencies=[Depends(require_admin)])
+
+ADMIN_ORDER_STATUSES = {"preparing", "shipping", "delivered", "released", "dispute", "cancelled"}
+
+def record_admin_order_history(cursor, order_key: str, old_status: str | None, new_status: str, note: str = "", changed_by: int | None = None):
+    cursor.execute("SHOW TABLES LIKE 'order_status_history';")
+    if cursor.fetchone():
+        cursor.execute("""
+            INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
+            VALUES (?, ?, ?, ?, ?);
+        """, (order_key, old_status, new_status, changed_by, note))
 
 @router.get("/shops")
 def get_all_shops():
@@ -166,83 +184,67 @@ def create_or_approve_product(payload: ProductCreate):
 
     return {"message": f"Đã thêm sản phẩm '{payload.title}' vào sàn thành công!", "id": new_id}
 
-@router.get("/orders")
+@router.get("/orders", response_model=dict[str, dict[str, AdminOrderResponse]])
 def get_admin_orders():
-    """Tra cứu toàn bộ đơn hàng trong hệ thống phục vụ quản lý Escrow."""
+    """Tra cứu toàn bộ đơn hàng và ánh xạ kết quả theo schema Pydantic."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM orders ORDER BY order_key DESC;")
     orders_rows = cursor.fetchall()
-    orders_dict = {}
-
-    for o in orders_rows:
-        cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (o["order_key"],))
-        items_rows = cursor.fetchall()
-        items = [
-            {
-                "name": item["name"],
-                "variant": item["variant"],
-                "price": item["price"],
-                "qty": item["qty"],
-                "subtotal": item["subtotal"],
-            }
-            for item in items_rows
-        ]
-        orders_dict[o["order_key"]] = {
-            "id": o["id_display"],
-            "key": o["order_key"],
-            "escrowBadge": o["escrow_badge"],
-            "escrowClass": o["escrow_class"],
-            "time": o["time_info"],
-            "shopName": o["shop_name"],
-            "shopAddress": o["shop_address"],
-            "buyerName": o["buyer_name"],
-            "buyerPhone": o["buyer_phone"],
-            "buyerAddress": o["buyer_address"],
-            "total": o["total"],
-            "numericTotal": o["numeric_total"],
-            "fee": o["fee"],
-            "net": o["net"],
-            "status": o["status"],
-            "items": items,
-        }
-
+    orders_dict = {
+        row["order_key"]: build_admin_order(cursor, row).model_dump(by_alias=False)
+        for row in orders_rows
+    }
     conn.close()
     return {"orders": orders_dict}
 
 @router.put("/orders/{order_key}/freeze")
-def freeze_order_dispute(order_key: str, payload: FreezeOrderRequest):
-    """Admin khóa đơn tranh chấp / tạm đóng băng tiền Escrow."""
-    clean_key = order_key.replace("#", "")
+def freeze_order_dispute(order_key: str, payload: AdminOrderFreezeRequest):
+    """Admin khóa đơn tranh chấp và ghi lý do."""
+    clean_key = order_key.replace("#", "").strip()
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = row["status"]
     cursor.execute("""
         UPDATE orders
-        SET status = 'dispute',
-            escrow_badge = '⚠️ Đang xử lý khiếu nại',
+        SET status = 'dispute', escrow_badge = '⚠️ Đang xử lý khiếu nại',
             escrow_class = 'bg-danger-50 text-danger-500 border-danger-200'
         WHERE order_key = ?;
     """, (clean_key,))
+    record_admin_order_history(cursor, clean_key, old_status, "dispute", payload.reason)
     conn.commit()
     conn.close()
-    return {"message": f"Đã khóa bảo lưu đơn hàng #{clean_key} để xử lý tranh chấp!"}
+    return {"message": f"Đã khóa bảo lưu đơn hàng #{clean_key}", "old_status": old_status, "status": "dispute"}
 
 @router.put("/orders/{order_key}/release")
 def release_order_funds(order_key: str):
     """Admin phê duyệt giải ngân tiền vào ví Shop."""
-    clean_key = order_key.replace("#", "")
+    clean_key = order_key.replace("#", "").strip()
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = row["status"]
     cursor.execute("""
         UPDATE orders
-        SET status = 'released',
-            escrow_badge = '✓ Đã nhận được hàng',
+        SET status = 'released', escrow_badge = '✓ Đã giải ngân',
             escrow_class = 'bg-emerald-50 text-emerald-600 border-emerald-200'
         WHERE order_key = ?;
     """, (clean_key,))
+    record_admin_order_history(cursor, clean_key, old_status, "released", "Admin giải ngân tiền đơn hàng")
     conn.commit()
     conn.close()
-    return {"message": f"Đã giải ngân tiền đơn #{clean_key} thành công vào ví Chủ Shop!"}
+    return {"message": f"Đã giải ngân tiền đơn #{clean_key} thành công", "old_status": old_status, "status": "released"}
 
 @router.get("/customers")
 def get_all_customers():
@@ -337,3 +339,66 @@ def create_customer(payload: CustomerCreate):
     conn.commit()
     conn.close()
     return {"message": f"Đã thêm khách hàng #{cust_key} thành công!", "key": cust_key}
+
+@router.put("/orders/{order_key}/status")
+def update_admin_order_status(order_key: str, payload: AdminOrderStatusUpdate):
+    """Admin chuyển trạng thái đơn và ghi lịch sử."""
+    clean_key = order_key.replace("#", "").strip()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = row["status"]
+    badge_map = {
+        "preparing": ("📦 Shop đang chuẩn bị đơn", "bg-amber-50 text-amber-600"),
+        "shipping": ("🚚 Đang vận chuyển", "bg-blue-50 text-blue-600"),
+        "delivered": ("✓ Đã nhận được hàng", "bg-emerald-50 text-emerald-600 border-emerald-200"),
+        "released": ("✓ Đã giải ngân", "bg-emerald-50 text-emerald-600 border-emerald-200"),
+        "dispute": ("⚠️ Đang xử lý khiếu nại", "bg-danger-50 text-danger-500 border-danger-200"),
+        "cancelled": ("× Đơn hàng đã hủy", "bg-neutral-100 text-neutral-600 border-neutral-200"),
+    }
+    badge, badge_class = badge_map[payload.status]
+    cursor.execute("UPDATE orders SET status = ?, escrow_badge = ?, escrow_class = ? WHERE order_key = ?;", (payload.status, badge, badge_class, clean_key))
+    record_admin_order_history(cursor, clean_key, old_status, payload.status, payload.note)
+    conn.commit()
+    conn.close()
+    return {"message": f"Đã chuyển đơn #{clean_key} sang '{payload.status}'", "old_status": old_status, "status": payload.status}
+
+def build_admin_order(cursor, order_row):
+    """Chuyển một row orders thành dữ liệu chuẩn theo AdminOrderResponse."""
+    cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (order_row["order_key"],))
+    item_rows = cursor.fetchall()
+    items = [
+        {
+            "name": item["name"],
+            "variant": item["variant"],
+            "price": item["price"],
+            "qty": item["qty"],
+            "subtotal": item["subtotal"],
+        }
+        for item in item_rows
+    ]
+
+    return AdminOrderResponse(
+        id=order_row["id_display"],
+        key=order_row["order_key"],
+        escrowBadge=order_row["escrow_badge"],
+        escrowClass=order_row["escrow_class"],
+        time=order_row["time_info"],
+        shopName=order_row["shop_name"],
+        shopAddress=order_row["shop_address"],
+        buyerName=order_row["buyer_name"],
+        buyerPhone=order_row["buyer_phone"] or "",
+        buyerAddress=order_row["buyer_address"],
+        total=order_row["total"],
+        numericTotal=int(order_row["numeric_total"] or 0),
+        fee=order_row["fee"],
+        net=order_row["net"],
+        status=order_row["status"],
+        createdAt=order_row["created_at"] if "created_at" in order_row else "",
+        items=items,
+    )
