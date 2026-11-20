@@ -889,7 +889,25 @@
                 <span>📱 Thiết Bị Số & PC</span>
                 <span class="category-count">4</span>
               </div>
+              <div class="category-item" data-cat="shoes" onclick="selectCategory('shoes', this)">
+                <span>👟 Giày &amp; Sneakers</span>
+                <span class="category-count">0</span>
+              </div>
+              <div class="category-item" data-cat="beauty" onclick="selectCategory('beauty', this)">
+                <span>✨ Mỹ Phẩm &amp; Nước Hoa</span>
+                <span class="category-count">0</span>
+              </div>
             </div>
+          </div>
+
+          <!-- Nhóm 1B: Thương Hiệu (Tải từ /api/products/facets) -->
+          <div class="filter-group" id="brandFilterGroup">
+            <div class="filter-group-title">
+              <span>Thương Hiệu</span>
+            </div>
+            <select id="brandFilterSelect" class="sort-select" style="width: 100%; padding: 8px 10px;" onchange="handleBrandFilter(this.value)">
+              <option value="all">Tất cả thương hiệu</option>
+            </select>
           </div>
 
           <!-- Nhóm 2: Khoảng Giá -->
@@ -987,7 +1005,7 @@
               <button class="sort-tab" data-sort="newest" onclick="changeSort('newest', this)">Mới Nhất</button>
               <button class="sort-tab" data-sort="bestseller" onclick="changeSort('bestseller', this)">Bán Chạy</button>
               
-              <select class="sort-select" onchange="handlePriceSortSelect(this.value)">
+              <select id="priceSortSelect" class="sort-select" onchange="handlePriceSortSelect(this.value)">
                 <option value="default">Giá: Mặc định</option>
                 <option value="price-asc">Giá: Thấp đến Cao ↑</option>
                 <option value="price-desc">Giá: Cao đến Thấp ↓</option>
