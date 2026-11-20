@@ -14,28 +14,58 @@ class ProductCreate(BaseModel):
 
 
 class OrderItemCreate(BaseModel):
+    product_id: Optional[int] = None
     name: str
-    variant: str
+    variant: Optional[str] = "Tiêu chuẩn"
     price: str
     qty: str
-    subtotal: str
+    subtotal: Optional[str] = ""
+
+
+class CartItemInput(BaseModel):
+    product_id: Optional[int] = None
+    name: Optional[str] = None
+    variant: Optional[str] = "Tiêu chuẩn"
+    price: Optional[int] = None
+    qty: int = 1
+    subtotal: Optional[int] = None
 
 
 class OrderCreate(BaseModel):
+    user_id: Optional[int] = None
+    cart_id: Optional[int] = None
     buyer_name: str
     buyer_phone: str
     buyer_address: str
-    shop_name: str = "AB Technology Ltd (JML Mall - #SH-102)"
-    total: str
-    numeric_total: int = 0
-    fee: str
-    net: str
-    items: List[OrderItemCreate]
+    shop_name: Optional[str] = "AB Technology Ltd (JML Mall - #SH-102)"
+    total: Optional[str] = ""
+    numeric_total: Optional[int] = 0
+    fee: Optional[str] = ""
+    net: Optional[str] = ""
+    items: Optional[List[OrderItemCreate]] = None
     shipping_method: Optional[str] = "Tiêu Chuẩn (GHN Express)"
     shipping_fee: Optional[int] = 0
     discount_code: Optional[str] = ""
     discount_amount: Optional[int] = 0
     payment_method: Optional[str] = "cod"
+    clear_cart: Optional[bool] = True
+
+
+class CreateOrderFromCartRequest(BaseModel):
+    user_id: Optional[int] = None
+    cart_id: Optional[int] = None
+    buyer_name: str
+    buyer_phone: str
+    buyer_address: str
+    shop_name: Optional[str] = "AB Technology Ltd (JML Mall - #SH-102)"
+    shipping_method: Optional[str] = "Tiêu Chuẩn (GHN Express)"
+    shipping_fee: Optional[int] = 0
+    discount_code: Optional[str] = ""
+    discount_amount: Optional[int] = 0
+    payment_method: Optional[str] = "cod"
+    items: Optional[List[CartItemInput]] = None
+    note: Optional[str] = ""
+    clear_cart: Optional[bool] = True
 
 
 class FreezeOrderRequest(BaseModel):

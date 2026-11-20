@@ -63,6 +63,14 @@ tailwind.config = {
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
+    <!-- Auth & RBAC Protection Guard (TF16DCF) -->
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        // Chặn trang quản trị ngay lập tức nếu chưa đăng nhập hoặc không phải Admin
+        if (!Auth.requireAdmin({ loginUrl: '../auth/index.html', forbiddenRedirect: '../user/index.html' })) {
+            document.documentElement.style.display = 'none';
+        }
+    </script>
     <!-- Custom Script -->
     <script src="script.js" defer></script>
 </head>
@@ -178,7 +186,7 @@ tailwind.config = {
                 <span class="font-bold text-neutral-900 text-sm">Kênh Quản Trị Sàn JML Store</span>
             </div>
 
-            <!-- Header Actions: Chỉ giữ lại 2 nút theo yêu cầu -->
+            <!-- Header Actions -->
             <div class="flex items-center gap-3">
                 <!-- 1. View Storefront Link -->
                 <a href="../user/index.html" target="_blank" class="inline-flex items-center gap-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200 font-semibold px-3.5 py-2 rounded-lg text-xs transition-colors whitespace-nowrap" title="Mở giao diện khách hàng (User Storefront) trong tab mới">
@@ -190,6 +198,12 @@ tailwind.config = {
                 <button onclick="toggleModal('campaignModal')" class="inline-flex items-center gap-1.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold px-4 py-2 rounded-lg text-xs shadow-sm transition-colors whitespace-nowrap">
                     <i data-lucide="zap" class="w-4 h-4 shrink-0"></i>
                     <span>Tạo Chiến dịch Sàn</span>
+                </button>
+
+                <!-- 3. Nút Đăng Xuất Quản Trị Viên (TF16DCF) -->
+                <button type="button" onclick="handleAdminLogout()" class="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold px-3.5 py-2 rounded-lg text-xs shadow-sm transition-colors whitespace-nowrap" title="Đăng xuất khỏi hệ thống quản trị">
+                    <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
+                    <span>Đăng xuất</span>
                 </button>
             </div>
         </header>

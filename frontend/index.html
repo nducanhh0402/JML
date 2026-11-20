@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JML Store - Demo Giao Diện Sprint 1</title>
+    <link rel="icon" type="image/svg+xml" href="./admin/jml-store-icon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #ea580c;
+        --primary-hover: #c2410c;
+        --primary-soft: #fff7ed;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: #e2e8f0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at top right, #ffedd5 0%, var(--bg) 42%);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+
+      .header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 36px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: var(--text);
+      }
+
+      .brand-badge {
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        color: #fff;
+        font-weight: 800;
+        font-size: 18px;
+        padding: 8px 14px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(234, 88, 12, 0.25);
+      }
+
+      .brand-title {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .hero {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 28px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      }
+
+      .hero h1 {
+        font-size: clamp(24px, 4vw, 34px);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 10px;
+      }
+
+      .hero p {
+        color: var(--muted);
+        max-width: 720px;
+        margin-bottom: 20px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(234, 88, 12, 0.25);
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn-secondary {
+        background: #f1f5f9;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: #e2e8f0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+      }
+
+      .card-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 22px;
+        background: var(--primary-soft);
+        margin-bottom: 12px;
+      }
+
+      .card h2 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .card p {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .card-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        color: var(--primary);
+        background: var(--primary-soft);
+        border: 1px solid #fed7aa;
+      }
+
+      .card-link:hover {
+        background: #ffedd5;
+      }
+
+      .note {
+        margin-top: 28px;
+        padding: 16px 20px;
+        border-radius: 14px;
+        background: #f1f5f9;
+        border: 1px solid var(--border);
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .note strong {
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <a class="brand" href="./buyer/index.html">
+          <span class="brand-badge">JML</span>
+          <span class="brand-title">STORE MARKETPLACE</span>
+        </a>
+        <span class="pill">Sprint 1 • Vercel Live Demo (TF173CC)</span>
+      </header>
+
+      <section class="hero">
+        <h1>Demo Giao Diện JML Store — Multi-Vendor Marketplace</h1>
+        <p>
+          Cổng truy cập nhanh toàn bộ các phân hệ giao diện Sprint 1 được triển khai trên Vercel:
+          Trang chủ người mua, Danh sách &amp; bộ lọc sản phẩm, Kênh người bán, Quản trị sàn và
+          Đăng nhập/Đăng ký đa vai trò.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="./buyer/index.html">
+            Mở Trang Chủ Người Mua (Buyer) →
+          </a>
+          <a class="btn btn-secondary" href="./buyer/products.html">
+            Xem Danh Sách Sản Phẩm
+          </a>
+          <a class="btn btn-secondary" href="./auth/index.html">
+            Đăng Nhập / Đăng Ký
+          </a>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div>
+            <div class="card-icon">🛍️</div>
+            <h2>Phân Hệ Người Mua (Buyer)</h2>
+            <p>
+              Trang chủ Flash Sale, danh mục nổi bật, gợi ý sản phẩm, giỏ hàng, thanh toán và
+              trang tìm kiếm/lọc sản phẩm.
+            </p>
+          </div>
+          <div class="card-links">
+            <a class="card-link" href="./buyer/index.html">Trang chủ Buyer</a>
+            <a class="card-link" href="./buyer/products.html">Sản phẩm &amp; Bộ lọc</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div>
+            <div class="card-icon">✨</div>
+            <h2>Storefront Người Dùng (User)</h2>
+            <p>
+              Phiên bản giao diện storefront người dùng với modal chi tiết sản phẩm và bộ lọc danh
+              mục đầy đủ.
+            </p>
+          </div>
+          <div class="card-links">
+            <a class="card-link" href="./user/index.html">Trang chủ User</a>
+            <a class="card-link" href="./user/products.html">Sản phẩm User</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div>
+            <div class="card-icon">🏪</div>
+            <h2>Kênh Người Bán (Seller Center)</h2>
+            <p>
+              Quản lý hồ sơ cửa hàng, đăng bán &amp; tồn kho sản phẩm, xử lý đơn hàng và theo dõi
+              ví doanh thu.
+            </p>
+          </div>
+          <div class="card-links">
+            <a class="card-link" href="./seller/index.html">Mở Seller Center</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div>
+            <div class="card-icon">🛡️</div>
+            <h2>Quản Trị Sàn (Admin Portal)</h2>
+            <p>
+              Dashboard tài chính toàn sàn, kiểm duyệt sản phẩm, quản lý shop, khách hàng và đơn
+              hàng trung gian Escrow.
+            </p>
+          </div>
+          <div class="card-links">
+            <a class="card-link" href="./admin/index.html">Mở Admin Portal</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div>
+            <div class="card-icon">🔐</div>
+            <h2>Xác Thực Đa Vai Trò (Auth)</h2>
+            <p>
+              Giao diện đăng nhập và đăng ký tài khoản cho Người mua (Buyer), Người bán (Seller)
+              và Quản trị viên (Admin).
+            </p>
+          </div>
+          <div class="card-links">
+            <a class="card-link" href="./auth/index.html">Mở Trang Auth</a>
+          </div>
+        </article>
+      </section>
+
+      <aside class="note">
+        <strong>Lưu ý chế độ Demo Static trên Vercel:</strong> Các trang Storefront (Buyer / User)
+        đã tích hợp sẵn dữ liệu mẫu (mock data) để hiển thị đầy đủ khi chưa kết nối FastAPI Backend
+        (<code>http://127.0.0.1:8000</code>).
+      </aside>
+    </main>
+  </body>
+</html>

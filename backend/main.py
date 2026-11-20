@@ -5,7 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 
 from backend.database import init_db
-from backend.src.middlewares.auth_middleware import SecurityHeadersMiddleware
+from backend.src.middlewares.auth_middleware import (
+    SecurityHeadersMiddleware,
+    RoleAuthMiddleware,
+)
 
 # Import modular routers
 from backend.src.modules.auth.router import router as auth_router
@@ -19,6 +22,7 @@ from backend.src.modules.cart.router import router as cart_router
 from backend.src.modules.payment.router import router as payment_router
 from backend.src.modules.review.router import router as review_router
 from backend.src.modules.admin.router import router as admin_router
+from backend.src.modules.homepage.router import router as homepage_router
 
 app = FastAPI(
     title="JML Store Multi-Vendor Marketplace API",
@@ -26,7 +30,8 @@ app = FastAPI(
     version="2.0.0",
 )
 
-# Cấu hình Middleware bảo mật và CORS cho phép Frontend truy cập
+# Cấu hình Middleware bảo mật, phân quyền RBAC và CORS
+app.add_middleware(RoleAuthMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +58,7 @@ app.include_router(cart_router)
 app.include_router(payment_router)
 app.include_router(review_router)
 app.include_router(admin_router)
+app.include_router(homepage_router)
 
 @app.get("/", include_in_schema=False)
 def root():
