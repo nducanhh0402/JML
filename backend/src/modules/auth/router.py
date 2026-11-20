@@ -1,4 +1,5 @@
 import random
+import bcrypt
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
@@ -7,19 +8,63 @@ from backend.src.middlewares.auth_middleware import create_access_token, get_cur
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
+
+# ==============================================================================
+# HÀM TIỆN ÍCH: HASH & KIỂM TRA MẬT KHẨU (BCRYPT)
+# ==============================================================================
+def hash_password(plain_password: str) -> str:
+    """Băm mật khẩu bằng bcrypt với salt tự động."""
+    pwd_bytes = plain_password.encode("utf-8")
+    hashed = bcrypt.hashpw(pwd_bytes, bcrypt.gensalt())
+    return hashed.decode("utf-8")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """So sánh mật khẩu người dùng nhập với mật khẩu đã băm trong DB."""
+    pwd_bytes = plain_password.encode("utf-8")
+    hashed_bytes = hashed_password.encode("utf-8")
+    return bcrypt.checkpw(pwd_bytes, hashed_bytes)
+
+
+# ==============================================================================
+# API ĐĂNG NHẬP (LOGIN) — Cấp JWT, trả 401 khi sai thông tin
+# ==============================================================================
 @router.post("/login")
 def auth_login(payload: LoginRequest):
-    """Đăng nhập đa vai trò: Khách hàng (Buyer), Chủ Shop (Seller), Quản trị viên (Admin)."""
+    """Đăng nhập đa vai trò: Khách hàng (Buyer), Chủ Shop (Seller), Quản trị viên (Admin).
+    Xác thực bằng mật khẩu đã băm (bcrypt), cấp JWT Access Token.
+    Trả lỗi 401 khi sai tài khoản hoặc mật khẩu.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # Tìm user theo username hoặc phone (KHÔNG so sánh password ở SQL)
     cursor.execute("""
         SELECT * FROM users 
-        WHERE (username = ? OR phone = ?) AND password = ?;
-    """, (payload.username.strip(), payload.username.strip(), payload.password.strip()))
+        WHERE username = ? OR phone = ?;
+    """, (payload.username.strip(), payload.username.strip()))
     user_row = cursor.fetchone()
 
     if not user_row:
+        conn.close()
+        raise HTTPException(
+            status_code=401,
+            detail="Tài khoản, số điện thoại hoặc mật khẩu không chính xác!"
+        )
+
+    # Kiểm tra mật khẩu đã băm bằng bcrypt
+    stored_password = user_row["password"]
+    password_valid = False
+
+    # Hỗ trợ cả mật khẩu đã băm (bcrypt) và mật khẩu cũ (plain text)
+    if stored_password.startswith("$2b$") or stored_password.startswith("$2a$"):
+        # Mật khẩu đã được băm bằng bcrypt
+        password_valid = verify_password(payload.password.strip(), stored_password)
+    else:
+        # Mật khẩu cũ dạng plain text (tương thích ngược)
+        password_valid = (payload.password.strip() == stored_password)
+
+    if not password_valid:
         conn.close()
         raise HTTPException(
             status_code=401,
@@ -65,16 +110,47 @@ def auth_login(payload: LoginRequest):
         }
     }
 
+
+# ==============================================================================
+# API ĐĂNG KÝ (REGISTER) — Kiểm tra trùng email, hash mật khẩu
+# ==============================================================================
 @router.post("/register")
 def auth_register(payload: RegisterRequest):
-    """Đăng ký tài khoản người mua hoặc người bán mới."""
+    """Đăng ký tài khoản người mua hoặc người bán mới.
+    - Kiểm tra trùng email, username, phone trước khi tạo tài khoản.
+    - Mật khẩu được băm bằng bcrypt trước khi lưu vào database.
+    - Tự động cấp JWT Access Token sau khi đăng ký thành công.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id FROM users WHERE username = ? OR phone = ?;", (payload.username.strip(), payload.phone.strip()))
+    # Kiểm tra trùng username hoặc phone
+    cursor.execute(
+        "SELECT id FROM users WHERE username = ? OR phone = ?;",
+        (payload.username.strip(), payload.phone.strip())
+    )
     if cursor.fetchone():
         conn.close()
-        raise HTTPException(status_code=400, detail="Tên đăng nhập hoặc số điện thoại đã tồn tại trên hệ thống!")
+        raise HTTPException(
+            status_code=400,
+            detail="Tên đăng nhập hoặc số điện thoại đã tồn tại trên hệ thống!"
+        )
+
+    # Kiểm tra trùng email (nếu email được cung cấp)
+    if payload.email and payload.email.strip():
+        cursor.execute(
+            "SELECT id FROM users WHERE email = ? AND email != '';",
+            (payload.email.strip(),)
+        )
+        if cursor.fetchone():
+            conn.close()
+            raise HTTPException(
+                status_code=400,
+                detail="Email đã được sử dụng bởi tài khoản khác!"
+            )
+
+    # Băm mật khẩu trước khi lưu vào database
+    hashed_pwd = hash_password(payload.password.strip())
 
     now_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     date_only = datetime.now().strftime("%d/%m/%Y")
@@ -83,7 +159,16 @@ def auth_register(payload: RegisterRequest):
     cursor.execute("""
         INSERT INTO users (username, password, role, full_name, phone, email, address, cust_key, created_at)
         VALUES (?, ?, ?, ?, ?, ?, '', ?, ?);
-    """, (payload.username.strip(), payload.password.strip(), payload.role, payload.full_name.strip(), payload.phone.strip(), payload.email.strip(), cust_key, now_str))
+    """, (
+        payload.username.strip(),
+        hashed_pwd,
+        payload.role,
+        payload.full_name.strip(),
+        payload.phone.strip(),
+        payload.email.strip(),
+        cust_key,
+        now_str,
+    ))
     new_user_id = cursor.lastrowid
 
     cursor.execute("""
@@ -111,6 +196,10 @@ def auth_register(payload: RegisterRequest):
         "token_type": "bearer",
     }
 
+
+# ==============================================================================
+# API LẤY THÔNG TIN TÀI KHOẢN HIỆN TẠI (PROFILE)
+# ==============================================================================
 @router.get("/me")
 def get_current_user_profile(current_user: dict = Depends(get_current_user)):
     """Lấy thông tin tài khoản hiện tại từ JWT Token xác thực."""
