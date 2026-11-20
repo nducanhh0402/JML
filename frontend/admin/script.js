@@ -654,6 +654,8 @@ function openOrderDetail(orderKey) {
     const order = ORDERS_DATABASE[cleanKey] || Object.values(ORDERS_DATABASE)[0];
     if (!order) return;
 
+    currentModalOrderKey = cleanKey;
+
     document.getElementById('modalOrderId').textContent = `Chi Tiết Đơn Hàng ${order.id}`;
     const badgeEl = document.getElementById('modalOrderEscrowBadge');
     badgeEl.textContent = order.escrowBadge;
@@ -680,7 +682,98 @@ function openOrderDetail(orderKey) {
         </tr>
     `).join('');
 
+    currentModalOrderKey = orderKey;
+    loadOrderStatusHistory(cleanKey);
+
     toggleModal('orderDetailModal');
+}
+
+let currentModalOrderKey = null;
+
+async function changeOrderStatusFromModal() {
+    if (!currentModalOrderKey) return;
+
+    const statusSelect = document.getElementById('modalOrderStatusSelect');
+    const noteInput = document.getElementById('modalOrderStatusNote');
+    const status = statusSelect?.value;
+    const note = noteInput?.value.trim() || '';
+    if (!status) return;
+
+    const cleanKey = currentModalOrderKey.replace('#', '').replace(/^#/, '');
+    const response = await fetch(`${API_BASE_URL}/api/admin/orders/${cleanKey}/status`, {
+        method: 'PUT',
+        headers: getAdminAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ status, note })
+    }).catch(() => null);
+
+    if (!response || !response.ok) {
+        alert('Không thể cập nhật trạng thái đơn hàng. Vui lòng kiểm tra quyền Admin hoặc kết nối API.');
+        return;
+    }
+
+    const customOrders = JSON.parse(localStorage.getItem('JML_ORDERS') || '[]');
+    const target = customOrders.find(o => (o.key || o.id?.replace('#', '') || '') === cleanKey);
+    if (target) {
+        target.status = status;
+        localStorage.setItem('JML_ORDERS', JSON.stringify(customOrders));
+    }
+
+    await syncWithFastAPI();
+    await loadOrderStatusHistory(cleanKey);
+    alert(`Đã chuyển đơn ${currentModalOrderKey} sang trạng thái ${status}`);
+}
+
+async function loadOrderStatusHistory(orderKey) {
+    const container = document.getElementById('modalOrderStatusHistory');
+    if (!container) return;
+
+    const cleanKey = orderKey.replace('#', '');
+    const response = await fetch(`${API_BASE_URL}/api/admin/orders/${cleanKey}/history`, {
+        headers: getAdminAuthHeaders()
+    }).catch(() => null);
+
+    if (!response || !response.ok) {
+        container.innerHTML = '<div>Không tải được lịch sử trạng thái.</div>';
+        return;
+    }
+
+    const data = await response.json();
+    const history = data.history || [];
+    container.innerHTML = history.length ? history.map(item => `
+        <div class="p-2 rounded-lg bg-neutral-50 border border-neutral-100">
+            <div class="font-semibold text-neutral-700">${item.old_status || 'Mới tạo'} → ${item.new_status}</div>
+            ${item.note ? `<div>${item.note}</div>` : ''}
+            <div class="text-[10px]">${item.created_at}</div>
+        </div>
+    `).join('') : '<div>Chưa có lịch sử thay đổi.</div>';
+}
+
+/**
+ * Cập nhật trạng thái đơn hàng ngay trong modal chi tiết đơn hàng
+ */
+async function updateOrderStatusInModal(orderKey) {
+    const cleanKey = orderKey.replace('#', '');
+    const order = ORDERS_DATABASE[cleanKey];
+    if (!order) return;
+
+    currentModalOrderKey = orderKey;
+
+    const statusSelect = document.getElementById('modalOrderStatusSelect');
+    const noteInput = document.getElementById('modalOrderStatusNote');
+
+    if (statusSelect) {
+        statusSelect.value = order.status || '';
+    }
+    if (noteInput) {
+        noteInput.value = order.note || '';
+    }
+
+    const historyContainer = document.getElementById('modalOrderStatusHistory');
+    if (historyContainer) {
+        historyContainer.innerHTML = '<div class="py-2 text-center text-neutral-400 text-xs">Đang tải lịch sử trạng thái...</div>';
+    }
+
+    await loadOrderStatusHistory(cleanKey);
 }
 
 /**
@@ -1528,7 +1621,7 @@ async function deleteCustomerDirect(arg1, arg2, arg3) {
     if (btn) {
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
-        btn.innerHTML = `<span class="inline-flex items-center gap-1.5"><svg class="animate-spin h-3 w-3 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Đang xóa...</span>`;
+        btn.innerHTML = `<span class="inline-flex items-center gap-1.5"><svg class="animate-spin h-3 w-3 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="00 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Đang xóa...</span>`;
     }
 
     if (statusCell) {
