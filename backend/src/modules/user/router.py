@@ -100,7 +100,7 @@ def update_my_profile(payload: ProfileUpdateRequest, current_user: dict = Depend
         cursor.execute("""
             UPDATE users SET full_name = ?, phone = ?, email = ?, address = ?
             WHERE id = ?;
-        """, (full_name, phone, email, address, row["id"]))
+        """, (full_name, phone, email or None, address, row["id"]))  # email rong = NULL (UNIQUE uq_users_email)
 
         # Đồng bộ bảng customers (liên kết theo số điện thoại)
         cursor.execute("""
