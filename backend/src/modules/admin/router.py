@@ -1,7 +1,8 @@
 import json
 import random
+from datetime import date as date_type
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from backend.src.config.database import get_db_connection
 from backend.schemas import ProductCreate, CustomerCreate, FreezeOrderRequest, OrderStatusUpdate
 from backend.src.middlewares.auth_middleware import require_admin
@@ -188,48 +189,76 @@ def create_or_approve_product(payload: ProductCreate):
     return {"message": f"Đã thêm sản phẩm '{payload.title}' vào sàn thành công!", "id": new_id}
 
 @router.get("/orders")
-def get_admin_orders():
-    """Tra cứu toàn bộ đơn hàng trong hệ thống phục vụ quản lý Escrow."""
+def get_admin_orders(
+    status: str | None = Query(default=None),
+    date_from: date_type | None = Query(default=None),
+    date_to: date_type | None = Query(default=None),
+    search: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+):
+    """Danh sách đơn admin có lọc trạng thái, khoảng ngày, tìm mã đơn và phân trang."""
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(status_code=400, detail="date_from không được lớn hơn date_to")
+
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM orders ORDER BY order_key DESC;")
+    where = []
+    params = []
+
+    if status:
+        status = status.strip()
+        if status:
+            where.append("status = ?")
+            params.append(status)
+
+    if date_from:
+        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
+        params.append(date_from.isoformat())
+
+    if date_to:
+        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
+        params.append(date_to.isoformat())
+
+    clean_search = search.strip().replace("#", "")
+    if clean_search:
+        where.append("(LOWER(order_key) LIKE LOWER(?) OR LOWER(id_display) LIKE LOWER(?))")
+        keyword = f"%{clean_search}%"
+        params.extend([keyword, keyword])
+
+    where_sql = f" WHERE {' AND '.join(where)}" if where else ""
+    cursor.execute(f"SELECT COUNT(*) AS total FROM orders{where_sql};", tuple(params))
+    total_row = cursor.fetchone()
+    total = int(total_row["total"] if total_row else 0)
+
+    offset = (page - 1) * limit
+    cursor.execute(
+        f"SELECT * FROM orders{where_sql} ORDER BY STR_TO_DATE(created_at, '%d/%m/%Y') DESC, order_key DESC LIMIT ? OFFSET ?;",
+        tuple(params + [limit, offset]),
+    )
     orders_rows = cursor.fetchall()
     orders_dict = {}
 
     for o in orders_rows:
         cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (o["order_key"],))
         items_rows = cursor.fetchall()
-        items = [
-            {
-                "name": item["name"],
-                "variant": item["variant"],
-                "price": item["price"],
-                "qty": item["qty"],
-                "subtotal": item["subtotal"],
-            }
-            for item in items_rows
-        ]
+        items = [{"name": item["name"], "variant": item["variant"], "price": item["price"], "qty": item["qty"], "subtotal": item["subtotal"]} for item in items_rows]
         orders_dict[o["order_key"]] = {
-            "id": o["id_display"],
-            "key": o["order_key"],
-            "escrowBadge": o["escrow_badge"],
-            "escrowClass": o["escrow_class"],
-            "time": o["time_info"],
-            "shopName": o["shop_name"],
-            "shopAddress": o["shop_address"],
-            "buyerName": o["buyer_name"],
-            "buyerPhone": o["buyer_phone"],
-            "buyerAddress": o["buyer_address"],
-            "total": o["total"],
-            "numericTotal": o["numeric_total"],
-            "fee": o["fee"],
-            "net": o["net"],
-            "status": o["status"],
-            "items": items,
+            "id": o["id_display"], "key": o["order_key"],
+            "escrowBadge": o["escrow_badge"], "escrowClass": o["escrow_class"],
+            "time": o["time_info"], "shopName": o["shop_name"], "shopAddress": o["shop_address"],
+            "buyerName": o["buyer_name"], "buyerPhone": o["buyer_phone"], "buyerAddress": o["buyer_address"],
+            "total": o["total"], "numericTotal": o["numeric_total"], "fee": o["fee"], "net": o["net"],
+            "status": o["status"], "createdAt": o["created_at"], "items": items,
         }
 
     conn.close()
-    return {"orders": orders_dict}
+    total_pages = (total + limit - 1) // limit if total else 0
+    return {
+        "orders": orders_dict,
+        "pagination": {"page": page, "limit": limit, "total": total, "total_pages": total_pages},
+        "filters": {"status": status, "date_from": date_from.isoformat() if date_from else None, "date_to": date_to.isoformat() if date_to else None, "search": search.strip()},
+    }
 
 @router.put("/orders/{order_key}/freeze")
 def freeze_order_dispute(order_key: str, payload: FreezeOrderRequest, current_user: dict = Depends(require_admin)):
@@ -335,7 +364,7 @@ def ban_customer(cust_key: str):
     cursor.execute("""
         UPDATE customers
         SET status = 'Bị khóa',
-            status_badge = 'bg-danger-50 text-danger-500 border-danger-200',
+            status_badge = 'bg-danger-50 text-danger-500',
             is_banned = 1
         WHERE cust_key = ?;
     """, (clean_key,))
