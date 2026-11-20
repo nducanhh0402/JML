@@ -587,6 +587,10 @@
         window.location.href = `index.html?productId=${id}`;
       }
 
+      function goToCart() {
+        window.location.href = 'index.html#cart';
+      }
+
       function addToCart(event, id) {
         event.stopPropagation();
         const p = allProducts.find(item => item.id === id);

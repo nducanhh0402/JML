@@ -361,6 +361,36 @@ let HOMEPAGE_CATEGORIES = [];
 let HOMEPAGE_BANNERS = [];
 let activeRecommendCategory = "all";
 
+const DEFAULT_HOMEPAGE_BANNERS = [
+  {
+    title: "Âm Thanh Đỉnh Cao - Giảm 25%",
+    description: "Bộ sưu tập tai nghe & loa Hi-End chính hãng",
+    imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Đồng Hồ Cơ Thụy Sĩ Sang Trọng",
+    description: "Khẳng định phong thái & đẳng cấp vượt thời gian",
+    imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Thời Trang & Đồ Da Quý Ông",
+    description: "Bộ sưu tập mới",
+    imageUrl: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    title: "Thiết Bị Số & PC",
+    description: "Hiệu năng mạnh mẽ",
+    imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=600&q=80",
+  },
+];
+
+const DEFAULT_HOMEPAGE_CATEGORIES = [
+  { id: "audio", name: "Thiết Bị Âm Thanh", icon: "🎧" },
+  { id: "watch", name: "Đồng Hồ Cao Cấp", icon: "⌚" },
+  { id: "fashion", name: "Thời Trang & Đồ Da", icon: "👔" },
+  { id: "tech", name: "Thiết Bị Số & PC", icon: "📱" },
+];
+
 function escapeHomepageHtml(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
@@ -789,23 +819,21 @@ async function loadProductsFromFastAPI() {
     }
   } catch (err) {
     // Chạy ở chế độ Local nếu chưa bật server FastAPI
+    console.warn("Chế độ Local/Offline do chưa kết nối API:", err.message);
     FLASH_PRODUCTS =
       JSON.parse(localStorage.getItem("JML_FLASH_PRODUCTS") || "null") ||
       DEFAULT_FLASH_PRODUCTS;
     RECOMMEND_PRODUCTS =
       JSON.parse(localStorage.getItem("JML_RECOMMEND_PRODUCTS") || "null") ||
       DEFAULT_RECOMMEND_PRODUCTS;
-    if (err.status === 404) {
-      await Promise.all([
-        retryHomepageSection("banners"),
-        retryHomepageSection("categories"),
-        loadProductsFallbackFromAPI(),
-      ]);
-    } else {
-      ["banners", "categories", "flash", "recommend", "latest"].forEach((s) =>
-        renderSectionErrorState(s, err.message),
-      );
-    }
+    LATEST_PRODUCTS = [...RECOMMEND_PRODUCTS, ...FLASH_PRODUCTS].sort(
+      (a, b) => (b.id || 0) - (a.id || 0),
+    );
+    renderHomepageBanners(DEFAULT_HOMEPAGE_BANNERS);
+    renderHomepageCategories(DEFAULT_HOMEPAGE_CATEGORIES);
+    renderFlashSaleProducts();
+    renderRecommendProducts(activeRecommendCategory);
+    renderLatestProducts(LATEST_PRODUCTS);
   }
 }
 
@@ -1623,6 +1651,8 @@ function openProductDetail(productId) {
         `;
 
   // Chuyển SPA view
+  const cartContainer = document.getElementById("view-cart");
+  if (cartContainer) cartContainer.classList.remove("active");
   homeContainer.classList.remove("active");
   detailContainer.classList.add("active");
   window.location.hash = "product/" + product.id;
@@ -1635,12 +1665,12 @@ function openProductDetail(productId) {
 function showHomeView() {
   const detailContainer = document.getElementById("view-product-detail");
   const homeContainer = document.getElementById("view-home");
-  if (detailContainer && homeContainer) {
-    detailContainer.classList.remove("active");
-    homeContainer.classList.add("active");
-    window.location.hash = "";
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  const cartContainer = document.getElementById("view-cart");
+  if (detailContainer) detailContainer.classList.remove("active");
+  if (cartContainer) cartContainer.classList.remove("active");
+  if (homeContainer) homeContainer.classList.add("active");
+  window.location.hash = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function switchDetailImage(index, imgSrc, angleName) {
@@ -1734,6 +1764,8 @@ function checkUrlHash() {
   if (hash.startsWith("#product/")) {
     const id = hash.replace("#product/", "");
     if (id) openProductDetail(id);
+  } else if (hash === "#cart") {
+    showCartView();
   } else {
     showHomeView();
   }
@@ -2938,6 +2970,335 @@ renderRecommendProducts("all");
 loadProductsFromFastAPI();
 
 // Kiểm tra URL hash khi mở trang lần đầu
-if (window.location.hash.startsWith("#product/")) {
+if (window.location.hash.startsWith("#product/") || window.location.hash === "#cart") {
   checkUrlHash();
+}
+
+
+/* ============================================================
+   CART VIEW (SPA) - Trang giỏ hàng nhúng trong index.html
+   - showCartView(): chuyển sang view giỏ hàng
+   - Tăng/giảm số lượng (tối thiểu 1), cập nhật tức thì
+   - Xóa từng item (confirm), xóa tất cả (confirm)
+   - Tổng tiền cập nhật real-time
+   - Kết nối API backend + localStorage fallback
+============================================================ */
+
+// ─── Thêm vào cuối file buyer-index.js ───
+
+const API_BASE = 'http://127.0.0.1:8000';
+let cvApiOnline = false;
+let cvPendingAction = null; // { type: 'remove'|'clear', idx? }
+
+// Inject HTML confirm overlay một lần
+function injectCartConfirmOverlay() {
+  if (document.getElementById('cvConfirmOverlay')) return;
+  const el = document.createElement('div');
+  el.id = 'cvConfirmOverlay';
+  el.className = 'cv-confirm-overlay';
+  el.innerHTML = `
+    <div class="cv-confirm-box">
+      <div class="cv-confirm-icon" id="cvConfirmIcon">🗑️</div>
+      <div class="cv-confirm-title" id="cvConfirmTitle">Xác nhận</div>
+      <div class="cv-confirm-desc" id="cvConfirmDesc"></div>
+      <div class="cv-confirm-actions">
+        <button class="cv-btn-cancel" onclick="cvCloseConfirm()">Hủy</button>
+        <button class="cv-btn-confirm" id="cvConfirmOkBtn">Xác nhận</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  el.addEventListener('click', (e) => { if (e.target === el) cvCloseConfirm(); });
+}
+
+function cvShowConfirm(icon, title, desc, onOk) {
+  injectCartConfirmOverlay();
+  document.getElementById('cvConfirmIcon').textContent = icon;
+  document.getElementById('cvConfirmTitle').textContent = title;
+  document.getElementById('cvConfirmDesc').innerHTML = desc;
+  document.getElementById('cvConfirmOkBtn').onclick = () => { cvCloseConfirm(); onOk(); };
+  document.getElementById('cvConfirmOverlay').classList.add('show');
+}
+function cvCloseConfirm() {
+  const el = document.getElementById('cvConfirmOverlay');
+  if (el) el.classList.remove('show');
+}
+
+// ─── Chuyển sang view giỏ hàng ───
+async function showCartView() {
+  const homeView   = document.getElementById('view-home');
+  const detailView = document.getElementById('view-product-detail');
+  const cartView   = document.getElementById('view-cart');
+  if (!cartView) return;
+
+  if (homeView)   homeView.classList.remove('active');
+  if (detailView) detailView.classList.remove('active');
+  cartView.classList.add('active');
+  window.location.hash = 'cart';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Đóng dropdown giỏ hàng nếu đang mở
+  closeAllDropdowns();
+
+  // Kiểm tra API
+  try {
+    const r = await fetch(`${API_BASE}/`, { signal: AbortSignal.timeout(1500) });
+    cvApiOnline = r.ok;
+  } catch { cvApiOnline = false; }
+
+  cvLoadAndRender();
+}
+
+// ─── Tải dữ liệu giỏ từ API hoặc localStorage ───
+async function cvLoadAndRender() {
+  cvSetLoading(true);
+  const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+
+  if (cvApiOnline && user && user.id) {
+    try {
+      const r = await fetch(`${API_BASE}/api/cart/${user.id}`);
+      if (r.ok) {
+        const data = await r.json();
+        if (data.items && data.items.length > 0) {
+          cartItems = data.items.map(it => ({
+            cartItemId: it.cart_item_id,
+            id: it.product_id,
+            title: it.title,
+            price: it.cart_price || it.product_price,
+            originalPrice: it.product_price,
+            image: cvParseImg(it.images_json),
+            shopName: it.shop_name || 'JML Store',
+            qty: it.quantity
+          }));
+          localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+        }
+      }
+    } catch (e) { console.log('Cart API load failed:', e); }
+  } else {
+    // Đọc từ localStorage — đảm bảo đồng bộ cartItems
+    cartItems = readStoredCart();
+  }
+
+  cvSetLoading(false);
+  cvRender();
+}
+
+function cvParseImg(raw) {
+  const fb = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=60';
+  if (!raw) return fb;
+  try {
+    const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(arr) ? (arr[0] || fb) : fb;
+  } catch { return typeof raw === 'string' ? raw : fb; }
+}
+
+function cvSetLoading(show) {
+  const lo = document.getElementById('cartViewLoading');
+  const li = document.getElementById('cartViewList');
+  const em = document.getElementById('cartViewEmpty');
+  if (lo) lo.style.display = show ? 'flex' : 'none';
+  if (li) li.style.display = 'none';
+  if (em) em.style.display = 'none';
+}
+
+// ─── Render toàn bộ giỏ hàng ───
+function cvRender() {
+  const list   = document.getElementById('cartViewList');
+  const empty  = document.getElementById('cartViewEmpty');
+  const clrBtn = document.getElementById('cartClearAllBtn');
+  const ckBtn  = document.getElementById('cvCheckoutBtn');
+  const pill   = document.getElementById('cartViewCountPill');
+
+  if (!list) return;
+
+  const totalQty = cartItems.reduce((s, it) => s + (it.qty || 1), 0);
+  if (pill) pill.textContent = cartItems.length;
+
+  if (cartItems.length === 0) {
+    list.style.display   = 'none';
+    empty.style.display  = 'block';
+    if (clrBtn) clrBtn.style.display = 'none';
+    if (ckBtn)  ckBtn.disabled = true;
+    cvUpdateSummary();
+    updateCartDisplay(); // sync badge header
+    return;
+  }
+
+  empty.style.display = 'none';
+  list.style.display  = 'block';
+  if (clrBtn) clrBtn.style.display = 'flex';
+  if (ckBtn)  ckBtn.disabled = false;
+
+  list.innerHTML = cartItems.map((item, idx) => `
+    <div class="cv-cart-item" id="cv-item-${idx}">
+      <img class="cv-item-img"
+        src="${item.image || ''}"
+        alt="${escHtml(item.title)}"
+        onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=60'"
+      />
+      <div class="cv-item-info">
+        <div class="cv-item-shop">🏪 ${escHtml(item.shopName || 'JML Store')}</div>
+        <div class="cv-item-title" title="${escHtml(item.title)}">${escHtml(item.title)}</div>
+        <div class="cv-item-price">${formatCurrency(item.price)}</div>
+        ${item.originalPrice && item.originalPrice > item.price
+          ? `<div class="cv-item-orig">${formatCurrency(item.originalPrice)}</div>`
+          : ''}
+      </div>
+      <div class="cv-item-actions">
+        <div class="cv-qty-ctrl">
+          <button class="cv-qty-btn" onclick="cvChangeQty(${idx}, -1)"
+            ${(item.qty || 1) <= 1 ? 'disabled' : ''} title="Giảm">−</button>
+          <input type="number" class="cv-qty-num" value="${item.qty || 1}"
+            min="1" onchange="cvSetQtyDirect(${idx}, this.value)" />
+          <button class="cv-qty-btn" onclick="cvChangeQty(${idx}, 1)" title="Tăng">+</button>
+        </div>
+        <div class="cv-item-subtotal">${formatCurrency(item.price * (item.qty || 1))}</div>
+        <button class="cv-remove-btn" onclick="cvConfirmRemove(${idx})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6l-1 14H6L5 6"></path>
+            <path d="M10 11v6M14 11v6"></path>
+          </svg>Xóa
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  cvUpdateSummary();
+  updateCartDisplay(); // sync badge + dropdown header
+}
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Tổng tiền tức thì ───
+function cvUpdateSummary() {
+  const totalQty  = cartItems.reduce((s, it) => s + (it.qty || 1), 0);
+  const subtotal  = cartItems.reduce((s, it) => s + it.price * (it.qty || 1), 0);
+  const origTotal = cartItems.reduce((s, it) => s + (it.originalPrice || it.price) * (it.qty || 1), 0);
+  const savings   = Math.max(0, origTotal - subtotal);
+
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setTxt('cvSummaryCount',   totalQty);
+  setTxt('cvSummarySubtotal', formatCurrency(subtotal));
+  setTxt('cvSummaryTotal',    formatCurrency(subtotal));
+
+  const svRow = document.getElementById('cvSavingsRow');
+  if (svRow) svRow.style.display = savings > 0 ? 'flex' : 'none';
+  setTxt('cvSavingsAmt', formatCurrency(savings));
+}
+
+// ─── Tăng / Giảm số lượng ───
+async function cvChangeQty(idx, delta) {
+  if (idx < 0 || idx >= cartItems.length) return;
+  const item = cartItems[idx];
+  const newQty = Math.max(1, (item.qty || 1) + delta);
+  cartItems[idx].qty = newQty;
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  cvRender();
+
+  // Gọi API nếu online (xóa + add lại với qty mới)
+  const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+  if (cvApiOnline && user && user.id && item.cartItemId) {
+    try {
+      await fetch(`${API_BASE}/api/cart/items/${item.cartItemId}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/cart/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, product_id: item.id, quantity: newQty })
+      });
+    } catch(e) { console.log('API qty update failed:', e); }
+  }
+}
+
+function cvSetQtyDirect(idx, raw) {
+  const val = parseInt(raw);
+  cartItems[idx].qty = isNaN(val) || val < 1 ? 1 : val;
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  cvRender();
+}
+
+// ─── Xóa item ───
+function cvConfirmRemove(idx) {
+  const item = cartItems[idx];
+  cvShowConfirm('🗑️', 'Xóa sản phẩm?',
+    `Bạn có chắc muốn xóa <strong>"${escHtml(item.title.substring(0, 45))}..."</strong> khỏi giỏ hàng?`,
+    () => cvDoRemove(idx)
+  );
+}
+
+async function cvDoRemove(idx) {
+  const item = cartItems[idx];
+  if (cvApiOnline && item.cartItemId) {
+    try {
+      await fetch(`${API_BASE}/api/cart/items/${item.cartItemId}`, { method: 'DELETE' });
+    } catch(e) {}
+  }
+  cartItems.splice(idx, 1);
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  cvRender();
+  showToast('Đã xóa', `"${item.title.substring(0, 30)}..." đã được xóa khỏi giỏ`);
+}
+
+// ─── Xóa tất cả ───
+function cartViewClearAll() {
+  if (cartItems.length === 0) return;
+  cvShowConfirm('🗑️', 'Xóa toàn bộ giỏ hàng?',
+    `Bạn có chắc muốn xóa tất cả <strong>${cartItems.length} sản phẩm</strong> khỏi giỏ không?`,
+    cvDoClearAll
+  );
+}
+
+async function cvDoClearAll() {
+  const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+  if (cvApiOnline && user && user.id) {
+    try {
+      const r = await fetch(`${API_BASE}/api/cart/${user.id}`);
+      if (r.ok) {
+        const data = await r.json();
+        if (data.cart && data.cart.id) {
+          await fetch(`${API_BASE}/api/cart/${data.cart.id}/clear`, { method: 'DELETE' });
+        }
+      }
+    } catch(e) {}
+  }
+  cartItems = [];
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  cvRender();
+  showToast('Giỏ hàng', 'Đã xóa toàn bộ sản phẩm khỏi giỏ hàng');
+}
+
+// ─── Checkout ───
+async function cartViewCheckout() {
+  if (cartItems.length === 0) return;
+  const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+  if (!user) {
+    showToast('⚠️ Chưa đăng nhập', 'Vui lòng đăng nhập để tiến hành thanh toán!');
+    setTimeout(() => openCustomerAuthModal('login'), 1500);
+    return;
+  }
+
+  if (cvApiOnline) {
+    try {
+      const r = await fetch(`${API_BASE}/api/cart/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartItems.map(it => ({ product_id: it.id, qty: it.qty })) })
+      });
+      if (r.ok) {
+        const v = await r.json();
+        if (!v.valid) {
+          showToast('⚠️ Lỗi giỏ hàng', v.errors.join(' | '));
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+
+  // Mở modal checkout hiện có
+  if (typeof handleCheckout === 'function') {
+    handleCheckout();
+  } else {
+    showToast('Thanh toán', 'Đang chuyển tới trang thanh toán...');
+  }
 }
