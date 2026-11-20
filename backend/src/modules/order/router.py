@@ -1,9 +1,10 @@
 import random
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Union
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request, Header, Depends
 from backend.src.config.database import get_db_connection
-from backend.schemas import OrderCreate, CreateOrderFromCartRequest
+from backend.schemas import OrderCreate, CreateOrderFromCartRequest, CancelOrderRequest
+from backend.src.middlewares.auth_middleware import decode_access_token
 
 router = APIRouter(tags=["Orders"])
 
@@ -512,35 +513,373 @@ def create_order(payload: OrderCreate):
         conn.close()
 
 
+def resolve_requester(
+    request: Request,
+    user_id: Optional[int] = None,
+    phone: Optional[str] = None,
+    conn = None
+) -> Dict[str, Any]:
+    """
+    Xác định danh tính người dùng gọi API qua JWT Token, Header hoặc Query Params.
+    Đảm bảo bảo mật IDOR & chống mạo danh:
+    1. Kiểm tra JWT token từ Header Authorization (Bearer <token>).
+       - Giải mã token -> lấy user_id, role, username, email.
+       - Nếu không phải Admin và client cố tình truyền user_id/phone khác với token -> 403 Forbidden!
+       - Nếu caller là Admin -> cho phép xem toàn quyền.
+    2. Nếu không có JWT, kiểm tra Header 'X-User-Id' và 'X-User-Phone'.
+    3. Nếu không có Header, dùng query params 'user_id' và 'phone'.
+    4. Trả về dict thông tin requester.
+    """
+    auth_header = request.headers.get("Authorization")
+    jwt_payload = None
+
+    if auth_header:
+        parts = auth_header.strip().split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            jwt_payload = decode_access_token(parts[1])
+
+    header_uid = request.headers.get("X-User-Id")
+    header_phone = request.headers.get("X-User-Phone")
+
+    clean_header_uid = int(header_uid) if header_uid and header_uid.strip().isdigit() else None
+    clean_header_phone = header_phone.strip() if header_phone else None
+
+    clean_query_uid = None
+    if user_id is not None and not hasattr(user_id, "default"):
+        try:
+            clean_query_uid = int(user_id)
+        except (ValueError, TypeError):
+            clean_query_uid = None
+
+    clean_query_phone = None
+    if phone is not None and not hasattr(phone, "default") and isinstance(phone, str):
+        clean_query_phone = phone.strip()
+
+    # Ưu tiên lấy user_id và phone từ các nguồn
+    effective_uid = clean_header_uid if clean_header_uid is not None else clean_query_uid
+    effective_phone = clean_header_phone or clean_query_phone
+
+    if jwt_payload:
+        token_uid = jwt_payload.get("user_id") or (int(jwt_payload["sub"]) if str(jwt_payload.get("sub", "")).isdigit() else None)
+        token_role = str(jwt_payload.get("role", "customer")).lower()
+        token_username = jwt_payload.get("username", "")
+
+        # Lấy phone từ DB nếu token chưa có phone
+        token_phone = jwt_payload.get("phone")
+        if not token_phone and conn and token_uid:
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT phone FROM users WHERE id = ?;", (token_uid,))
+                u_row = cursor.fetchone()
+                if u_row and u_row.get("phone"):
+                    token_phone = u_row["phone"]
+            except Exception:
+                pass
+
+        is_admin = (token_role == "admin")
+
+        # Kiểm tra Anti-Spoofing: Người dùng không phải admin không được phép truyền ID/phone của người khác
+        if not is_admin:
+            if effective_uid is not None and token_uid is not None and int(effective_uid) != int(token_uid):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Bạn không có quyền truy cập hoặc xem đơn hàng của người khác!"
+                )
+            if effective_phone and token_phone and effective_phone != token_phone:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Bạn không có quyền truy cập hoặc xem đơn hàng của người khác!"
+                )
+
+        return {
+            "user_id": token_uid,
+            "phone": token_phone or effective_phone,
+            "role": token_role,
+            "username": token_username,
+            "is_authenticated": True,
+            "is_admin": is_admin
+        }
+
+    # Trường hợp không có JWT token
+    return {
+        "user_id": effective_uid,
+        "phone": effective_phone,
+        "role": "customer",
+        "username": None,
+        "is_authenticated": (effective_uid is not None or bool(effective_phone)),
+        "is_admin": False
+    }
+
+
+def check_order_ownership(order: Dict[str, Any], auth_info: Dict[str, Any], conn=None) -> bool:
+    """
+    Kiểm tra quyền sở hữu đơn hàng (Chặn xem đơn của người khác):
+    1. Nếu là Admin -> Cho phép toàn quyền.
+    2. Nếu requester khớp user_id với order["user_id"] -> Hợp lệ.
+    3. Nếu requester khớp phone với order["buyer_phone"] -> Hợp lệ.
+    4. Nếu order có user_id và requester có phone: kiểm tra xem phone đó có thuộc user_id đó trong DB không.
+    5. Nếu không khớp bất kỳ điều kiện nào -> Ném lỗi 403 Forbidden!
+    """
+    if auth_info.get("is_admin"):
+        return True
+
+    req_uid = auth_info.get("user_id")
+    req_phone = (auth_info.get("phone") or "").strip()
+
+    ord_uid = order.get("user_id")
+    ord_phone = (order.get("buyer_phone") or "").strip()
+
+    # So sánh user_id
+    if req_uid is not None and ord_uid is not None:
+        try:
+            if int(req_uid) == int(ord_uid):
+                return True
+        except (ValueError, TypeError):
+            pass
+
+    # So sánh số điện thoại
+    if req_phone and ord_phone:
+        clean_req_p = req_phone.replace("+84", "0").replace(" ", "")
+        clean_ord_p = ord_phone.replace("+84", "0").replace(" ", "")
+        if clean_req_p == clean_ord_p:
+            return True
+
+    # Kiểm tra liên kết giữa user_id và phone qua bảng users nếu có conn
+    if conn:
+        cursor = conn.cursor()
+        if req_uid and ord_phone:
+            try:
+                cursor.execute("SELECT phone FROM users WHERE id = ?;", (req_uid,))
+                u_row = cursor.fetchone()
+                if u_row and u_row.get("phone") and u_row["phone"].strip() == ord_phone:
+                    return True
+            except Exception:
+                pass
+        if ord_uid and req_phone:
+            try:
+                cursor.execute("SELECT phone FROM users WHERE id = ?;", (ord_uid,))
+                u_row = cursor.fetchone()
+                if u_row and u_row.get("phone") and u_row["phone"].strip() == req_phone:
+                    return True
+            except Exception:
+                pass
+
+    raise HTTPException(
+        status_code=403,
+        detail="Bạn không có quyền truy cập hoặc xem đơn hàng của người khác!"
+    )
+
+
 @router.get("/api/user/orders")
-def get_user_orders(phone: str = Query(""), name: str = Query("")):
-    """Lấy danh sách lịch sử đơn hàng của người dùng theo SĐT hoặc Tên."""
+@router.get("/api/orders/my-orders")
+def get_user_orders(
+    request: Request,
+    phone: Optional[str] = Query(None, description="Số điện thoại người mua"),
+    name: Optional[str] = Query(None, description="Tên người mua hoặc từ khóa tìm kiếm"),
+    user_id: Optional[int] = Query(None, description="ID tài khoản người dùng"),
+    status: Optional[str] = Query(None, description="Lọc theo trạng thái: all, preparing, shipping, delivered, cancelled, dispute, escrow"),
+    page: int = Query(1, ge=1, description="Trang hiện tại (mặc định 1)"),
+    limit: int = Query(20, ge=1, le=100, description="Số lượng đơn trên mỗi trang (mặc định 20)")
+):
+    """
+    API Danh sách đơn của khách hàng (TF173B2):
+    - Hỗ trợ lọc theo trạng thái (preparing, shipping, delivered, cancelled, dispute, escrow).
+    - Phân trang (page, limit) và sắp xếp mới nhất lên đầu.
+    - Chặn xem đơn của người khác: Khách hàng chỉ xem được đơn của chính mình (theo user_id hoặc phone).
+    - Trả mã lỗi 401 nếu chưa đăng nhập và không cung cấp định danh.
+    - Trả mã lỗi 403 nếu cố tình tra cứu dữ liệu của tài khoản khác.
+    """
     conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
+        auth_info = resolve_requester(request, user_id=user_id, phone=phone, conn=conn)
 
-    clean_phone = phone.strip()
-    clean_name = name.strip()
+        # Chặn xem đơn người khác: Nếu không phải Admin và không có bất kỳ định danh nào -> Bắt buộc xác thực
+        if not auth_info["is_admin"] and not auth_info["user_id"] and not auth_info["phone"]:
+            raise HTTPException(
+                status_code=401,
+                detail="Yêu cầu đăng nhập hoặc cung cấp user_id / số điện thoại để tra cứu lịch sử đơn hàng của bạn!"
+            )
 
-    if clean_phone and clean_name:
-        cursor.execute("""
+        where_clauses = []
+        params = []
+
+        # Điều kiện chủ sở hữu (Ownership)
+        if not auth_info["is_admin"]:
+            req_uid = auth_info.get("user_id")
+            req_phone = (auth_info.get("phone") or "").strip()
+
+            if req_uid and req_phone:
+                where_clauses.append("(user_id = ? OR buyer_phone = ?)")
+                params.extend([req_uid, req_phone])
+            elif req_uid:
+                where_clauses.append("user_id = ?")
+                params.append(req_uid)
+            elif req_phone:
+                where_clauses.append("buyer_phone = ?")
+                params.append(req_phone)
+        else:
+            # Admin có thể lọc theo user_id hoặc phone nếu được chỉ định
+            if user_id and not hasattr(user_id, "default"):
+                where_clauses.append("user_id = ?")
+                params.append(int(user_id))
+            elif phone and not hasattr(phone, "default") and isinstance(phone, str) and phone.strip():
+                where_clauses.append("buyer_phone = ?")
+                params.append(phone.strip())
+
+        # Điều kiện lọc theo trạng thái đơn hàng (Filter by Status)
+        clean_status = status.strip().lower() if status and not hasattr(status, "default") and isinstance(status, str) else None
+        if clean_status and clean_status != "all":
+            if clean_status in ["delivered", "released", "hoàn tất", "đã giao"]:
+                where_clauses.append("(LOWER(status) = 'delivered' OR LOWER(status) = 'released')")
+            else:
+                where_clauses.append("LOWER(status) = ?")
+                params.append(clean_status)
+
+        # Điều kiện tìm kiếm theo tên hoặc mã đơn (nếu có)
+        clean_name = name.strip() if name and not hasattr(name, "default") and isinstance(name, str) else ""
+        if clean_name:
+            where_clauses.append("(buyer_name LIKE ? OR order_key LIKE ? OR id_display LIKE ?)")
+            params.extend([f"%{clean_name}%", f"%{clean_name}%", f"%{clean_name}%"])
+
+        where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+        # Đếm tổng số đơn
+        cursor.execute(f"SELECT COUNT(*) FROM orders {where_sql};", tuple(params))
+        count_row = cursor.fetchone()
+        total_orders = count_row[0] if count_row else 0
+
+        # Lấy danh sách đơn theo phân trang
+        page_num = int(page) if page and not hasattr(page, "default") else 1
+        limit_num = int(limit) if limit and not hasattr(limit, "default") else 20
+        offset = (page_num - 1) * limit_num
+        cursor.execute(f"""
             SELECT * FROM orders 
-            WHERE buyer_phone = ? OR buyer_name LIKE ? 
-            ORDER BY order_key DESC;
-        """, (clean_phone, f"%{clean_name}%"))
-    elif clean_phone:
-        cursor.execute("SELECT * FROM orders WHERE buyer_phone = ? ORDER BY order_key DESC;", (clean_phone,))
-    elif clean_name:
-        cursor.execute("SELECT * FROM orders WHERE buyer_name LIKE ? ORDER BY order_key DESC;", (f"%{clean_name}%",))
-    else:
-        cursor.execute("SELECT * FROM orders ORDER BY order_key DESC LIMIT 10;")
+            {where_sql} 
+            ORDER BY order_key DESC 
+            LIMIT ? OFFSET ?;
+        """, tuple(params + [limit_num, offset]))
+        rows = cursor.fetchall()
 
-    rows = cursor.fetchall()
-    orders_list = []
-    for o in rows:
-        cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (o["order_key"],))
+        orders_list = []
+        for o in rows:
+            cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (o["order_key"],))
+            items_rows = cursor.fetchall()
+            items = [
+                {
+                    "id": it.get("id"),
+                    "order_key": it["order_key"],
+                    "name": it["name"],
+                    "variant": it["variant"],
+                    "price": it["price"],
+                    "qty": it["qty"],
+                    "subtotal": it["subtotal"]
+                }
+                for it in items_rows
+            ]
+
+            # Lấy thông tin thanh toán nếu có
+            payments = []
+            try:
+                cursor.execute("SELECT * FROM payments WHERE order_key = ? ORDER BY id DESC;", (o["order_key"],))
+                p_rows = cursor.fetchall()
+                for p in p_rows:
+                    payments.append({
+                        "id": p.get("id"),
+                        "payment_method": p.get("payment_method"),
+                        "payment_status": p.get("payment_status"),
+                        "amount": p.get("amount"),
+                        "transaction_code": p.get("transaction_code"),
+                        "created_at": str(p.get("created_at")) if p.get("created_at") else ""
+                    })
+            except Exception:
+                pass
+
+            orders_list.append({
+                "order_key": o["order_key"],
+                "id_display": o["id_display"],
+                "user_id": o.get("user_id"),
+                "buyer_name": o["buyer_name"],
+                "buyer_phone": o["buyer_phone"],
+                "buyer_address": o["buyer_address"],
+                "shop_name": o["shop_name"],
+                "shop_address": o["shop_address"],
+                "total": o["total"],
+                "numeric_total": o["numeric_total"],
+                "fee": o["fee"],
+                "net": o["net"],
+                "status": o["status"],
+                "escrow_badge": o["escrow_badge"],
+                "escrow_class": o["escrow_class"],
+                "time_info": o["time_info"],
+                "created_at": o["created_at"],
+                "items": items,
+                "payments": payments,
+                "items_count": len(items)
+            })
+
+        return {
+            "success": True,
+            "total": total_orders,
+            "page": page,
+            "limit": limit,
+            "status_filter": status or "all",
+            "orders": orders_list
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/api/user/orders/{order_key}")
+@router.get("/api/orders/{order_key}")
+def get_order_detail(
+    order_key: str,
+    request: Request,
+    user_id: Optional[int] = Query(None, description="ID tài khoản người dùng"),
+    phone: Optional[str] = Query(None, description="Số điện thoại người mua")
+):
+    """
+    API Chi tiết đơn hàng của khách (TF173B2):
+    - Lấy đầy đủ thông tin đơn hàng, danh sách sản phẩm (order_items), thanh toán (payments) và lịch sử trạng thái (order_status_history).
+    - Chặn xem đơn của người khác: Chỉ chủ sở hữu đơn hàng (khớp user_id hoặc buyer_phone) hoặc Quản trị viên (Admin) mới có quyền truy cập.
+    - Trả lỗi 401 nếu chưa xác thực/không cung cấp định danh.
+    - Trả lỗi 403 nếu truy cập đơn của khách hàng khác.
+    - Trả lỗi 404 nếu đơn hàng không tồn tại.
+    """
+    clean_key = order_key.replace("#", "").strip()
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # 1. Tìm đơn hàng trong DB
+        cursor.execute("SELECT * FROM orders WHERE order_key = ? OR id_display = ?;", (clean_key, f"#{clean_key}"))
+        order = cursor.fetchone()
+
+        if not order:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Không tìm thấy đơn hàng #{clean_key} trên hệ thống!"
+            )
+
+        # 2. Xác định danh tính requester
+        auth_info = resolve_requester(request, user_id=user_id, phone=phone, conn=conn)
+
+        if not auth_info["is_authenticated"]:
+            raise HTTPException(
+                status_code=401,
+                detail="Yêu cầu xác thực tài khoản để xem chi tiết đơn hàng!"
+            )
+
+        # 3. Chặn xem đơn của người khác (Check ownership)
+        check_order_ownership(dict(order), auth_info, conn=conn)
+
+        # 4. Lấy danh sách sản phẩm trong đơn
+        cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (order["order_key"],))
         items_rows = cursor.fetchall()
         items = [
             {
+                "id": it.get("id"),
+                "order_key": it["order_key"],
                 "name": it["name"],
                 "variant": it["variant"],
                 "price": it["price"],
@@ -549,45 +888,216 @@ def get_user_orders(phone: str = Query(""), name: str = Query("")):
             }
             for it in items_rows
         ]
-        orders_list.append({
-            "order_key": o["order_key"],
-            "id_display": o["id_display"],
-            "buyer_name": o["buyer_name"],
-            "buyer_phone": o["buyer_phone"],
-            "buyer_address": o["buyer_address"],
-            "shop_name": o["shop_name"],
-            "shop_address": o["shop_address"],
-            "total": o["total"],
-            "numeric_total": o["numeric_total"],
-            "fee": o["fee"],
-            "net": o["net"],
-            "status": o["status"],
-            "escrow_badge": o["escrow_badge"],
-            "escrow_class": o["escrow_class"],
-            "time_info": o["time_info"],
-            "created_at": o["created_at"],
-            "items": items
-        })
 
-    conn.close()
-    return {"orders": orders_list}
+        # 5. Lấy lịch sử giao dịch thanh toán
+        payments = []
+        try:
+            cursor.execute("SELECT * FROM payments WHERE order_key = ? ORDER BY id DESC;", (order["order_key"],))
+            p_rows = cursor.fetchall()
+            for p in p_rows:
+                payments.append({
+                    "id": p.get("id"),
+                    "payment_method": p.get("payment_method"),
+                    "payment_status": p.get("payment_status"),
+                    "amount": p.get("amount"),
+                    "transaction_code": p.get("transaction_code"),
+                    "created_at": str(p.get("created_at")) if p.get("created_at") else ""
+                })
+        except Exception:
+            pass
+
+        # 6. Lấy lịch sử thay đổi trạng thái đơn
+        status_history = []
+        try:
+            cursor.execute("SELECT * FROM order_status_history WHERE order_key = ? ORDER BY id ASC;", (order["order_key"],))
+            h_rows = cursor.fetchall()
+            for h in h_rows:
+                status_history.append({
+                    "id": h.get("id"),
+                    "old_status": h.get("old_status"),
+                    "new_status": h.get("new_status"),
+                    "changed_by": h.get("changed_by"),
+                    "note": h.get("note"),
+                    "created_at": str(h.get("created_at")) if h.get("created_at") else ""
+                })
+        except Exception:
+            pass
+
+        return {
+            "success": True,
+            "order": {
+                "order_key": order["order_key"],
+                "id_display": order["id_display"],
+                "user_id": order.get("user_id"),
+                "buyer_name": order["buyer_name"],
+                "buyer_phone": order["buyer_phone"],
+                "buyer_address": order["buyer_address"],
+                "shop_name": order["shop_name"],
+                "shop_address": order["shop_address"],
+                "total": order["total"],
+                "numeric_total": order["numeric_total"],
+                "fee": order["fee"],
+                "net": order["net"],
+                "status": order["status"],
+                "escrow_badge": order["escrow_badge"],
+                "escrow_class": order["escrow_class"],
+                "time_info": order["time_info"],
+                "created_at": order["created_at"],
+                "items": items,
+                "payments": payments,
+                "status_history": status_history,
+                "items_count": len(items)
+            }
+        }
+    finally:
+        conn.close()
 
 
 @router.put("/api/user/orders/{order_key}/receive")
-def confirm_order_received(order_key: str):
-    """Khách hàng bấm 'Đã nhận được hàng' -> Cập nhật trạng thái 'delivered' và giải ngân cho Shop."""
-    clean_key = order_key.replace("#", "")
+@router.put("/api/user/orders/{order_key}/confirm-received")
+def confirm_order_received(
+    order_key: str,
+    request: Request,
+    user_id: Optional[int] = Query(None),
+    phone: Optional[str] = Query(None)
+):
+    """
+    Khách hàng bấm 'Đã nhận được hàng':
+    - Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hoặc Admin mới được xác nhận).
+    - Cập nhật trạng thái 'delivered' và giải ngân cho Shop.
+    - Ghi nhận lịch sử trạng thái vào order_status_history.
+    """
+    clean_key = order_key.replace("#", "").strip()
     conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders WHERE order_key = ? OR id_display = ?;", (clean_key, f"#{clean_key}"))
+        order = cursor.fetchone()
 
-    cursor.execute("""
-        UPDATE orders
-        SET status = 'delivered',
-            escrow_badge = '✓ Đã nhận được hàng',
-            escrow_class = 'bg-emerald-50 text-emerald-600 border-emerald-200'
-        WHERE order_key = ?;
-    """, (clean_key,))
-    conn.commit()
-    conn.close()
+        if not order:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Không tìm thấy đơn hàng #{clean_key}!"
+            )
 
-    return {"message": f"Đơn hàng #{clean_key} đã được xác nhận hoàn tất thành công!"}
+        auth_info = resolve_requester(request, user_id=user_id, phone=phone, conn=conn)
+        if not auth_info["is_authenticated"]:
+            raise HTTPException(status_code=401, detail="Yêu cầu xác thực tài khoản để thao tác trên đơn hàng!")
+
+        check_order_ownership(dict(order), auth_info, conn=conn)
+
+        old_status = order["status"]
+        cursor.execute("""
+            UPDATE orders
+            SET status = 'delivered',
+                escrow_badge = '✓ Đã nhận được hàng',
+                escrow_class = 'bg-emerald-50 text-emerald-600 border-emerald-200'
+            WHERE order_key = ?;
+        """, (order["order_key"],))
+
+        try:
+            cursor.execute("""
+                INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
+                VALUES (?, ?, 'delivered', ?, 'Khách hàng xác nhận đã nhận được hàng');
+            """, (order["order_key"], old_status, auth_info.get("user_id")))
+        except Exception:
+            pass
+
+        conn.commit()
+        return {
+            "success": True,
+            "message": f"Đơn hàng #{order['order_key']} đã được xác nhận hoàn tất thành công!",
+            "order_key": order["order_key"],
+            "status": "delivered"
+        }
+    finally:
+        conn.close()
+
+
+@router.put("/api/user/orders/{order_key}/cancel")
+@router.post("/api/user/orders/{order_key}/cancel")
+def cancel_user_order(
+    order_key: str,
+    request: Request,
+    payload: Optional[CancelOrderRequest] = None,
+    user_id: Optional[int] = Query(None),
+    phone: Optional[str] = Query(None)
+):
+    """
+    Khách hàng yêu cầu hủy đơn hàng:
+    - Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hoặc Admin mới được hủy).
+    - Chỉ cho phép hủy khi đơn ở trạng thái 'preparing' hoặc 'escrow'.
+    - Hoàn trả lại số lượng tồn kho và giảm số lượng đã bán.
+    - Ghi nhận lịch sử trạng thái vào order_status_history.
+    """
+    clean_key = order_key.replace("#", "").strip()
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders WHERE order_key = ? OR id_display = ?;", (clean_key, f"#{clean_key}"))
+        order = cursor.fetchone()
+
+        if not order:
+            raise HTTPException(status_code=404, detail=f"Không tìm thấy đơn hàng #{clean_key}!")
+
+        auth_info = resolve_requester(request, user_id=user_id, phone=phone, conn=conn)
+        if not auth_info["is_authenticated"]:
+            raise HTTPException(status_code=401, detail="Yêu cầu xác thực tài khoản để thao tác trên đơn hàng!")
+
+        check_order_ownership(dict(order), auth_info, conn=conn)
+
+        curr_status = str(order["status"]).lower()
+        if curr_status not in ["preparing", "escrow"]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Không thể hủy đơn hàng ở trạng thái '{curr_status}'. Chỉ cho phép hủy đơn đang chuẩn bị hoặc chờ xử lý!"
+            )
+
+        cancel_reason = (payload.reason if payload and payload.reason else "Khách hàng hủy đơn").strip()
+
+        # Hoàn trả lại tồn kho sản phẩm
+        cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (order["order_key"],))
+        items = cursor.fetchall()
+        for it in items:
+            try:
+                qty_val = int(it.get("qty", 1))
+            except (ValueError, TypeError):
+                qty_val = 1
+            try:
+                cursor.execute("""
+                    UPDATE products 
+                    SET sold = GREATEST(0, sold - ?), total_stock = total_stock + ? 
+                    WHERE title = ? OR title LIKE ?;
+                """, (qty_val, qty_val, it["name"], f"%{it['name']}%"))
+            except Exception:
+                pass
+
+        # Cập nhật trạng thái đơn
+        cursor.execute("""
+            UPDATE orders 
+            SET status = 'cancelled',
+                escrow_badge = '✕ Đã hủy đơn hàng',
+                escrow_class = 'bg-rose-50 text-rose-600 border-rose-200'
+            WHERE order_key = ?;
+        """, (order["order_key"],))
+
+        # Ghi log lịch sử trạng thái
+        try:
+            cursor.execute("""
+                INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
+                VALUES (?, ?, 'cancelled', ?, ?);
+            """, (order["order_key"], curr_status, auth_info.get("user_id"), f"Hủy đơn: {cancel_reason}"))
+        except Exception:
+            pass
+
+        conn.commit()
+        return {
+            "success": True,
+            "message": f"Hủy đơn hàng #{order['order_key']} thành công!",
+            "order_key": order["order_key"],
+            "status": "cancelled",
+            "reason": cancel_reason
+        }
+    finally:
+        conn.close()
+
