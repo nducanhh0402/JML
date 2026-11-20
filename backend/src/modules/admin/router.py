@@ -500,3 +500,122 @@ def get_admin_order_history(order_key: str):
             for row in rows
         ],
     }
+
+@router.get("/reports/revenue")
+def get_admin_revenue_report(
+    period: str = Query(default="day", pattern="^(day|month)$"),
+    date_from: date_type | None = Query(default=None),
+    date_to: date_type | None = Query(default=None),
+):
+    """Thống kê doanh thu theo ngày hoặc tháng từ đơn hàng thực tế."""
+    if hasattr(period, "default"):
+        period = "day"
+    if hasattr(date_from, "default"):
+        date_from = None
+    if hasattr(date_to, "default"):
+        date_to = None
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(status_code=400, detail="date_from không được lớn hơn date_to")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    where = ["status IN ('preparing', 'shipping', 'delivered', 'released', 'dispute')"]
+    params = []
+    if date_from:
+        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
+        params.append(date_from.isoformat())
+    if date_to:
+        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
+        params.append(date_to.isoformat())
+
+    date_format = "%d/%m/%Y" if period == "day" else "%m/%Y"
+    cursor.execute(f"""
+        SELECT DATE_FORMAT(STR_TO_DATE(created_at, '%d/%m/%Y'), '{date_format}') AS report_date,
+               COUNT(*) AS order_count,
+               COALESCE(SUM(numeric_total), 0) AS gmv,
+               ROUND(COALESCE(SUM(numeric_total), 0) * 0.07) AS revenue
+        FROM orders
+        WHERE {' AND '.join(where)}
+        GROUP BY report_date
+        ORDER BY STR_TO_DATE(MIN(created_at), '%d/%m/%Y') ASC;
+    """, tuple(params))
+    rows = cursor.fetchall()
+    conn.close()
+
+    data = [{"period": row["report_date"], "order_count": int(row["order_count"]), "gmv": int(row["gmv"] or 0), "revenue": int(row["revenue"] or 0)} for row in rows]
+    return {"period_type": period, "data": data, "total_gmv": sum(item["gmv"] for item in data), "total_revenue": sum(item["revenue"] for item in data)}
+
+@router.get("/reports/top-products")
+def get_admin_top_products(
+    limit: int = Query(default=10, ge=1, le=50),
+    date_from: date_type | None = Query(default=None),
+    date_to: date_type | None = Query(default=None),
+):
+    """Top sản phẩm theo số lượng đã bán, có thể lọc theo khoảng ngày."""
+    if hasattr(limit, "default"):
+        limit = 10
+
+    if hasattr(date_from, "default"):
+        date_from = None
+    if hasattr(date_to, "default"):
+        date_to = None
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(status_code=400, detail="date_from không được lớn hơn date_to")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    where = ["o.status IN ('preparing', 'shipping', 'delivered', 'released', 'dispute')"]
+    params = []
+    if date_from:
+        where.append("STR_TO_DATE(o.created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
+        params.append(date_from.isoformat())
+    if date_to:
+        where.append("STR_TO_DATE(o.created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
+        params.append(date_to.isoformat())
+
+    cursor.execute(f"""
+        SELECT oi.name AS product_name,
+               SUM(CAST(oi.qty AS UNSIGNED)) AS sold_quantity,
+               COUNT(DISTINCT oi.order_key) AS order_count,
+               SUM(CAST(REPLACE(REPLACE(REPLACE(oi.subtotal, '.', ''), ' ₫', ''), '₫', '') AS UNSIGNED)) AS revenue
+        FROM order_items oi
+        JOIN orders o ON o.order_key = oi.order_key
+        WHERE {' AND '.join(where)}
+        GROUP BY oi.name
+        ORDER BY sold_quantity DESC, revenue DESC
+        LIMIT ?;
+    """, tuple(params + [limit]))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return {"top_products": [{"name": row["product_name"], "sold_quantity": int(row["sold_quantity"] or 0), "order_count": int(row["order_count"] or 0), "revenue": int(row["revenue"] or 0)} for row in rows], "total": len(rows)}
+
+
+@router.get("/metrics")
+def get_admin_metrics():
+    """Chỉ số tổng quan cho dashboard admin."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) AS total, COALESCE(SUM(numeric_total), 0) AS gmv FROM orders;")
+    order_stat = cursor.fetchone() or {"total": 0, "gmv": 0}
+    cursor.execute("SELECT COUNT(*) AS total FROM products;")
+    product_stat = cursor.fetchone() or {"total": 0}
+    cursor.execute("SELECT COUNT(*) AS total FROM customers;")
+    customer_stat = cursor.fetchone() or {"total": 0}
+    cursor.execute("SELECT COUNT(*) AS total FROM shops;")
+    shop_stat = cursor.fetchone() or {"total": 0}
+    cursor.execute("SELECT COUNT(*) AS total FROM products WHERE status = 'pending';")
+    pending_stat = cursor.fetchone() or {"total": 0}
+
+    total_gmv = int(order_stat["gmv"] or 0)
+    conn.close()
+    return {
+        "total_gmv": total_gmv,
+        "total_revenue": round(total_gmv * 0.07),
+        "total_products": int(product_stat["total"] or 0),
+        "pending_products": int(pending_stat["total"] or 0),
+        "total_customers": int(customer_stat["total"] or 0),
+        "total_orders": int(order_stat["total"] or 0),
+        "total_shops": int(shop_stat["total"] or 0),
+    }
