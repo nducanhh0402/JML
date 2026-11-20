@@ -363,6 +363,23 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
+    # 10. Bảng REVIEWS (Đánh giá & chấm sao 1-5 cho từng sản phẩm)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        user_id INT NULL,
+        user_name VARCHAR(255) NOT NULL,
+        rating TINYINT NOT NULL,
+        comment TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_review_user_product (user_id, product_id),
+        INDEX idx_review_product (product_id),
+        INDEX idx_review_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
     # TF175F0: Index tối ưu lọc trạng thái, khoảng ngày và lịch sử đơn
     for index_sql in (
         "CREATE INDEX idx_order_status_created ON orders (status, created_at)",

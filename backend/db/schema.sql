@@ -167,3 +167,22 @@ INSERT INTO `banners` (`title`, `image_url`, `link_url`, `description`, `sort_or
 ('Bo Suu Tap Dong Ho Cao Cap', 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80', '/products?category=watch', 'Dong ho chinh hang - Bao hanh 5 nam', 3, 1),
 ('Am Thanh Dinh Cao', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80', '/products?category=audio', 'Tai nghe, Loa bluetooth giam 30%', 4, 1),
 ('Mien Phi Van Chuyen', 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80', '/products', 'Mien phi ship cho don hang tu 500.000d', 5, 1);
+
+
+-- ============================================================================
+-- BANG DANH GIA SAN PHAM (REVIEWS)
+-- Moi nguoi dung chi duoc gui 1 danh gia cho moi san pham (1-5 sao, nhan xet)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `reviews` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `product_id` INT NOT NULL,
+    `user_id` INT NULL,
+    `user_name` VARCHAR(255) NOT NULL,
+    `rating` TINYINT NOT NULL,
+    `comment` TEXT NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uniq_review_user_product` (`user_id`, `product_id`),
+    INDEX `idx_review_product` (`product_id`),
+    INDEX `idx_review_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
