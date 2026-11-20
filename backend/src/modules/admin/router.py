@@ -3,10 +3,29 @@ import random
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
-from backend.schemas import ProductCreate, CustomerCreate, FreezeOrderRequest
+from backend.schemas import ProductCreate, CustomerCreate, FreezeOrderRequest, OrderStatusUpdate
 from backend.src.middlewares.auth_middleware import require_admin
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"], dependencies=[Depends(require_admin)])
+
+ORDER_STATUS_BADGES = {
+    "preparing": ("📦 Shop đang chuẩn bị đơn", "bg-amber-50 text-amber-600"),
+    "shipping": ("🚚 Đang vận chuyển", "bg-blue-50 text-blue-600"),
+    "delivered": ("✓ Đã nhận được hàng", "bg-emerald-50 text-emerald-600 border-emerald-200"),
+    "released": ("✓ Đã giải ngân", "bg-emerald-50 text-emerald-600 border-emerald-200"),
+    "dispute": ("⚠️ Đang xử lý khiếu nại", "bg-danger-50 text-danger-500 border-danger-200"),
+    "cancelled": ("× Đơn hàng đã hủy", "bg-neutral-100 text-neutral-600 border-neutral-200"),
+}
+
+
+def record_order_status_change(cursor, order_key: str, old_status: str | None, new_status: str, changed_by: int | None, note: str = ""):
+    """Ghi nhận lịch sử trạng thái nếu bảng order_status_history đã tồn tại."""
+    cursor.execute("SHOW TABLES LIKE 'order_status_history';")
+    if cursor.fetchone():
+        cursor.execute("""
+            INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
+            VALUES (?, ?, ?, ?, ?);
+        """, (order_key, old_status, new_status, changed_by, note))
 
 @router.get("/shops")
 def get_all_shops():
@@ -119,6 +138,7 @@ def approve_pending_product(product_id: int):
     cursor.execute("UPDATE products SET status = 'approved' WHERE id = ?;", (product_id,))
     conn.commit()
     conn.close()
+
     return {"message": f"Đã duyệt sản phẩm #{product_id} lên kệ sàn thành công!"}
 
 @router.put("/products/{product_id}/reject")
@@ -129,6 +149,7 @@ def reject_pending_product(product_id: int):
     cursor.execute("UPDATE products SET status = 'rejected' WHERE id = ?;", (product_id,))
     conn.commit()
     conn.close()
+
     return {"message": f"Đã từ chối sản phẩm #{product_id}."}
 
 @router.post("/products")
@@ -211,11 +232,18 @@ def get_admin_orders():
     return {"orders": orders_dict}
 
 @router.put("/orders/{order_key}/freeze")
-def freeze_order_dispute(order_key: str, payload: FreezeOrderRequest):
+def freeze_order_dispute(order_key: str, payload: FreezeOrderRequest, current_user: dict = Depends(require_admin)):
     """Admin khóa đơn tranh chấp / tạm đóng băng tiền Escrow."""
     clean_key = order_key.replace("#", "")
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = row["status"]
     cursor.execute("""
         UPDATE orders
         SET status = 'dispute',
@@ -223,25 +251,48 @@ def freeze_order_dispute(order_key: str, payload: FreezeOrderRequest):
             escrow_class = 'bg-danger-50 text-danger-500 border-danger-200'
         WHERE order_key = ?;
     """, (clean_key,))
+
+    try:
+        changed_by_raw = current_user.get("user_id") or current_user.get("sub")
+        changed_by = int(changed_by_raw) if changed_by_raw is not None else None
+    except (TypeError, ValueError):
+        changed_by = None
+    record_order_status_change(cursor, clean_key, old_status, "dispute", changed_by, payload.reason)
     conn.commit()
     conn.close()
+
     return {"message": f"Đã khóa bảo lưu đơn hàng #{clean_key} để xử lý tranh chấp!"}
 
 @router.put("/orders/{order_key}/release")
-def release_order_funds(order_key: str):
+def release_order_funds(order_key: str, current_user: dict = Depends(require_admin)):
     """Admin phê duyệt giải ngân tiền vào ví Shop."""
     clean_key = order_key.replace("#", "")
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = row["status"]
     cursor.execute("""
         UPDATE orders
         SET status = 'released',
-            escrow_badge = '✓ Đã nhận được hàng',
+            escrow_badge = '✓ Đã giải ngân',
             escrow_class = 'bg-emerald-50 text-emerald-600 border-emerald-200'
         WHERE order_key = ?;
     """, (clean_key,))
+
+    try:
+        changed_by_raw = current_user.get("user_id") or current_user.get("sub")
+        changed_by = int(changed_by_raw) if changed_by_raw is not None else None
+    except (TypeError, ValueError):
+        changed_by = None
+    record_order_status_change(cursor, clean_key, old_status, "released", changed_by, "Admin giải ngân tiền đơn hàng")
     conn.commit()
     conn.close()
+
     return {"message": f"Đã giải ngân tiền đơn #{clean_key} thành công vào ví Chủ Shop!"}
 
 @router.get("/customers")
@@ -290,6 +341,7 @@ def ban_customer(cust_key: str):
     """, (clean_key,))
     conn.commit()
     conn.close()
+
     return {"message": f"Đã khóa tài khoản khách hàng #{clean_key} thành công!"}
 
 @router.put("/customers/{cust_key}/unban")
@@ -307,6 +359,7 @@ def unban_customer(cust_key: str):
     """, (clean_key,))
     conn.commit()
     conn.close()
+
     return {"message": f"Đã mở khóa tài khoản #{clean_key} thành công!"}
 
 @router.post("/customers")
@@ -336,4 +389,85 @@ def create_customer(payload: CustomerCreate):
     ))
     conn.commit()
     conn.close()
+
     return {"message": f"Đã thêm khách hàng #{cust_key} thành công!", "key": cust_key}
+
+@router.put("/orders/{order_key}/status")
+def update_admin_order_status(order_key: str, payload: OrderStatusUpdate, current_user: dict = Depends(require_admin)):
+    """Admin chuyển trạng thái đơn và ghi lại old_status, new_status vào lịch sử."""
+    clean_key = order_key.replace("#", "").strip()
+    new_status = str(payload.status).strip().lower()
+    note = str(payload.note).strip()
+
+    if not clean_key:
+        raise HTTPException(status_code=400, detail="Thiếu mã đơn hàng")
+    if new_status not in ORDER_STATUS_BADGES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Trạng thái không hợp lệ. Hỗ trợ: {', '.join(ORDER_STATUS_BADGES.keys())}",
+        )
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    order_row = cursor.fetchone()
+    if not order_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = order_row["status"]
+    badge, badge_class = ORDER_STATUS_BADGES[new_status]
+    cursor.execute("""
+        UPDATE orders
+        SET status = ?, escrow_badge = ?, escrow_class = ?
+        WHERE order_key = ?;
+    """, (new_status, badge, badge_class, clean_key))
+
+    try:
+        changed_by_raw = current_user.get("user_id") or current_user.get("sub")
+        changed_by = int(changed_by_raw) if changed_by_raw is not None else None
+    except (TypeError, ValueError):
+        changed_by = None
+
+    record_order_status_change(cursor, clean_key, old_status, new_status, changed_by, note)
+    conn.commit()
+    conn.close()
+
+    return {
+        "message": f"Đã chuyển đơn #{clean_key} từ '{old_status}' sang '{new_status}'",
+        "order_key": clean_key,
+        "old_status": old_status,
+        "status": new_status,
+        "badge": badge,
+    }
+
+
+@router.get("/orders/{order_key}/history")
+def get_admin_order_history(order_key: str):
+    """Xem lịch sử thay đổi trạng thái của một đơn hàng."""
+    clean_key = order_key.replace("#", "").strip()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, order_key, old_status, new_status, changed_by, note, created_at
+        FROM order_status_history
+        WHERE order_key = ?
+        ORDER BY created_at DESC, id DESC;
+    """, (clean_key,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return {
+        "order_key": clean_key,
+        "history": [
+            {
+                "id": row["id"],
+                "old_status": row["old_status"],
+                "new_status": row["new_status"],
+                "changed_by": row["changed_by"],
+                "note": row["note"],
+                "created_at": str(row["created_at"]),
+            }
+            for row in rows
+        ],
+    }

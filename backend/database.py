@@ -292,6 +292,21 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
+    # Lịch sử chuyển trạng thái đơn hàng
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS order_status_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        order_key VARCHAR(50) NOT NULL,
+        old_status VARCHAR(50) NULL,
+        new_status VARCHAR(50) NOT NULL,
+        changed_by INT NULL,
+        note VARCHAR(255) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_history_order_key (order_key),
+        INDEX idx_history_created_at (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
     # 9. Bảng BANNERS (Banner hiển thị trang chủ) - TF17398
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS banners (

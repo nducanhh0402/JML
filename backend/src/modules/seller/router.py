@@ -2,7 +2,7 @@ import json
 import random
 from fastapi import APIRouter, Query, HTTPException
 from backend.src.config.database import get_db_connection
-from backend.schemas import ProductCreate, ShopUpdateRequest
+from backend.schemas import ProductCreate, ShopUpdateRequest, OrderStatusUpdate
 
 router = APIRouter(tags=["Seller"])
 
@@ -197,21 +197,35 @@ def seller_submit_product(payload: ProductCreate):
     }
 
 @router.put("/api/seller/orders/{order_key}/status")
-def update_seller_order_status(order_key: str, payload: dict):
-    """Chủ Shop cập nhật tiến độ giao hàng: chuẩn bị đơn, giao cho shipper đi đơn."""
+def update_seller_order_status(order_key: str, payload: OrderStatusUpdate):
+    """Chủ Shop cập nhật tiến độ giao hàng và ghi lịch sử trạng thái."""
     clean_key = order_key.replace("#", "")
-    new_status = payload.get("status", "shipping")
-    
+    new_status = str(payload.status).strip().lower()
+    note = str(payload.note).strip()
+
     status_map = {
         "preparing": ("📦 Shop đang chuẩn bị đơn", "bg-amber-50 text-amber-600"),
         "shipping": ("🚚 Đang vận chuyển", "bg-blue-50 text-blue-600"),
         "delivered": ("✓ Đã nhận được hàng", "bg-emerald-50 text-emerald-600"),
-        "released": ("✓ Đã nhận được hàng", "bg-emerald-50 text-emerald-600")
+        "released": ("✓ Đã giải ngân", "bg-emerald-50 text-emerald-600")
     }
-    badge, badge_class = status_map.get(new_status, ("📦 Shop đang chuẩn bị đơn", "bg-amber-50 text-amber-600"))
+    if new_status not in status_map:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Trạng thái không hợp lệ. Hỗ trợ: {', '.join(status_map.keys())}",
+        )
+
+    badge, badge_class = status_map[new_status]
 
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    order_row = cursor.fetchone()
+    if not order_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = order_row["status"]
     cursor.execute("""
         UPDATE orders
         SET status = ?,
@@ -219,12 +233,21 @@ def update_seller_order_status(order_key: str, payload: dict):
             escrow_class = ?
         WHERE order_key = ?;
     """, (new_status, badge, badge_class, clean_key))
+
+    cursor.execute("SHOW TABLES LIKE 'order_status_history';")
+    if cursor.fetchone():
+        cursor.execute("""
+            INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
+            VALUES (?, ?, ?, NULL, ?);
+        """, (clean_key, old_status, new_status, note or "Người bán cập nhật trạng thái đơn hàng"))
+
     conn.commit()
     conn.close()
 
     return {
         "message": f"Cập nhật trạng thái đơn hàng #{clean_key} thành '{new_status}' thành công!",
         "order_key": clean_key,
+        "old_status": old_status,
         "status": new_status,
         "badge": badge
     }

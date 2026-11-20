@@ -136,6 +136,23 @@ class TestAuthRBACMiddleware(unittest.TestCase):
         self.assertEqual(res_orders.status_code, 200)
         self.assertIn("orders", res_orders.json())
 
+    def test_08d_admin_order_status_rejects_invalid_status(self):
+        """Admin không thể chuyển đơn sang trạng thái không được hỗ trợ."""
+        response = self.client.put(
+            "/api/admin/orders/MP-9999/status",
+            json={"status": "invalid_state", "note": "Test validation"},
+            headers={"Authorization": f"Bearer {self.admin_token}"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_08e_seller_order_status_rejects_invalid_status(self):
+        """Seller không thể cập nhật trạng thái ngoài danh sách cho phép."""
+        response = self.client.put(
+            "/api/seller/orders/MP-9999/status",
+            json={"status": "invalid_state", "note": "Test validation"}
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_09_cors_options_preflight_bypasses_auth(self):
         """CORS OPTIONS preflight request tới /api/admin/* không bị chặn bởi Auth."""
         response = self.client.options(

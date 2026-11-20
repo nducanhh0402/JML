@@ -109,4 +109,9 @@ class ShopUpdateRequest(BaseModel):
     address: str = ""
 
 
+class OrderStatusUpdate(BaseModel):
+    status: str
+    note: str = ""
+
+
 

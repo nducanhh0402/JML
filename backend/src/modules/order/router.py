@@ -954,6 +954,7 @@ def get_order_detail(
 
 
 @router.put("/api/user/orders/{order_key}/receive")
+
 @router.put("/api/user/orders/{order_key}/confirm-received")
 def confirm_order_received(
     order_key: str,
@@ -968,6 +969,11 @@ def confirm_order_received(
     - Ghi nhận lịch sử trạng thái vào order_status_history.
     """
     clean_key = order_key.replace("#", "").strip()
+
+def confirm_order_received(order_key: str):
+    """Khách hàng xác nhận đã nhận hàng và chuyển trạng thái đơn sang delivered."""
+    clean_key = order_key.replace("#", "")
+
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -1100,4 +1106,32 @@ def cancel_user_order(
         }
     finally:
         conn.close()
+
+
+    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+
+    old_status = row["status"]
+    cursor.execute("""
+        UPDATE orders
+        SET status = 'delivered',
+            escrow_badge = '✓ Đã nhận được hàng',
+            escrow_class = 'bg-emerald-50 text-emerald-600 border-emerald-200'
+        WHERE order_key = ?;
+    """, (clean_key,))
+
+    cursor.execute("SHOW TABLES LIKE 'order_status_history';")
+    if cursor.fetchone():
+        cursor.execute("""
+            INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
+            VALUES (?, ?, 'delivered', NULL, 'Người mua xác nhận đã nhận hàng');
+        """, (clean_key, old_status))
+
+    conn.commit()
+    conn.close()
+
+    return {"message": f"Đơn hàng #{clean_key} đã được xác nhận hoàn toàn thành công!"}
 
