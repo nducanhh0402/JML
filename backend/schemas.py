@@ -72,6 +72,10 @@ class FreezeOrderRequest(BaseModel):
     reason: str = "Khách khiếu nại sản phẩm lỗi"
 
 
+class CancelOrderRequest(BaseModel):
+    reason: Optional[str] = "Khách hàng yêu cầu hủy đơn"
+
+
 class CustomerCreate(BaseModel):
     name: str
     phone: str
