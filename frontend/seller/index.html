@@ -560,7 +560,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) syncSellerDashboard();
         });
-        // Tá»± Ä‘á»™ng lÃ m má»›i Ä‘Æ¡n hÃ ng vÃ  sáº£n pháº©m Ä‘á»‹nh ká»³ má»—i 5 giÃ¢y
+        // Tự động làm mới đơn hàng và sản phẩm định kỳ mỗi 5 giây
         setInterval(() => {
             syncSellerDashboard();
         }, 5000);
@@ -631,7 +631,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    alertEl.textContent = `âŒ ${data.detail || 'ÄÄƒng nháº­p tháº¥t báº¡i!'}`;
+                    alertEl.textContent = `❌ ${data.detail || 'Đăng nhập thất bại!'}`;
                     alertEl.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block';
                     return;
                 }
@@ -641,9 +641,9 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 loadSellerSession();
                 await syncSellerDashboard();
                 closeSellerAuthModal();
-                alert(`âœ… Xin chÃ o ${data.user.full_name || data.user.shop_name}! ÄÃ£ Ä‘Äƒng nháº­p vÃ o KÃªnh Quáº£n LÃ½ Cá»­a HÃ ng.`);
+                alert(`✅ Xin chào ${data.user.full_name || data.user.shop_name}! Đã đăng nhập vào Kênh Quản Lý Cửa Hàng.`);
             } catch (err) {
-                alertEl.textContent = 'âŒ Lá»—i káº¿t ná»‘i FastAPI server!';
+                alertEl.textContent = '❌ Lỗi kết nối FastAPI server!';
                 alertEl.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block';
             }
         }
@@ -672,7 +672,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    alertEl.textContent = `âŒ ${data.detail || 'ÄÄƒng kÃ½ má»Ÿ Shop tháº¥t báº¡i!'}`;
+                    alertEl.textContent = `❌ ${data.detail || 'Đăng ký mở Shop thất bại!'}`;
                     alertEl.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block';
                     return;
                 }
@@ -682,9 +682,9 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 loadSellerSession();
                 await syncSellerDashboard();
                 closeSellerAuthModal();
-                alert(`ðŸŽ‰ ChÃºc má»«ng báº¡n Ä‘Ã£ Ä‘Äƒng kÃ½ má»Ÿ Cá»­a hÃ ng "${payload.shop_name}" thÃ nh cÃ´ng!`);
+                alert(`🎉 Chúc mừng bạn đã đăng ký mở Cửa hàng "${payload.shop_name}" thành công!`);
             } catch (err) {
-                alertEl.textContent = 'âŒ Lá»—i káº¿t ná»‘i FastAPI server!';
+                alertEl.textContent = '❌ Lỗi kết nối FastAPI server!';
                 alertEl.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block';
             }
         }
@@ -700,37 +700,37 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
         }
 
         function formatVND(val) {
-            if (!val || val === 0) return '0 â‚«';
-            return Number(val).toLocaleString('vi-VN') + ' â‚«';
+            if (!val || val === 0) return '0 ₫';
+            return Number(val).toLocaleString('vi-VN') + ' ₫';
         }
 
         async function syncSellerDashboard() {
             const shopKey = currentSellerUser?.shop_key || '';
             const shopName = currentSellerUser?.shop_name || '';
 
-            // Náº¿u chÆ°a Ä‘Äƒng nháº­p tÃ i khoáº£n Shop, reset sáº¡ch toÃ n bá»™ vá» tráº¡ng thÃ¡i ban Ä‘áº§u
+            // Nếu chưa đăng nhập tài khoản Shop, reset sạch toàn bộ về trạng thái ban đầu
             if (!currentSellerUser) {
                 currentShopData = null;
                 document.getElementById('noShopWarningBanner').classList.remove('hidden');
-                document.getElementById('headerShopTitle').textContent = 'Trung TÃ¢m Quáº£n LÃ½ Cá»­a HÃ ng (Seller Center)';
+                document.getElementById('headerShopTitle').textContent = 'Trung Tâm Quản Lý Cửa Hàng (Seller Center)';
 
-                // Cáº­p nháº­t cá»¥m gÃ³c pháº£i Header khi chÆ°a Ä‘Äƒng nháº­p
+                // Cập nhật cụm góc phải Header khi chưa đăng nhập
                 const headerLoginBtn = document.getElementById('headerLoginBtn');
                 const headerShopCard = document.getElementById('headerShopCard');
                 if (headerLoginBtn) headerLoginBtn.classList.remove('hidden');
                 if (headerShopCard) headerShopCard.classList.add('hidden');
 
-                document.getElementById('kpiShopGmv').textContent = '0 â‚«';
-                document.getElementById('kpiShopNet').textContent = '0 â‚«';
-                document.getElementById('kpiShopOrders').innerHTML = '0 <span class="text-sm font-medium text-slate-500">ÄÆ¡n</span>';
-                document.getElementById('kpiShopProducts').innerHTML = '0 <span class="text-sm font-medium text-slate-500">Sáº£n pháº©m</span>';
+                document.getElementById('kpiShopGmv').textContent = '0 ₫';
+                document.getElementById('kpiShopNet').textContent = '0 ₫';
+                document.getElementById('kpiShopOrders').innerHTML = '0 <span class="text-sm font-medium text-slate-500">Đơn</span>';
+                document.getElementById('kpiShopProducts').innerHTML = '0 <span class="text-sm font-medium text-slate-500">Sản phẩm</span>';
 
                 document.getElementById('badgeSellerProducts').textContent = '0';
                 document.getElementById('badgeSellerOrders').textContent = '0';
 
-                document.getElementById('walletAvailable').textContent = '0 â‚«';
-                document.getElementById('walletEscrow').textContent = '0 â‚«';
-                document.getElementById('walletFee').textContent = '0 â‚«';
+                document.getElementById('walletAvailable').textContent = '0 ₫';
+                document.getElementById('walletEscrow').textContent = '0 ₫';
+                document.getElementById('walletFee').textContent = '0 ₫';
 
                 renderSellerProducts([]);
                 renderSellerOrders([]);
@@ -750,9 +750,9 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                     warningBanner.classList.remove('hidden');
                 } else {
                     warningBanner.classList.add('hidden');
-                    document.getElementById('headerShopTitle').textContent = `Cá»­a hÃ ng: ${currentShopData.name} (${currentShopData.id_display})`;
+                    document.getElementById('headerShopTitle').textContent = `Cửa hàng: ${currentShopData.name} (${currentShopData.id_display})`;
 
-                    // Cáº­p nháº­t cá»¥m gÃ³c pháº£i Header khi Ä‘Ã£ cÃ³ Shop
+                    // Cập nhật cụm góc phải Header khi đã có Shop
                     const headerLoginBtn = document.getElementById('headerLoginBtn');
                     const headerShopCard = document.getElementById('headerShopCard');
                     if (headerLoginBtn) headerLoginBtn.classList.add('hidden');
@@ -775,8 +775,8 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 const m = data.metrics || {};
                 document.getElementById('kpiShopGmv').textContent = formatVND(m.total_gmv);
                 document.getElementById('kpiShopNet').textContent = formatVND(m.total_net);
-                document.getElementById('kpiShopOrders').innerHTML = `${m.total_orders || 0} <span class="text-sm font-medium text-slate-500">ÄÆ¡n</span>`;
-                document.getElementById('kpiShopProducts').innerHTML = `${m.total_products || 0} <span class="text-sm font-medium text-slate-500">Sáº£n pháº©m</span>`;
+                document.getElementById('kpiShopOrders').innerHTML = `${m.total_orders || 0} <span class="text-sm font-medium text-slate-500">Đơn</span>`;
+                document.getElementById('kpiShopProducts').innerHTML = `${m.total_products || 0} <span class="text-sm font-medium text-slate-500">Sản phẩm</span>`;
 
                 document.getElementById('badgeSellerProducts').textContent = m.total_products || 0;
                 document.getElementById('badgeSellerOrders').textContent = m.total_orders || 0;
@@ -788,7 +788,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 renderSellerProducts(data.products || []);
                 renderSellerOrders(data.orders || []);
             } catch (err) {
-                console.error('Lá»—i Ä‘á»“ng bá»™ Seller Center:', err);
+                console.error('Lỗi đồng bộ Seller Center:', err);
             }
         }
 
@@ -800,11 +800,11 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" class="py-10 text-center text-slate-400">
-                            Cá»­a hÃ ng chÆ°a cÃ³ sáº£n pháº©m nÃ o. HÃ£y báº¥m "ÄÄƒng Sáº£n Pháº©m Má»›i" Ä‘á»ƒ Ä‘Æ°a hÃ ng lÃªn ká»‡!
+                            Cửa hàng chưa có sản phẩm nào. Hãy bấm "Đăng Sản Phẩm Mới" để đưa hàng lên kệ!
                         </td>
                     </tr>
                 `;
-                miniList.innerHTML = `<div class="py-8 text-center text-slate-400 text-xs">ChÆ°a cÃ³ sáº£n pháº©m nÃ o trong kho.</div>`;
+                miniList.innerHTML = `<div class="py-8 text-center text-slate-400 text-xs">Chưa có sản phẩm nào trong kho.</div>`;
                 return;
             }
 
@@ -815,7 +815,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                             <img src="${p.image}" alt="${p.title}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0">
                             <div>
                                 <p class="font-bold text-slate-900 line-clamp-1">${p.title}</p>
-                                <span class="text-[11px] font-mono text-slate-400">MÃ£ SP: #${p.id}</span>
+                                <span class="text-[11px] font-mono text-slate-400">Mã SP: #${p.id}</span>
                             </div>
                         </div>
                     </td>
@@ -825,16 +825,16 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                     <td class="py-3 px-4 text-slate-600">${p.sold}</td>
                     <td class="py-3 px-4">
                         ${p.status === 'pending'
-                            ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[11px] animate-pulse">â³ Chá» duyá»‡t</span>'
+                            ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[11px] animate-pulse">⏳ Chờ duyệt</span>'
                             : p.status === 'rejected'
-                            ? '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold text-[11px]">âœ• Tá»« chá»‘i</span>'
+                            ? '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold text-[11px]">✕ Từ chối</span>'
                             : p.is_flash_sale
-                            ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[11px]">âš¡ Flash Sale</span>'
-                            : '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-medium text-[11px]">âœ“ Äang bÃ¡n</span>'}
+                            ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[11px]">⚡ Flash Sale</span>'
+                            : '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-medium text-[11px]">✓ Đang bán</span>'}
                     </td>
                     <td class="py-3 px-4 text-right">
                         <button onclick="deleteSellerProduct(${p.id}, '${p.title.replace(/'/g, "\\'")}')" class="px-2.5 py-1 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-semibold">
-                            XÃ³a SP
+                            Xóa SP
                         </button>
                     </td>
                 </tr>
@@ -859,20 +859,20 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
             const fullContainer = document.getElementById('sellerOrdersListContainer');
 
             if (orders.length === 0) {
-                recentBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">ChÆ°a cÃ³ Ä‘Æ¡n hÃ ng nÃ o phÃ¡t sinh táº¡i Cá»­a hÃ ng.</td></tr>`;
-                fullContainer.innerHTML = `<div class="py-12 text-center bg-white rounded-xl border border-slate-200 text-slate-400 text-xs">ChÆ°a cÃ³ Ä‘Æ¡n hÃ ng nÃ o táº¡i Cá»­a hÃ ng cá»§a báº¡n.</div>`;
+                recentBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Chưa có đơn hàng nào phát sinh tại Cửa hàng.</td></tr>`;
+                fullContainer.innerHTML = `<div class="py-12 text-center bg-white rounded-xl border border-slate-200 text-slate-400 text-xs">Chưa có đơn hàng nào tại Cửa hàng của bạn.</div>`;
                 return;
             }
 
             recentBody.innerHTML = orders.slice(0, 5).map(o => {
                 let badgeClass = 'bg-amber-50 text-amber-600 border border-amber-200';
-                let badgeText = o.escrow_badge || 'ðŸ“¦ Shop Ä‘ang chuáº©n bá»‹ Ä‘Æ¡n';
+                let badgeText = o.escrow_badge || '📦 Shop đang chuẩn bị đơn';
                 if (o.status === 'shipping') {
                     badgeClass = 'bg-blue-50 text-blue-600 border border-blue-200';
-                    badgeText = 'ðŸšš Äang váº­n chuyá»ƒn';
+                    badgeText = '🚚 Đang vận chuyển';
                 } else if (o.status === 'delivered' || o.status === 'released') {
                     badgeClass = 'bg-emerald-50 text-emerald-600 border border-emerald-200';
-                    badgeText = 'âœ“ ÄÃ£ giao hÃ ng';
+                    badgeText = '✓ Đã giao hàng';
                 }
 
                 return `
@@ -890,33 +890,33 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
             fullContainer.innerHTML = orders.map(o => {
                 const currentStatus = o.status || 'preparing';
                 let badgeClass = 'bg-amber-50 text-amber-600 border border-amber-200';
-                let badgeText = o.escrow_badge || 'ðŸ“¦ Shop Ä‘ang chuáº©n bá»‹ Ä‘Æ¡n';
+                let badgeText = o.escrow_badge || '📦 Shop đang chuẩn bị đơn';
                 if (currentStatus === 'shipping') {
                     badgeClass = 'bg-blue-50 text-blue-600 border border-blue-200';
-                    badgeText = 'ðŸšš Äang váº­n chuyá»ƒn';
+                    badgeText = '🚚 Đang vận chuyển';
                 } else if (currentStatus === 'delivered' || currentStatus === 'released') {
                     badgeClass = 'bg-emerald-50 text-emerald-600 border border-emerald-200';
-                    badgeText = 'âœ“ KhÃ¡ch Ä‘Ã£ nháº­n hÃ ng';
+                    badgeText = '✓ Khách đã nhận hàng';
                 }
 
                 return `
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="px-5 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-                        <span class="font-bold text-slate-800">MÃ£ Ä‘Æ¡n: <strong class="text-blue-600">${o.id_display}</strong> â€¢ NgÃ y: ${o.created_at}</span>
+                        <span class="font-bold text-slate-800">Mã đơn: <strong class="text-blue-600">${o.id_display}</strong> • Ngày: ${o.created_at}</span>
                         <div class="flex items-center gap-2">
                             <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${badgeClass}">${badgeText}</span>
-                            <!-- NÃºt thao tÃ¡c Ä‘i Ä‘Æ¡n chuáº©n Shopee -->
+                            <!-- Nút thao tác đi đơn chuẩn Shopee -->
                             ${currentStatus === 'preparing' ? `
                                 <button onclick="changeSellerOrderStatus('${o.order_key}', 'shipping')" class="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-bold text-xs shadow-sm transition-colors">
-                                    ðŸšš Giao cho ÄÆ¡n vá»‹ váº­n chuyá»ƒn (Äi Ä‘Æ¡n)
+                                    🚚 Giao cho Đơn vị vận chuyển (Đi đơn)
                                 </button>
                             ` : currentStatus === 'shipping' ? `
                                 <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                    Chá» ngÆ°á»i mua xÃ¡c nháº­n Ä‘Ã£ nháº­n hÃ ng
+                                    Chờ người mua xác nhận đã nhận hàng
                                 </span>
                             ` : `
-                                <span class="text-xs font-bold text-emerald-600">âœ“ ÄÆ¡n hÃ ng Ä‘Ã£ hoÃ n táº¥t</span>
+                                <span class="text-xs font-bold text-emerald-600">✓ Đơn hàng đã hoàn tất</span>
                             `}
                         </div>
                     </div>
@@ -936,11 +936,11 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                             `).join('')}
                         </div>
                         <div class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-slate-200 pt-3 lg:pt-0 lg:pl-5 space-y-1.5">
-                            <p class="text-slate-600">KhÃ¡ch Ä‘áº·t: <strong class="text-slate-900">${o.buyer_name}</strong></p>
-                            <p class="text-slate-600">Äá»‹a chá»‰ giao: ${o.buyer_address}</p>
+                            <p class="text-slate-600">Khách đặt: <strong class="text-slate-900">${o.buyer_name}</strong></p>
+                            <p class="text-slate-600">Địa chỉ giao: ${o.buyer_address}</p>
                             <div class="pt-2 border-t border-slate-100 flex justify-between">
-                                <span>Tá»•ng Ä‘Æ¡n: <strong>${o.total}</strong></span>
-                                <span class="text-emerald-600 font-bold">Thá»±c nháº­n (93%): ${o.net}</span>
+                                <span>Tổng đơn: <strong>${o.total}</strong></span>
+                                <span class="text-emerald-600 font-bold">Thực nhận (93%): ${o.net}</span>
                             </div>
                         </div>
                     </div>
@@ -1021,7 +1021,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
             e.preventDefault();
             const shopKey = document.getElementById('profileShopKey').value;
             if (!shopKey) {
-                alert('Báº¡n chÆ°a cÃ³ Cá»­a hÃ ng. Vui lÃ²ng Ä‘Äƒng kÃ½ má»Ÿ Shop trÆ°á»›c!');
+                alert('Bạn chưa có Cửa hàng. Vui lòng đăng ký mở Shop trước!');
                 return;
             }
             const payload = {

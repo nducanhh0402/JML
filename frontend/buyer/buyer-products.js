@@ -1,10 +1,10 @@
-// Dá»¯ liá»‡u sáº£n pháº©m máº«u phong phÃº (16 sáº£n pháº©m thuá»™c 4 ngÃ nh hÃ ng chÃ­nh)
+// Dữ liệu sản phẩm mẫu phong phú (16 sản phẩm thuộc 4 ngành hàng chính)
       const MOCK_PRODUCTS = [
         // Audio
         {
           id: 1,
           category: "audio",
-          title: "Tai Nghe Chá»¥p Tai Apple AirPods Max SiÃªu Chá»‘ng á»’n ANC",
+          title: "Tai Nghe Chụp Tai Apple AirPods Max Siêu Chống Ồn ANC",
           price: 12490000,
           originalPrice: 14990000,
           discount: "-17%",
@@ -13,13 +13,13 @@
           totalStock: 45,
           image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
           shopName: "SoundMax & Marshall Audio",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: true
         },
         {
           id: 2,
           category: "audio",
-          title: "Loa Bluetooth Di Äá»™ng Marshall Emberton II Ã‚m Thanh Äa HÆ°á»›ng",
+          title: "Loa Bluetooth Di Động Marshall Emberton II Âm Thanh Đa Hướng",
           price: 3950000,
           originalPrice: 4600000,
           discount: "-14%",
@@ -28,13 +28,13 @@
           totalStock: 60,
           image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80",
           shopName: "SoundMax & Marshall Audio",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 3,
           category: "audio",
-          title: "Tai Nghe Chá»‘ng á»’n Cao Cáº¥p Sony WH-1000XM5 Pin 30 Giá»",
+          title: "Tai Nghe Chống Ồn Cao Cấp Sony WH-1000XM5 Pin 30 Giờ",
           price: 7690000,
           originalPrice: 8990000,
           discount: "-14%",
@@ -43,13 +43,13 @@
           totalStock: 30,
           image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
           shopName: "SoundMax & Marshall Audio",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 4,
           category: "audio",
-          title: "Loa Marshall Stanmore III Bluetooth Home Speaker CÃ´ng Suáº¥t 80W",
+          title: "Loa Marshall Stanmore III Bluetooth Home Speaker Công Suất 80W",
           price: 8990000,
           originalPrice: 10500000,
           discount: "-14%",
@@ -58,7 +58,7 @@
           totalStock: 25,
           image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80",
           shopName: "SoundMax & Marshall Audio",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
 
@@ -66,7 +66,7 @@
         {
           id: 5,
           category: "watch",
-          title: "Äá»“ng Há»“ CÆ¡ Nam Tissot Le Locle Powermatic 80 Thá»¥y SÄ©",
+          title: "Đồng Hồ Cơ Nam Tissot Le Locle Powermatic 80 Thụy Sĩ",
           price: 15800000,
           originalPrice: 18500000,
           discount: "-15%",
@@ -75,13 +75,13 @@
           totalStock: 20,
           image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80",
           shopName: "Luxury Watch Vietnam",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 6,
           category: "watch",
-          title: "Äá»“ng Há»“ Nam Thá»ƒ Thao Seiko 5 Sports Automatic Chá»‘ng NÆ°á»›c 100m",
+          title: "Đồng Hồ Nam Thể Thao Seiko 5 Sports Automatic Chống Nước 100m",
           price: 6200000,
           originalPrice: 7500000,
           discount: "-17%",
@@ -90,13 +90,13 @@
           totalStock: 50,
           image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
           shopName: "Luxury Watch Vietnam",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 7,
           category: "watch",
-          title: "Äá»“ng Há»“ Ná»¯ DÃ¢y Da Cao Cáº¥p Daniel Wellington Petite Melrose",
+          title: "Đồng Hồ Nữ Dây Da Cao Cấp Daniel Wellington Petite Melrose",
           price: 3600000,
           originalPrice: 4500000,
           discount: "-20%",
@@ -105,13 +105,13 @@
           totalStock: 80,
           image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80",
           shopName: "Luxury Watch Vietnam",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 8,
           category: "watch",
-          title: "Äá»“ng Há»“ ThÃ´ng Minh Apple Watch Ultra 2 GPS + Cellular 49mm Titan",
+          title: "Đồng Hồ Thông Minh Apple Watch Ultra 2 GPS + Cellular 49mm Titan",
           price: 20490000,
           originalPrice: 22990000,
           discount: "-11%",
@@ -120,7 +120,7 @@
           totalStock: 18,
           image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80",
           shopName: "Luxury Watch Vietnam",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: true
         },
 
@@ -128,7 +128,7 @@
         {
           id: 9,
           category: "fashion",
-          title: "Ão Blazer Nam May Äo Phong CÃ¡ch Ã Aristino Premium Wool",
+          title: "Áo Blazer Nam May Đo Phong Cách Ý Aristino Premium Wool",
           price: 2450000,
           originalPrice: 3200000,
           discount: "-23%",
@@ -137,13 +137,13 @@
           totalStock: 40,
           image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80",
           shopName: "Aristino & Gentleman Store",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 10,
           category: "fashion",
-          title: "VÃ­ Da Nam BÃ² Ã Cáº§m Tay KhÃ³a KÃ©o Cao Cáº¥p Giovanni Leather",
+          title: "Ví Da Nam Bò Ý Cầm Tay Khóa Kéo Cao Cấp Giovanni Leather",
           price: 1850000,
           originalPrice: 2500000,
           discount: "-26%",
@@ -152,13 +152,13 @@
           totalStock: 55,
           image: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80",
           shopName: "Aristino & Gentleman Store",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 11,
           category: "fashion",
-          title: "TÃºi XÃ¡ch Ná»¯ Da Tháº­t Cao Cáº¥p Thiáº¿t Káº¿ Paris Sang Trá»ng",
+          title: "Túi Xách Nữ Da Thật Cao Cấp Thiết Kế Paris Sang Trọng",
           price: 3200000,
           originalPrice: 4200000,
           discount: "-24%",
@@ -167,13 +167,13 @@
           totalStock: 35,
           image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
           shopName: "Luxe Paris & Bags",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 12,
           category: "fashion",
-          title: "Tháº¯t LÆ°ng Nam Da BÃ² Tháº­t KhÃ³a Tá»± Äá»™ng Máº¡ VÃ ng 18K",
+          title: "Thắt Lưng Nam Da Bò Thật Khóa Tự Động Mạ Vàng 18K",
           price: 950000,
           originalPrice: 1350000,
           discount: "-30%",
@@ -182,7 +182,7 @@
           totalStock: 70,
           image: "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=800&q=80",
           shopName: "Luxe Paris & Bags",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
 
@@ -190,7 +190,7 @@
         {
           id: 13,
           category: "tech",
-          title: "Card MÃ n HÃ¬nh VGA ASUS ROG Strix GeForce RTX 5090 OC 32GB",
+          title: "Card Màn Hình VGA ASUS ROG Strix GeForce RTX 5090 OC 32GB",
           price: 68900000,
           originalPrice: 75000000,
           discount: "-8%",
@@ -199,13 +199,13 @@
           totalStock: 10,
           image: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=80",
           shopName: "GearVN Official Store",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: true
         },
         {
           id: 14,
           category: "tech",
-          title: "BÃ n PhÃ­m CÆ¡ KhÃ´ng DÃ¢y Custom GMMK Pro 75% Switch Gateron",
+          title: "Bàn Phím Cơ Không Dây Custom GMMK Pro 75% Switch Gateron",
           price: 4250000,
           originalPrice: 4950000,
           discount: "-14%",
@@ -214,13 +214,13 @@
           totalStock: 40,
           image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
           shopName: "GearVN Official Store",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 15,
           category: "tech",
-          title: "Chuá»™t CÃ´ng ThÃ¡i Há»c KhÃ´ng DÃ¢y Logitech MX Master 3S SiÃªu Nháº¡y",
+          title: "Chuột Công Thái Học Không Dây Logitech MX Master 3S Siêu Nhạy",
           price: 2490000,
           originalPrice: 2990000,
           discount: "-17%",
@@ -229,13 +229,13 @@
           totalStock: 60,
           image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
           shopName: "GearVN Official Store",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         },
         {
           id: 16,
           category: "tech",
-          title: "MÃ n HÃ¬nh ChuyÃªn Nghiá»‡p Dell UltraSharp U2724D 27 inch 2K 120Hz IPS",
+          title: "Màn Hình Chuyên Nghiệp Dell UltraSharp U2724D 27 inch 2K 120Hz IPS",
           price: 10890000,
           originalPrice: 12500000,
           discount: "-13%",
@@ -244,12 +244,12 @@
           totalStock: 25,
           image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80",
           shopName: "GearVN Official Store",
-          exclusive: "ChÃ­nh HÃ£ng",
+          exclusive: "Chính Hãng",
           isFlashSale: false
         }
       ];
 
-      // Biáº¿n tráº¡ng thÃ¡i toÃ n cá»¥c
+      // Biến trạng thái toàn cục
       let allProducts = [...MOCK_PRODUCTS];
       let filteredProducts = [...MOCK_PRODUCTS];
       let currentCategory = "all";
@@ -260,9 +260,9 @@
       let currentPage = 1;
       const pageSize = 8;
 
-      // Khá»Ÿi táº¡o trang
+      // Khởi tạo trang
       document.addEventListener("DOMContentLoaded", () => {
-        // Cá»‘ gáº¯ng fetch tá»« API náº¿u backend Ä‘ang cháº¡y
+        // Cố gắng fetch từ API nếu backend đang chạy
         fetchProductsFromAPI();
         updateCartBadge();
       });
@@ -286,19 +286,19 @@
                 totalStock: p.totalStock || 50,
                 image: (p.images && p.images[0]) ? p.images[0] : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
                 shopName: p.shopName || "JML Official Store",
-                exclusive: p.exclusive || "ChÃ­nh HÃ£ng",
+                exclusive: p.exclusive || "Chính Hãng",
                 isFlashSale: Boolean(p.is_flash_sale)
               }));
             }
           }
         } catch (e) {
-          console.log("Sá»­ dá»¥ng bá»™ dá»¯ liá»‡u Mock tÄ©nh Ä‘áº§y Ä‘á»§ 16 sáº£n pháº©m.");
+          console.log("Sử dụng bộ dữ liệu Mock tĩnh đầy đủ 16 sản phẩm.");
         }
         applyAllFilters();
       }
 
       // =========================================================================
-      // Bá»˜ Lá»ŒC (FILTERS LOGIC)
+      // BỘ LỌC (FILTERS LOGIC)
       // =========================================================================
       function selectCategory(cat, el) {
         currentCategory = cat;
@@ -306,16 +306,16 @@
         if (el) el.classList.add("active");
 
         const catNames = {
-          "all": "Táº¥t cáº£ ngÃ nh hÃ ng",
-          "audio": "Thiáº¿t Bá»‹ Ã‚m Thanh",
-          "watch": "Äá»“ng Há»“ Cao Cáº¥p",
-          "fashion": "Thá»i Trang & Äá»“ Da",
-          "tech": "Thiáº¿t Bá»‹ Sá»‘ & PC"
+          "all": "Tất cả ngành hàng",
+          "audio": "Thiết Bị Âm Thanh",
+          "watch": "Đồng Hồ Cao Cấp",
+          "fashion": "Thời Trang & Đồ Da",
+          "tech": "Thiết Bị Số & PC"
         };
         document.getElementById("breadcrumbCurrentCategory").textContent = catNames[cat] || cat;
         applyAllFilters();
 
-        // Tá»± Ä‘á»™ng Ä‘Ã³ng drawer trÃªn mobile sau khi chá»n
+        // Tự động đóng drawer trên mobile sau khi chọn
         if (window.innerWidth <= 900) {
           closeFilterDrawer();
         }
@@ -332,11 +332,11 @@
         const minVal = parseInt(document.getElementById("minPriceInput").value) || 0;
         const maxVal = parseInt(document.getElementById("maxPriceInput").value) || Infinity;
 
-        // Bá» chá»n cÃ¡c radio button giÃ¡
+        // Bỏ chọn các radio button giá
         document.querySelectorAll('input[name="priceRange"]').forEach(r => r.checked = false);
         currentPriceRange = { custom: true, min: minVal, max: maxVal };
         applyAllFilters();
-        showToast("ÄÃ£ Ã¡p dá»¥ng khoáº£ng giÃ¡: " + formatCurrency(minVal) + " - " + (maxVal === Infinity ? "Trá»Ÿ lÃªn" : formatCurrency(maxVal)));
+        showToast("Đã áp dụng khoảng giá: " + formatCurrency(minVal) + " - " + (maxVal === Infinity ? "Trở lên" : formatCurrency(maxVal)));
         if (window.innerWidth <= 900) closeFilterDrawer();
       }
 
@@ -374,28 +374,28 @@
         document.querySelectorAll(".category-item").forEach((it, idx) => {
           it.classList.toggle("active", idx === 0);
         });
-        document.getElementById("breadcrumbCurrentCategory").textContent = "Táº¥t cáº£ ngÃ nh hÃ ng";
+        document.getElementById("breadcrumbCurrentCategory").textContent = "Tất cả ngành hàng";
         applyAllFilters();
-        showToast("ÄÃ£ Ä‘áº·t láº¡i táº¥t cáº£ bá»™ lá»c");
+        showToast("Đã đặt lại tất cả bộ lọc");
       }
 
-      // Ãp dá»¥ng tá»•ng há»£p táº¥t cáº£ tiÃªu chÃ­ lá»c
+      // Áp dụng tổng hợp tất cả tiêu chí lọc
       function applyAllFilters() {
         const isFlashOnly = document.getElementById("chkFlashSale")?.checked;
         const isExclusiveOnly = document.getElementById("chkExclusive")?.checked;
 
         filteredProducts = allProducts.filter(p => {
-          // 1. Danh má»¥c
+          // 1. Danh mục
           if (currentCategory !== "all" && p.category !== currentCategory) return false;
 
-          // 2. TÃ¬m kiáº¿m tÃªn sáº£n pháº©m / shop
+          // 2. Tìm kiếm tên sản phẩm / shop
           if (searchQuery) {
             const matchTitle = p.title.toLowerCase().includes(searchQuery);
             const matchShop = p.shopName.toLowerCase().includes(searchQuery);
             if (!matchTitle && !matchShop) return false;
           }
 
-          // 3. Khoáº£ng giÃ¡
+          // 3. Khoảng giá
           if (currentPriceRange === "under-1m" && p.price >= 1000000) return false;
           if (currentPriceRange === "1m-5m" && (p.price < 1000000 || p.price > 5000000)) return false;
           if (currentPriceRange === "5m-15m" && (p.price < 5000000 || p.price > 15000000)) return false;
@@ -404,26 +404,26 @@
             if (p.price < currentPriceRange.min || p.price > currentPriceRange.max) return false;
           }
 
-          // 4. ÄÃ¡nh giÃ¡
+          // 4. Đánh giá
           if (currentRating === "5" && p.rating < 5.0) return false;
           if (currentRating === "4" && p.rating < 4.0) return false;
           if (currentRating === "3" && p.rating < 3.0) return false;
 
-          // 5. Khuyáº¿n mÃ£i khÃ¡c
+          // 5. Khuyến mãi khác
           if (isFlashOnly && !p.isFlashSale) return false;
-          if (isExclusiveOnly && p.exclusive !== "ChÃ­nh HÃ£ng") return false;
+          if (isExclusiveOnly && p.exclusive !== "Chính Hãng") return false;
 
           return true;
         });
 
-        // Ãp dá»¥ng sáº¯p xáº¿p
+        // Áp dụng sắp xếp
         sortProducts();
 
-        // Cáº­p nháº­t sá»‘ lÆ°á»£ng
+        // Cập nhật số lượng
         document.getElementById("productCountText").textContent = filteredProducts.length;
         document.getElementById("countAll").textContent = allProducts.length;
 
-        // Äáº¿m bá»™ lá»c Ä‘ang kÃ­ch hoáº¡t
+        // Đếm bộ lọc đang kích hoạt
         let activeCount = 0;
         if (currentCategory !== "all") activeCount++;
         if (currentPriceRange !== "all") activeCount++;
@@ -437,7 +437,7 @@
       }
 
       // =========================================================================
-      // Sáº®P Xáº¾P (SORTING LOGIC)
+      // SẮP XẾP (SORTING LOGIC)
       // =========================================================================
       function changeSort(sortType, el) {
         currentSort = sortType;
@@ -469,13 +469,13 @@
         } else if (currentSort === "bestseller") {
           filteredProducts.sort((a, b) => (b.sold || 0) - (a.sold || 0));
         } else {
-          // popular: Æ°u tiÃªn rating vÃ  sold
+          // popular: ưu tiên rating và sold
           filteredProducts.sort((a, b) => (b.rating * 10 + b.sold) - (a.rating * 10 + a.sold));
         }
       }
 
       // =========================================================================
-      // RENDER LÆ¯á»šI Sáº¢N PHáº¨M & PHÃ‚N TRANG
+      // RENDER LƯỚI SẢN PHẨM & PHÂN TRANG
       // =========================================================================
       function renderProducts() {
         const grid = document.getElementById("productsGrid");
@@ -484,10 +484,10 @@
         if (filteredProducts.length === 0) {
           grid.innerHTML = `
             <div class="empty-state">
-              <div class="empty-state-icon">ðŸ”</div>
-              <div class="empty-state-title">KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m phÃ¹ há»£p</div>
-              <p class="empty-state-desc">HÃ£y thá»­ thay Ä‘á»•i danh má»¥c hoáº·c má»Ÿ rá»™ng khoáº£ng giÃ¡ tÃ¬m kiáº¿m cá»§a báº¡n.</p>
-              <button class="btn-apply-price" style="width: auto; padding: 8px 20px; display: inline-block;" onclick="resetAllFilters()">XÃ³a Táº¥t Cáº£ Bá»™ Lá»c</button>
+              <div class="empty-state-icon">🔍</div>
+              <div class="empty-state-title">Không tìm thấy sản phẩm phù hợp</div>
+              <p class="empty-state-desc">Hãy thử thay đổi danh mục hoặc mở rộng khoảng giá tìm kiếm của bạn.</p>
+              <button class="btn-apply-price" style="width: auto; padding: 8px 20px; display: inline-block;" onclick="resetAllFilters()">Xóa Tất Cả Bộ Lọc</button>
             </div>
           `;
           document.getElementById("paginationWrapper").style.display = "none";
@@ -496,7 +496,7 @@
 
         document.getElementById("paginationWrapper").style.display = "flex";
 
-        // Cáº¯t theo trang
+        // Cắt theo trang
         const start = (currentPage - 1) * pageSize;
         const pageItems = filteredProducts.slice(start, start + pageSize);
 
@@ -505,7 +505,7 @@
             <div class="product-img-wrap">
               <img src="${p.image}" alt="${p.title}" class="product-img" loading="lazy" />
               ${p.discount ? `<span class="discount-tag">${p.discount}</span>` : ""}
-              <span class="shop-tag">ðŸª ${p.shopName || "JML Mall"}</span>
+              <span class="shop-tag">🏪 ${p.shopName || "JML Mall"}</span>
             </div>
             <div class="product-info">
               <h3 class="product-title" title="${p.title}">${p.title}</h3>
@@ -514,14 +514,14 @@
                 ${p.originalPrice > p.price ? `<span class="price-original">${formatCurrency(p.originalPrice)}</span>` : ""}
               </div>
               <div class="product-meta-row">
-                <span class="stars-yellow">â˜… ${p.rating.toFixed(1)}</span>
-                <span>ÄÃ£ bÃ¡n ${p.sold || 0}</span>
+                <span class="stars-yellow">★ ${p.rating.toFixed(1)}</span>
+                <span>Đã bán ${p.sold || 0}</span>
               </div>
               <button class="btn-add-cart" onclick="addToCart(event, ${p.id})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M12 5v14M5 12h14"></path>
                 </svg>
-                ThÃªm VÃ o Giá»
+                Thêm Vào Giỏ
               </button>
             </div>
           </div>
@@ -539,13 +539,13 @@
         if (nextBtn) nextBtn.disabled = (currentPage === totalPages);
 
         const pagWrapper = document.getElementById("paginationWrapper");
-        let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">â€¹</button>`;
+        let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">‹</button>`;
 
         for (let i = 1; i <= totalPages; i++) {
           html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
         }
 
-        html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">â€º</button>`;
+        html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">›</button>`;
         pagWrapper.innerHTML = html;
       }
 
@@ -558,14 +558,14 @@
       }
 
       // =========================================================================
-      // MOBILE DRAWER LOGIC (Má»ž / ÄÃ“NG PANEL Bá»˜ Lá»ŒC TRÃŠN ÄIá»†N THOáº I)
+      // MOBILE DRAWER LOGIC (MỞ / ĐÓNG PANEL BỘ LỌC TRÊN ĐIỆN THOẠI)
       // =========================================================================
       function openFilterDrawer() {
         const sidebar = document.getElementById("filterSidebar");
         const backdrop = document.getElementById("drawerBackdrop");
         if (sidebar) sidebar.classList.add("drawer-open");
         if (backdrop) backdrop.classList.add("active");
-        document.body.style.overflow = "hidden"; // KhÃ³a cuá»™n trang khi drawer má»Ÿ
+        document.body.style.overflow = "hidden"; // Khóa cuộn trang khi drawer mở
       }
 
       function closeFilterDrawer() {
@@ -573,14 +573,14 @@
         const backdrop = document.getElementById("drawerBackdrop");
         if (sidebar) sidebar.classList.remove("drawer-open");
         if (backdrop) backdrop.classList.remove("active");
-        document.body.style.overflow = ""; // Má»Ÿ láº¡i cuá»™n trang
+        document.body.style.overflow = ""; // Mở lại cuộn trang
       }
 
       // =========================================================================
-      // TIá»†N ÃCH & GIá»Ž HÃ€NG
+      // TIỆN ÍCH & GIỎ HÀNG
       // =========================================================================
       function formatCurrency(amount) {
-        return Number(amount).toLocaleString("vi-VN") + " â‚«";
+        return Number(amount).toLocaleString("vi-VN") + " ₫";
       }
 
       function goToDetail(id) {
@@ -608,7 +608,7 @@
         }
         localStorage.setItem("JML_CART_ITEMS", JSON.stringify(cart));
         updateCartBadge();
-        showToast(`ÄÃ£ thÃªm "${p.title.substring(0, 24)}..." vÃ o giá» hÃ ng!`);
+        showToast(`Đã thêm "${p.title.substring(0, 24)}..." vào giỏ hàng!`);
       }
 
       function updateCartBadge() {
@@ -622,7 +622,7 @@
         const box = document.getElementById("toastBox");
         if (!box) return;
         box.className = "toast-msg";
-        box.innerHTML = `<span>âœ“</span><span>${msg}</span>`;
+        box.innerHTML = `<span>✓</span><span>${msg}</span>`;
         box.style.display = "flex";
         setTimeout(() => {
           box.style.display = "none";

@@ -1,12 +1,12 @@
 // --------------------------------------------------------------------------
-      // Dá»® LIá»†U Sáº¢N PHáº¨M MáºªU (DATA STORE KÃˆM Bá»˜ SÆ¯U Táº¬P áº¢NH ÄA GÃ“C CHá»¤P CHO Má»–I Sáº¢N PHáº¨M)
+      // DỮ LIỆU SẢN PHẨM MẪU (DATA STORE KÈM BỘ SƯU TẬP ẢNH ĐA GÓC CHỤP CHO MỖI SẢN PHẨM)
       // --------------------------------------------------------------------------
       const API_BASE_URL = "http://127.0.0.1:8000";
       const DEFAULT_FLASH_PRODUCTS = [
         {
           id: 101,
           category: "audio",
-          title: "Tai Nghe Chá»‘ng á»’n Cao Cáº¥p Sony WH-1000XM5 Black Edition",
+          title: "Tai Nghe Chống Ồn Cao Cấp Sony WH-1000XM5 Black Edition",
           price: 7490000,
           originalPrice: 9490000,
           discount: "-21%",
@@ -20,17 +20,17 @@
             "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "ChÃ­nh diá»‡n",
-            "GÃ³c nghiÃªng",
-            "Cáº­n cáº£nh Ä‘á»‡m da",
-            "TrÃªn tay lifestyle",
+            "Chính diện",
+            "Góc nghiêng",
+            "Cận cảnh đệm da",
+            "Trên tay lifestyle",
           ],
-          exclusive: "BÃ¡n Cháº¡y",
+          exclusive: "Bán Chạy",
         },
         {
           id: 102,
           category: "watch",
-          title: "Äá»“ng Há»“ Nam CÆ¡ Tá»± Äá»™ng Tissot Le Locle Powermatic 80",
+          title: "Đồng Hồ Nam Cơ Tự Động Tissot Le Locle Powermatic 80",
           price: 13800000,
           originalPrice: 17250000,
           discount: "-20%",
@@ -44,10 +44,10 @@
             "https://images.unsplash.com/photo-1533139502658-0198f920d8e8?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Máº·t sá»‘ Guilloche",
-            "GÃ³c nghiÃªng viá»n",
-            "Náº¯p lÆ°ng lá»™ cÆ¡",
-            "Äeo trÃªn cá»• tay",
+            "Mặt số Guilloche",
+            "Góc nghiêng viền",
+            "Nắp lưng lộ cơ",
+            "Đeo trên cổ tay",
           ],
           exclusive: "Hot Deal",
         },
@@ -68,17 +68,17 @@
             "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "VÃ²m Acrylic",
-            "ÄÃ¨n Ambient LED",
-            "MÃ ng Subwoofer",
-            "PhÃ²ng khÃ¡ch tá»‘i giáº£n",
+            "Vòm Acrylic",
+            "Đèn Ambient LED",
+            "Màng Subwoofer",
+            "Phòng khách tối giản",
           ],
           exclusive: "Flash",
         },
         {
           id: 104,
           category: "fashion",
-          title: "KÃ­nh MÃ¡t PhÃ¢n Cá»±c Ray-Ban Aviator Classic Gold Frame",
+          title: "Kính Mát Phân Cực Ray-Ban Aviator Classic Gold Frame",
           price: 3650000,
           originalPrice: 4800000,
           discount: "-24%",
@@ -92,17 +92,17 @@
             "https://images.unsplash.com/photo-1508296695146-257a814070b4?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Khung máº¡ vÃ ng",
-            "Máº·t nghiÃªng gá»ng",
-            "TrÃ²ng kÃ­nh rÃ¢m",
-            "Phá»‘i Ä‘á»“ phong cÃ¡ch",
+            "Khung mạ vàng",
+            "Mặt nghiêng gọng",
+            "Tròng kính râm",
+            "Phối đồ phong cách",
           ],
           exclusive: "Trend",
         },
         {
           id: 105,
           category: "tech",
-          title: "BÃ n PhÃ­m CÆ¡ KhÃ´ng DÃ¢y NuPhy Air75 V2 Low-Profile",
+          title: "Bàn Phím Cơ Không Dây NuPhy Air75 V2 Low-Profile",
           price: 2990000,
           originalPrice: 3800000,
           discount: "-21%",
@@ -116,12 +116,12 @@
             "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Máº·t phÃ­m PBT",
-            "Äá»™ má»ng hÃ´ng",
-            "Switch cÆ¡ há»c",
-            "BÃ n lÃ m viá»‡c Desk",
+            "Mặt phím PBT",
+            "Độ mỏng hông",
+            "Switch cơ học",
+            "Bàn làm việc Desk",
           ],
-          exclusive: "Sáº¯p ChÃ¡y HÃ ng",
+          exclusive: "Sắp Cháy Hàng",
         },
       ];
 
@@ -129,7 +129,7 @@
         {
           id: 201,
           category: "tech",
-          title: "iPad Pro M4 11-inch OLED SiÃªu Má»ng 256GB Space Black",
+          title: "iPad Pro M4 11-inch OLED Siêu Mỏng 256GB Space Black",
           price: 26990000,
           originalPrice: 28990000,
           discount: "-7%",
@@ -142,16 +142,16 @@
             "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "MÃ n hÃ¬nh Ultra OLED",
-            "Cáº¡nh vÃ¡t má»ng 5.1mm",
-            "Máº·t lÆ°ng Space Black",
-            "Tráº£i nghiá»‡m Apple Pencil",
+            "Màn hình Ultra OLED",
+            "Cạnh vát mỏng 5.1mm",
+            "Mặt lưng Space Black",
+            "Trải nghiệm Apple Pencil",
           ],
         },
         {
           id: 202,
           category: "watch",
-          title: "Apple Watch Ultra 2 GPS + Cellular DÃ¢y Alpine Loop",
+          title: "Apple Watch Ultra 2 GPS + Cellular Dây Alpine Loop",
           price: 20490000,
           originalPrice: 21990000,
           discount: "-7%",
@@ -164,16 +164,16 @@
             "https://images.unsplash.com/photo-1508615039623-a25605d2b022?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "MÃ n hÃ¬nh 3000 nits",
-            "NÃºt Action Titanium",
-            "KhÃ³a dá»‡t Alpine",
-            "Äeo dÃ£ ngoáº¡i ngoÃ i trá»i",
+            "Màn hình 3000 nits",
+            "Nút Action Titanium",
+            "Khóa dệt Alpine",
+            "Đeo dã ngoại ngoài trời",
           ],
         },
         {
           id: 203,
           category: "audio",
-          title: "Tai Nghe Airpods Max Apple Báº£n KhÃ´ng Gian Chá»‘ng á»’n",
+          title: "Tai Nghe Airpods Max Apple Bản Không Gian Chống Ồn",
           price: 12490000,
           originalPrice: 13990000,
           discount: "-11%",
@@ -186,16 +186,16 @@
             "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Chá»¥p tai vÃ²m lÆ°á»›i",
-            "Khung thÃ©p khÃ´ng gá»‰",
-            "NÃºm xoay Digital Crown",
-            "Phá»‘i trang phá»¥c thá»i thÆ°á»£ng",
+            "Chụp tai vòm lưới",
+            "Khung thép không gỉ",
+            "Núm xoay Digital Crown",
+            "Phối trang phục thời thượng",
           ],
         },
         {
           id: 204,
           category: "fashion",
-          title: "VÃ­ Da Nam Cáº§m Tay Epsom Äen Thá»§ CÃ´ng Phong CÃ¡ch PhÃ¡p",
+          title: "Ví Da Nam Cầm Tay Epsom Đen Thủ Công Phong Cách Pháp",
           price: 1850000,
           originalPrice: 2400000,
           discount: "-23%",
@@ -208,16 +208,16 @@
             "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "VÃ¢n da dáº­p Epsom",
-            "ÄÆ°á»ng may chá»‰ sÃ¡p",
-            "NgÄƒn tháº» & tiá»n",
-            "Cáº§m tay phong cÃ¡ch quÃ½ Ã´ng",
+            "Vân da dập Epsom",
+            "Đường may chỉ sáp",
+            "Ngăn thẻ & tiền",
+            "Cầm tay phong cách quý ông",
           ],
         },
         {
           id: 205,
           category: "tech",
-          title: "MÃ¡y áº¢nh Mirrorless Fujifilm X-T5 Cá»• Äiá»ƒn KÃ¨m á»ng KÃ­nh Kit",
+          title: "Máy Ảnh Mirrorless Fujifilm X-T5 Cổ Điển Kèm Ống Kính Kit",
           price: 43900000,
           originalPrice: 46500000,
           discount: "-6%",
@@ -230,16 +230,16 @@
             "https://images.unsplash.com/photo-1495745966610-2a67f2297e5e?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Máº·t trÆ°á»›c phong cÃ¡ch Retro",
-            "VÃ²ng xoay kim loáº¡i cÆ¡",
-            "MÃ n hÃ¬nh láº­t Ä‘a hÆ°á»›ng",
-            "Chá»¥p thá»±c Ä‘á»‹a Ä‘Æ°á»ng phá»‘",
+            "Mặt trước phong cách Retro",
+            "Vòng xoay kim loại cơ",
+            "Màn hình lật đa hướng",
+            "Chụp thực địa đường phố",
           ],
         },
         {
           id: 206,
           category: "fashion",
-          title: "Ão Blazer Dáº¡ Nam Thiáº¿t Káº¿ Slimfit Chuáº©n Phong CÃ¡ch Ã",
+          title: "Áo Blazer Dạ Nam Thiết Kế Slimfit Chuẩn Phong Cách Ý",
           price: 2450000,
           originalPrice: 3200000,
           discount: "-23%",
@@ -252,17 +252,17 @@
             "https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "DÃ¡ng Ã¡o Slimfit",
-            "Cáº­n cáº£nh ve Ã¡o & cÃºc sá»«ng",
-            "Cháº¥t dáº¡ cá»«u dá»‡t má»‹n",
-            "Phá»‘i tá»•ng thá»ƒ thanh lá»‹ch",
+            "Dáng áo Slimfit",
+            "Cận cảnh ve áo & cúc sừng",
+            "Chất dạ cừu dệt mịn",
+            "Phối tổng thể thanh lịch",
           ],
         },
         {
           id: 207,
           category: "watch",
           title:
-            "Äá»“ng Há»“ Ná»¯ DÃ¢y Kim Loáº¡i Citizen Eco-Drive NÄƒng LÆ°á»£ng Ãnh SÃ¡ng",
+            "Đồng Hồ Nữ Dây Kim Loại Citizen Eco-Drive Năng Lượng Ánh Sáng",
           price: 5200000,
           originalPrice: 6500000,
           discount: "-20%",
@@ -275,16 +275,16 @@
             "https://images.unsplash.com/photo-1533139502658-0198f920d8e8?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Kháº£m xÃ  cá»« máº·t sá»‘",
-            "GÃ³c nghiÃªng viá»n Ä‘Ã¡",
-            "DÃ¢y thÃ©p Ä‘an máº¯t nhá»",
-            "Äeo tay dáº¡ tiá»‡c sang trá»ng",
+            "Khảm xà cừ mặt số",
+            "Góc nghiêng viền đá",
+            "Dây thép đan mắt nhỏ",
+            "Đeo tay dạ tiệc sang trọng",
           ],
         },
         {
           id: 208,
           category: "audio",
-          title: "Loa Di Äá»™ng Marshall Emberton II Ã‚m Thanh Äa HÆ°á»›ng",
+          title: "Loa Di Động Marshall Emberton II Âm Thanh Đa Hướng",
           price: 3950000,
           originalPrice: 4600000,
           discount: "-14%",
@@ -297,16 +297,16 @@
             "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "LÆ°á»›i táº£n nhiá»‡t Ä‘á»“ng thau",
-            "NÃºm Ä‘iá»u hÆ°á»›ng kim loáº¡i",
-            "Máº·t sau chá»‘ng nÆ°á»›c IP67",
-            "Cáº§m tay picnic dÃ£ ngoáº¡i",
+            "Lưới tản nhiệt đồng thau",
+            "Núm điều hướng kim loại",
+            "Mặt sau chống nước IP67",
+            "Cầm tay picnic dã ngoại",
           ],
         },
         {
           id: 209,
           category: "fashion",
-          title: "TÃºi XÃ¡ch Ná»¯ Da Tháº­t Quai XÃ¡ch Sang Trá»ng Tone Beige",
+          title: "Túi Xách Nữ Da Thật Quai Xách Sang Trọng Tone Beige",
           price: 3200000,
           originalPrice: 4100000,
           discount: "-22%",
@@ -319,16 +319,16 @@
             "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "ChÃ­nh diá»‡n tone Beige",
-            "KhÃ³a kim loáº¡i máº¡ vÃ ng",
-            "Cáº­n cáº£nh vÃ¢n da bÃ²",
-            "Mix outfit dáº¡o phá»‘",
+            "Chính diện tone Beige",
+            "Khóa kim loại mạ vàng",
+            "Cận cảnh vân da bò",
+            "Mix outfit dạo phố",
           ],
         },
         {
           id: 210,
           category: "tech",
-          title: "Chuá»™t CÃ´ng ThÃ¡i Há»c KhÃ´ng DÃ¢y Logitech MX Master 3S",
+          title: "Chuột Công Thái Học Không Dây Logitech MX Master 3S",
           price: 2190000,
           originalPrice: 2600000,
           discount: "-16%",
@@ -341,16 +341,16 @@
             "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
           ],
           angles: [
-            "Form dÃ¡ng Ergonomic",
-            "Con lÄƒn MagSpeed thÃ©p",
-            "Cá»¥m nÃºt ngÃ³n cÃ¡i",
-            "Setup bÃ n lÃ m viá»‡c tá»‘i giáº£n",
+            "Form dáng Ergonomic",
+            "Con lăn MagSpeed thép",
+            "Cụm nút ngón cái",
+            "Setup bàn làm việc tối giản",
           ],
         },
       ];
 
       // --------------------------------------------------------------------------
-      // Äá»’NG Bá»˜ Dá»® LIá»†U Sáº¢N PHáº¨M Tá»ª FASTAPI + SQL DATABASE
+      // ĐỒNG BỘ DỮ LIỆU SẢN PHẨM TỪ FASTAPI + SQL DATABASE
       // --------------------------------------------------------------------------
       let FLASH_PRODUCTS =
         JSON.parse(localStorage.getItem("JML_FLASH_PRODUCTS") || "null") ||
@@ -374,7 +374,7 @@
             renderRecommendProducts("all");
           }
         } catch (err) {
-          // Cháº¡y á»Ÿ cháº¿ Ä‘á»™ Local náº¿u chÆ°a báº­t server FastAPI
+          // Chạy ở chế độ Local nếu chưa bật server FastAPI
           FLASH_PRODUCTS =
             JSON.parse(localStorage.getItem("JML_FLASH_PRODUCTS") || "null") ||
             DEFAULT_FLASH_PRODUCTS;
@@ -394,103 +394,103 @@
         if (!document.hidden) loadProductsFromFastAPI();
       });
 
-      // Dá»¯ liá»‡u mÃ´ táº£ chi tiáº¿t & thÃ´ng sá»‘ ká»¹ thuáº­t bá»• sung cho trang chi tiáº¿t
+      // Dữ liệu mô tả chi tiết & thông số kỹ thuật bổ sung cho trang chi tiết
       const PRODUCT_EXTRA_INFO = {
         101: {
           brand: "Sony",
-          origin: "Nháº­t Báº£n / Láº¯p rÃ¡p Malaysia",
-          warranty: "12 thÃ¡ng chÃ­nh hÃ£ng Sony Viá»‡t Nam",
-          desc: "Tai nghe chá»‘ng á»“n khÃ´ng dÃ¢y Sony WH-1000XM5 sá»Ÿ há»¯u cÃ´ng nghá»‡ dáº«n Ä‘áº§u ngÃ nh vá»›i hai bá»™ xá»­ lÃ½ chuyÃªn dá»¥ng V1 vÃ  HD QN1, kiá»ƒm soÃ¡t 8 micro Ä‘á»ƒ triá»‡t tiÃªu tiáº¿ng á»“n má»™t cÃ¡ch triá»‡t Ä‘á»ƒ nháº¥t. Thiáº¿t káº¿ driver 30mm sá»­ dá»¥ng mÃ ng vÃ²m sá»£i carbon siÃªu cá»©ng cho cháº¥t Ã¢m tinh táº¿, truyá»n táº£i chuáº©n xÃ¡c tá»«ng ná»‘t nháº¡c Hi-Res Audio Wireless LDAC.",
+          origin: "Nhật Bản / Lắp ráp Malaysia",
+          warranty: "12 tháng chính hãng Sony Việt Nam",
+          desc: "Tai nghe chống ồn không dây Sony WH-1000XM5 sở hữu công nghệ dẫn đầu ngành với hai bộ xử lý chuyên dụng V1 và HD QN1, kiểm soát 8 micro để triệt tiêu tiếng ồn một cách triệt để nhất. Thiết kế driver 30mm sử dụng màng vòm sợi carbon siêu cứng cho chất âm tinh tế, truyền tải chuẩn xác từng nốt nhạc Hi-Res Audio Wireless LDAC.",
           specs: [
-            { key: "ThÆ°Æ¡ng hiá»‡u", val: "Sony" },
-            { key: "DÃ²ng sáº£n pháº©m", val: "WH-1000XM5 Flagship Series" },
+            { key: "Thương hiệu", val: "Sony" },
+            { key: "Dòng sản phẩm", val: "WH-1000XM5 Flagship Series" },
             {
-              key: "Bá»™ xá»­ lÃ½ chá»‘ng á»“n",
+              key: "Bộ xử lý chống ồn",
               val: "Dual Processor V1 & HD Noise Cancelling QN1",
             },
             {
-              key: "Thá»i lÆ°á»£ng pin",
-              val: "30 giá» (báº­t ANC), 40 giá» (táº¯t ANC)",
+              key: "Thời lượng pin",
+              val: "30 giờ (bật ANC), 40 giờ (tắt ANC)",
             },
-            { key: "Cá»•ng sáº¡c", val: "USB Type-C há»— trá»£ chuáº©n Power Delivery" },
-            { key: "Trá»ng lÆ°á»£ng", val: "250g (thiáº¿t káº¿ siÃªu nháº¹ Ä‘á»‡m da má»m)" },
+            { key: "Cổng sạc", val: "USB Type-C hỗ trợ chuẩn Power Delivery" },
+            { key: "Trọng lượng", val: "250g (thiết kế siêu nhẹ đệm da mềm)" },
             {
-              key: "TÃ­nh nÄƒng thÃ´ng minh",
+              key: "Tính năng thông minh",
               val: "Speak-to-Chat, Quick Attention, Auto NC Optimizer",
             },
           ],
           colors: [
-            "Äen Black Edition",
-            "Báº¡c Silver White",
+            "Đen Black Edition",
+            "Bạc Silver White",
             "Xanh Midnight Blue",
           ],
         },
         102: {
           brand: "Tissot 1853",
-          origin: "Thá»¥y SÄ© (Swiss Made)",
-          warranty: "24 thÃ¡ng quá»‘c táº¿ chÃ­nh hÃ£ng",
-          desc: "Tissot Le Locle Powermatic 80 lÃ  dÃ²ng Ä‘á»“ng há»“ cÆ¡ tá»± Ä‘á»™ng kinh Ä‘iá»ƒn tÃ´n vinh thá»‹ tráº¥n Le Locle - cÃ¡i nÃ´i Ä‘á»“ng há»“ Thá»¥y SÄ©. Máº·t sá»‘ Ä‘Æ°á»£c cháº¡m trá»• hoa vÄƒn Guilloche Clous de Paris tinh xáº£o, cá»c sá»‘ La MÃ£ mang Ä‘áº­m phong thÃ¡i quÃ½ tá»™c cá»• Ä‘iá»ƒn. TrÃ¡i tim lÃ  cá»— mÃ¡y cÆ¡ Powermatic 80 trá»¯ cÃ³t lÃªn Ä‘áº¿n 80 giá» hoáº¡t Ä‘á»™ng bá»n bá»‰.",
+          origin: "Thụy Sĩ (Swiss Made)",
+          warranty: "24 tháng quốc tế chính hãng",
+          desc: "Tissot Le Locle Powermatic 80 là dòng đồng hồ cơ tự động kinh điển tôn vinh thị trấn Le Locle - cái nôi đồng hồ Thụy Sĩ. Mặt số được chạm trổ hoa văn Guilloche Clous de Paris tinh xảo, cọc số La Mã mang đậm phong thái quý tộc cổ điển. Trái tim là cỗ máy cơ Powermatic 80 trữ cót lên đến 80 giờ hoạt động bền bỉ.",
           specs: [
-            { key: "ThÆ°Æ¡ng hiá»‡u", val: "Tissot 1853" },
-            { key: "Xuáº¥t xá»©", val: "Thá»¥y SÄ© (Swiss Made)" },
+            { key: "Thương hiệu", val: "Tissot 1853" },
+            { key: "Xuất xứ", val: "Thụy Sĩ (Swiss Made)" },
             {
-              key: "Bá»™ mÃ¡y cÆ¡",
-              val: "Automatic Powermatic 80.111 (23 chÃ¢n kÃ­nh)",
+              key: "Bộ máy cơ",
+              val: "Automatic Powermatic 80.111 (23 chân kính)",
             },
-            { key: "Thá»i gian trá»¯ cÃ³t", val: "80 giá» bá»n bá»‰" },
-            { key: "ÄÆ°á»ng kÃ­nh máº·t", val: "39.3 mm â€¢ Äá»™ dÃ y 9.8 mm" },
+            { key: "Thời gian trữ cót", val: "80 giờ bền bỉ" },
+            { key: "Đường kính mặt", val: "39.3 mm • Độ dày 9.8 mm" },
             {
-              key: "KÃ­nh báº£o vá»‡",
-              val: "Sapphire nguyÃªn khá»‘i chá»‘ng tráº§y xÆ°á»›c tuyá»‡t Ä‘á»‘i",
+              key: "Kính bảo vệ",
+              val: "Sapphire nguyên khối chống trầy xước tuyệt đối",
             },
             {
-              key: "Cháº¥t liá»‡u vá» & dÃ¢y",
-              val: "ThÃ©p khÃ´ng gá»‰ 316L máº¡ cÃ´ng nghá»‡ PVD cao cáº¥p",
+              key: "Chất liệu vỏ & dây",
+              val: "Thép không gỉ 316L mạ công nghệ PVD cao cấp",
             },
           ],
           colors: [
-            "Báº¡c Máº·t Tráº¯ng Cá»• Äiá»ƒn",
-            "VÃ ng Demi HoÃ ng Gia",
-            "Máº·t Äen Lá»‹ch LÃ£m",
+            "Bạc Mặt Trắng Cổ Điển",
+            "Vàng Demi Hoàng Gia",
+            "Mặt Đen Lịch Lãm",
           ],
         },
         201: {
           brand: "Apple Inc.",
-          origin: "Hoa Ká»³ / Láº¯p rÃ¡p chÃ­nh hÃ£ng",
-          warranty: "12 thÃ¡ng Apple Care toÃ n quá»‘c",
-          desc: "iPad Pro M4 11-inch hoÃ n toÃ n má»›i lÃ  bÆ°á»›c nháº£y vá»t cÃ´ng nghá»‡ vá»›i Ä‘á»™ má»ng khÃ³ tin chá»‰ 5.1mm, tÃ­ch há»£p vi xá»­ lÃ½ Apple M4 tháº¿ há»‡ tiáº¿p theo mang láº¡i hiá»‡u nÄƒng Ä‘á»“ há»a vÃ  trÃ­ tuá»‡ nhÃ¢n táº¡o vÆ°á»£t trá»™i. MÃ n hÃ¬nh Ultra Retina XDR sá»­ dá»¥ng cÃ´ng nghá»‡ Tandem OLED Ä‘á»™t phÃ¡ vá»›i Ä‘á»™ sÃ¡ng tá»‘i Ä‘a 1600 nits.",
+          origin: "Hoa Kỳ / Lắp ráp chính hãng",
+          warranty: "12 tháng Apple Care toàn quốc",
+          desc: "iPad Pro M4 11-inch hoàn toàn mới là bước nhảy vọt công nghệ với độ mỏng khó tin chỉ 5.1mm, tích hợp vi xử lý Apple M4 thế hệ tiếp theo mang lại hiệu năng đồ họa và trí tuệ nhân tạo vượt trội. Màn hình Ultra Retina XDR sử dụng công nghệ Tandem OLED đột phá với độ sáng tối đa 1600 nits.",
           specs: [
-            { key: "ThÆ°Æ¡ng hiá»‡u", val: "Apple" },
+            { key: "Thương hiệu", val: "Apple" },
             {
-              key: "Vi xá»­ lÃ½",
+              key: "Vi xử lý",
               val: "Apple M4 Chip (10-core CPU, 10-core GPU, 16-core NPU)",
             },
             {
-              key: "MÃ n hÃ¬nh",
+              key: "Màn hình",
               val: "11 inch Ultra Retina XDR Tandem OLED 120Hz ProMotion",
             },
             {
-              key: "Äá»™ sÃ¡ng tá»‘i Ä‘a",
-              val: "1600 nits (HDR content), 1000 nits tiÃªu chuáº©n",
+              key: "Độ sáng tối đa",
+              val: "1600 nits (HDR content), 1000 nits tiêu chuẩn",
             },
-            { key: "Bá»™ nhá»›", val: "256GB / 512GB / 1TB / 2TB Ultra Fast SSD" },
+            { key: "Bộ nhớ", val: "256GB / 512GB / 1TB / 2TB Ultra Fast SSD" },
             {
-              key: "Äá»™ má»ng",
-              val: "5.1 mm (Chiáº¿c iPad má»ng nháº¥t lá»‹ch sá»­ Apple)",
+              key: "Độ mỏng",
+              val: "5.1 mm (Chiếc iPad mỏng nhất lịch sử Apple)",
             },
             {
-              key: "Há»— trá»£ phá»¥ kiá»‡n",
+              key: "Hỗ trợ phụ kiện",
               val: "Apple Pencil Pro, Magic Keyboard M4",
             },
           ],
-          colors: ["Äen KhÃ´ng Gian (Space Black)", "Báº¡c Ãnh Kim (Silver)"],
+          colors: ["Đen Không Gian (Space Black)", "Bạc Ánh Kim (Silver)"],
         },
       };
 
-      // Tráº¡ng thÃ¡i Giá» hÃ ng (Cart state)
+      // Trạng thái Giỏ hàng (Cart state)
       let cartItems = [];
 
-      // Helper format tiá»n tá»‡ VNÄ
+      // Helper format tiền tệ VNĐ
       function formatCurrency(amount) {
         return new Intl.NumberFormat("vi-VN", {
           style: "currency",
@@ -501,15 +501,15 @@
       function getCategoryName(cat) {
         switch (cat) {
           case "audio":
-            return "Thiáº¿t Bá»‹ Ã‚m Thanh";
+            return "Thiết Bị Âm Thanh";
           case "watch":
-            return "Äá»“ng Há»“ Cao Cáº¥p";
+            return "Đồng Hồ Cao Cấp";
           case "fashion":
-            return "Thá»i Trang & Äá»“ Da";
+            return "Thời Trang & Đồ Da";
           case "tech":
-            return "Thiáº¿t Bá»‹ Sá»‘ & CÃ´ng Nghá»‡";
+            return "Thiết Bị Số & Công Nghệ";
           default:
-            return "Sáº£n Pháº©m Cao Cáº¥p";
+            return "Sản Phẩm Cao Cấp";
         }
       }
 
@@ -522,20 +522,20 @@
         );
       }
 
-      // Helper táº¡o cáº¥u trÃºc Multi-Image Carousel bÃªn trong khung áº£nh sáº£n pháº©m
+      // Helper tạo cấu trúc Multi-Image Carousel bên trong khung ảnh sản phẩm
       function createCarouselMarkup(product) {
         const images = product.images || [product.image];
         const angles = product.angles || [
-          "ChÃ­nh diá»‡n",
-          "GÃ³c nghiÃªng",
-          "Cáº­n cáº£nh",
-          "Thá»±c táº¿",
+          "Chính diện",
+          "Góc nghiêng",
+          "Cận cảnh",
+          "Thực tế",
         ];
 
         const imagesHtml = images
           .map(
             (img, idx) => `
-        <img src="${img}" alt="${product.title} - ${angles[idx] || "GÃ³c " + (idx + 1)}" class="product-slide-img ${idx === 0 ? "active" : ""}" data-index="${idx}" loading="lazy">
+        <img src="${img}" alt="${product.title} - ${angles[idx] || "Góc " + (idx + 1)}" class="product-slide-img ${idx === 0 ? "active" : ""}" data-index="${idx}" loading="lazy">
       `,
           )
           .join("");
@@ -549,7 +549,7 @@
           .join("");
 
         const angleBadgeHtml = `
-        <span class="product-angle-badge" data-badge>${angles[0] || "áº¢nh 1"}</span>
+        <span class="product-angle-badge" data-badge>${angles[0] || "Ảnh 1"}</span>
       `;
 
         return `
@@ -568,7 +568,7 @@
       }
 
       // --------------------------------------------------------------------------
-      // 1. RENDER Sáº¢N PHáº¨M FLASH SALE & Gá»¢I Ã
+      // 1. RENDER SẢN PHẨM FLASH SALE & GỢI Ý
       // --------------------------------------------------------------------------
       function renderFlashSaleProducts() {
         const container = document.getElementById("flashProductsContainer");
@@ -576,7 +576,7 @@
         if (!FLASH_PRODUCTS || FLASH_PRODUCTS.length === 0) {
           container.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 36px 16px; background: #fff; border-radius: 16px; border: 1px dashed #cbd5e1; margin: 8px 0;">
-              <p style="font-weight: 600; font-size: 14px; color: #64748b;">ChÆ°a cÃ³ sáº£n pháº©m Flash Sale nÃ o Ä‘ang cháº¡y</p>
+              <p style="font-weight: 600; font-size: 14px; color: #64748b;">Chưa có sản phẩm Flash Sale nào đang chạy</p>
             </div>
           `;
           return;
@@ -592,8 +592,8 @@
             <div class="product-body">
               <h3 class="product-title" title="${product.title}">${product.title}</h3>
               <div class="product-meta">
-                <span class="rating-stars">â˜… ${product.rating}</span>
-                <span>â€¢ ÄÃ£ bÃ¡n ${product.sold}</span>
+                <span class="rating-stars">★ ${product.rating}</span>
+                <span>• Đã bán ${product.sold}</span>
               </div>
               <div class="price-row">
                 <span class="current-price">${formatCurrency(product.price)}</span>
@@ -604,13 +604,13 @@
                   <div class="progress-bar-fill" style="width: ${percentSold}%;"></div>
                 </div>
                 <div class="progress-text">
-                  <span>ÄÃ£ bÃ¡n ${product.sold}/${product.totalStock}</span>
+                  <span>Đã bán ${product.sold}/${product.totalStock}</span>
                   <span>${percentSold}%</span>
                 </div>
               </div>
               <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || "").replace(/'/g, "\\'")}')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                ThÃªm VÃ o Giá»
+                Thêm Vào Giỏ
               </button>
             </div>
           </div>
@@ -630,9 +630,9 @@
         if (!filtered || filtered.length === 0) {
           container.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: #fff; border-radius: 16px; border: 1px dashed #cbd5e1; margin: 16px 0;">
-              <div style="font-size: 36px; margin-bottom: 8px;">ðŸ“¦</div>
-              <p style="font-weight: 700; font-size: 15px; color: #334155; margin-bottom: 4px;">Hiá»‡n chÆ°a cÃ³ sáº£n pháº©m nÃ o trÃªn ká»‡</p>
-              <p style="font-size: 13px; color: #64748b;">Admin cÃ³ thá»ƒ thÃªm sáº£n pháº©m má»›i tá»« trang Quáº£n trá»‹ SÃ n Ä‘á»ƒ xuáº¥t hiá»‡n táº¡i Ä‘Ã¢y.</p>
+              <div style="font-size: 36px; margin-bottom: 8px;">📦</div>
+              <p style="font-weight: 700; font-size: 15px; color: #334155; margin-bottom: 4px;">Hiện chưa có sản phẩm nào trên kệ</p>
+              <p style="font-size: 13px; color: #64748b;">Admin có thể thêm sản phẩm mới từ trang Quản trị Sàn để xuất hiện tại đây.</p>
             </div>
           `;
           return;
@@ -647,8 +647,8 @@
             <div class="product-body">
               <h3 class="product-title" title="${product.title}">${product.title}</h3>
               <div class="product-meta">
-                <span class="rating-stars">â˜… ${product.rating}</span>
-                <span>â€¢ ÄÃ£ bÃ¡n ${product.soldCount}</span>
+                <span class="rating-stars">★ ${product.rating}</span>
+                <span>• Đã bán ${product.soldCount}</span>
               </div>
               <div class="price-row">
                 <span class="current-price">${formatCurrency(product.price)}</span>
@@ -657,7 +657,7 @@
               <div style="margin-top: auto;">
                 <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || "").replace(/'/g, "\\'")}')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                  ThÃªm VÃ o Giá»
+                  Thêm Vào Giỏ
                 </button>
               </div>
             </div>
@@ -669,7 +669,7 @@
       }
 
       // --------------------------------------------------------------------------
-      // CÆ  CHáº¾ HOVER CAROUSEL Tá»° Äá»˜NG CHUYá»‚N GÃ“C CHá»¤P Sáº¢N PHáº¨M TRÃŠN CARD (1.1s/láº§n)
+      // CƠ CHẾ HOVER CAROUSEL TỰ ĐỘNG CHUYỂN GÓC CHỤP SẢN PHẨM TRÊN CARD (1.1s/lần)
       // --------------------------------------------------------------------------
       function attachHoverCarouselListeners(parentContainer) {
         const wrappers = parentContainer.querySelectorAll(
@@ -706,7 +706,7 @@
             }
           }
 
-          // Cho phÃ©p hover vÃ o tá»«ng dot Ä‘á»ƒ chuyá»ƒn gÃ³c ngay tá»©c kháº¯c
+          // Cho phép hover vào từng dot để chuyển góc ngay tức khắc
           dots.forEach((dot, dotIdx) => {
             dot.addEventListener("mouseenter", (e) => {
               e.stopPropagation();
@@ -715,7 +715,7 @@
             });
           });
 
-          // Tá»± Ä‘á»™ng chuyá»ƒn láº§n lÆ°á»£t má»—i 1.1 giÃ¢y khi ngÆ°á»i dÃ¹ng hover chuá»™t
+          // Tự động chuyển lần lượt mỗi 1.1 giây khi người dùng hover chuột
           wrapper.addEventListener("mouseenter", () => {
             clearInterval(timer);
             timer = setInterval(() => {
@@ -723,7 +723,7 @@
             }, 1100);
           });
 
-          // Khi rÃª chuá»™t ra ngoÃ i (mouseleave), tá»± Ä‘á»™ng trá»Ÿ vá» áº£nh Ä‘áº¡i diá»‡n ban Ä‘áº§u
+          // Khi rê chuột ra ngoài (mouseleave), tự động trở về ảnh đại diện ban đầu
           wrapper.addEventListener("mouseleave", () => {
             clearInterval(timer);
             setSlide(0);
@@ -732,7 +732,7 @@
       }
 
       // --------------------------------------------------------------------------
-      // 2. MÃ€N HÃŒNH CHI TIáº¾T Sáº¢N PHáº¨M (SINGLE PAGE APPLICATION DETAIL VIEW)
+      // 2. MÀN HÌNH CHI TIẾT SẢN PHẨM (SINGLE PAGE APPLICATION DETAIL VIEW)
       // --------------------------------------------------------------------------
       let currentDetailProduct = null;
       let currentDetailQty = 1;
@@ -745,39 +745,39 @@
         currentDetailProduct = product;
         currentDetailQty = 1;
 
-        // Láº¥y thÃ´ng tin má»Ÿ rá»™ng hoáº·c táº¡o thÃ´ng sá»‘ máº·c Ä‘á»‹nh phÃ¹ há»£p
+        // Lấy thông tin mở rộng hoặc tạo thông số mặc định phù hợp
         const extra = PRODUCT_EXTRA_INFO[product.id] || {
-          brand: "ThÆ°Æ¡ng Hiá»‡u Cao Cáº¥p",
-          origin: "Nháº­p kháº©u chÃ­nh hÃ£ng",
-          warranty: "24 thÃ¡ng chÃ­nh hÃ£ng JML Store",
-          desc: `${product.title} lÃ  sáº£n pháº©m hÃ ng Ä‘áº§u trong bá»™ sÆ°u táº­p cao cáº¥p, Ä‘Æ°á»£c cháº¿ tÃ¡c tá»‰ má»‰ tá»« nhá»¯ng váº­t liá»‡u tinh hoa nháº¥t. Sáº£n pháº©m Ä‘Ã¡p á»©ng tiÃªu chuáº©n kháº¯t khe vá» Ä‘á»™ hoÃ n thiá»‡n, tÃ­nh tháº©m má»¹ vÃ  Ä‘á»™ bá»n bá»‰ dÃ i lÃ¢u.`,
+          brand: "Thương Hiệu Cao Cấp",
+          origin: "Nhập khẩu chính hãng",
+          warranty: "24 tháng chính hãng JML Store",
+          desc: `${product.title} là sản phẩm hàng đầu trong bộ sưu tập cao cấp, được chế tác tỉ mỉ từ những vật liệu tinh hoa nhất. Sản phẩm đáp ứng tiêu chuẩn khắt khe về độ hoàn thiện, tính thẩm mỹ và độ bền bỉ dài lâu.`,
           specs: [
-            { key: "TÃªn sáº£n pháº©m", val: product.title },
-            { key: "Danh má»¥c", val: getCategoryName(product.category) },
+            { key: "Tên sản phẩm", val: product.title },
+            { key: "Danh mục", val: getCategoryName(product.category) },
             {
-              key: "TiÃªu chuáº©n kiá»ƒm duyá»‡t",
-              val: "100% ChÃ­nh hÃ£ng phÃ¢n phá»‘i Ä‘á»™c quyá»n",
+              key: "Tiêu chuẩn kiểm duyệt",
+              val: "100% Chính hãng phân phối độc quyền",
             },
-            { key: "TÃ¬nh tráº¡ng", val: "Má»›i 100% nguyÃªn há»™p kÃ¨m tháº» báº£o hÃ nh" },
-            { key: "Báº£o hÃ nh", val: "24 thÃ¡ng Ä‘á»•i má»›i trong 30 ngÃ y náº¿u lá»—i" },
+            { key: "Tình trạng", val: "Mới 100% nguyên hộp kèm thẻ bảo hành" },
+            { key: "Bảo hành", val: "24 tháng đổi mới trong 30 ngày nếu lỗi" },
           ],
-          colors: ["MÃ u TiÃªu Chuáº©n (Máº·c Ä‘á»‹nh)", "PhiÃªn Báº£n Giá»›i Háº¡n"],
+          colors: ["Màu Tiêu Chuẩn (Mặc định)", "Phiên Bản Giới Hạn"],
         };
 
         const images = product.images || [product.image];
         const angles = product.angles || [
-          "ChÃ­nh diá»‡n",
-          "GÃ³c nghiÃªng",
-          "Cáº­n cáº£nh",
-          "Thá»±c táº¿",
+          "Chính diện",
+          "Góc nghiêng",
+          "Cận cảnh",
+          "Thực tế",
         ];
         currentSelectedColor = extra.colors[0];
-        currentSelectedVersion = "Báº£n TiÃªu Chuáº©n";
+        currentSelectedVersion = "Bản Tiêu Chuẩn";
 
         const detailContainer = document.getElementById("view-product-detail");
         const homeContainer = document.getElementById("view-home");
 
-        // Gá»£i Ã½ 4 sáº£n pháº©m cÃ¹ng phÃ¢n khÃºc
+        // Gợi ý 4 sản phẩm cùng phân khúc
         const relatedList = RECOMMEND_PRODUCTS.filter(
           (p) => p.id !== product.id,
         ).slice(0, 4);
@@ -790,8 +790,8 @@
               <div class="product-body">
                 <h3 class="product-title" title="${rel.title}">${rel.title}</h3>
                 <div class="product-meta">
-                  <span class="rating-stars">â˜… ${rel.rating}</span>
-                  <span>â€¢ ÄÃ£ bÃ¡n ${rel.soldCount}</span>
+                  <span class="rating-stars">★ ${rel.rating}</span>
+                  <span>• Đã bán ${rel.soldCount}</span>
                 </div>
                 <div class="price-row">
                   <span class="current-price">${formatCurrency(rel.price)}</span>
@@ -799,7 +799,7 @@
                 </div>
                 <div style="margin-top: auto;">
                   <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${rel.title.replace(/'/g, "\\'")}', ${rel.price}, '${relImg}', '${(rel.shopName || "").replace(/'/g, "\\'")}')">
-                    ThÃªm VÃ o Giá»
+                    Thêm Vào Giỏ
                   </button>
                 </div>
               </div>
@@ -814,10 +814,10 @@
             <div class="detail-breadcrumb-bar">
               <button class="btn-back-home" onclick="showHomeView()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Quay Láº¡i Danh SÃ¡ch
+                Quay Lại Danh Sách
               </button>
               <div class="breadcrumb-trail">
-                <a href="#" onclick="showHomeView(); return false;">Trang Chá»§</a>
+                <a href="#" onclick="showHomeView(); return false;">Trang Chủ</a>
                 <span>/</span>
                 <span class="breadcrumb-cat" onclick="filterCategory('${product.category || "all"}'); showHomeView(); scrollToRecommend();" style="cursor: pointer;">${getCategoryName(product.category)}</span>
                 <span>/</span>
@@ -841,9 +841,9 @@
                   ${images
                     .map(
                       (img, idx) => `
-                    <div class="gallery-thumb-item ${idx === 0 ? "active" : ""}" onclick="switchDetailImage(${idx}, '${img}', '${angles[idx] || "GÃ³c " + (idx + 1)}')">
+                    <div class="gallery-thumb-item ${idx === 0 ? "active" : ""}" onclick="switchDetailImage(${idx}, '${img}', '${angles[idx] || "Góc " + (idx + 1)}')">
                       <img src="${img}" alt="${angles[idx]}">
-                      <span>${angles[idx] || "áº¢nh " + (idx + 1)}</span>
+                      <span>${angles[idx] || "Ảnh " + (idx + 1)}</span>
                     </div>
                   `,
                     )
@@ -853,31 +853,31 @@
                 <!-- Trust Guarantees Box -->
                 <div class="trust-features-grid">
                   <div class="trust-item">
-                    <div class="trust-icon">ðŸ›¡ï¸</div>
+                    <div class="trust-icon">🛡️</div>
                     <div>
-                      <strong>100% ChÃ­nh HÃ£ng</strong>
-                      <span>Äá»n bÃ¹ 200% náº¿u phÃ¡t hiá»‡n giáº£</span>
+                      <strong>100% Chính Hãng</strong>
+                      <span>Đền bù 200% nếu phát hiện giả</span>
                     </div>
                   </div>
                   <div class="trust-item">
-                    <div class="trust-icon">ðŸ”„</div>
+                    <div class="trust-icon">🔄</div>
                     <div>
-                      <strong>Äá»•i Tráº£ 30 NgÃ y</strong>
-                      <span>Miá»…n phÃ­ 100% náº¿u cÃ³ lá»—i tá»« NSX</span>
+                      <strong>Đổi Trả 30 Ngày</strong>
+                      <span>Miễn phí 100% nếu có lỗi từ NSX</span>
                     </div>
                   </div>
                   <div class="trust-item">
-                    <div class="trust-icon">ðŸš€</div>
+                    <div class="trust-icon">🚀</div>
                     <div>
-                      <strong>Giao Há»a Tá»‘c 2H</strong>
-                      <span>Ná»™i thÃ nh HÃ  Ná»™i & TP.HCM</span>
+                      <strong>Giao Hỏa Tốc 2H</strong>
+                      <span>Nội thành Hà Nội & TP.HCM</span>
                     </div>
                   </div>
                   <div class="trust-item">
-                    <div class="trust-icon">ðŸ’Ž</div>
+                    <div class="trust-icon">💎</div>
                     <div>
-                      <strong>Báº£o HÃ nh 24 ThÃ¡ng</strong>
-                      <span>Báº£o hÃ nh Ä‘iá»‡n tá»­ chÃ­nh hÃ£ng</span>
+                      <strong>Bảo Hành 24 Tháng</strong>
+                      <span>Bảo hành điện tử chính hãng</span>
                     </div>
                   </div>
                 </div>
@@ -886,43 +886,43 @@
               <!-- Right Column: Purchasing & Details -->
               <div class="showcase-info">
                 <div class="detail-mall-badge">
-                  <span class="mall-pill">âœ“ JML OFFICIAL MALL</span>
-                  <span class="sku-pill">MÃƒ SP: #LX-${product.id}</span>
+                  <span class="mall-pill">✓ JML OFFICIAL MALL</span>
+                  <span class="sku-pill">MÃ SP: #LX-${product.id}</span>
                 </div>
 
                 <h1 class="detail-product-title">${product.title}</h1>
 
                 <div class="detail-meta-row">
                   <div class="meta-rating">
-                    <span class="stars">â˜…â˜…â˜…â˜…â˜…</span>
+                    <span class="stars">★★★★★</span>
                     <strong>${product.rating}</strong>
                   </div>
-                  <span>â€¢</span>
-                  <span class="meta-reviews">184 ÄÃ¡nh giÃ¡ thá»±c táº¿</span>
-                  <span>â€¢</span>
-                  <span class="meta-sold">ÄÃ£ bÃ¡n ${product.sold || product.soldCount || 120}</span>
+                  <span>•</span>
+                  <span class="meta-reviews">184 Đánh giá thực tế</span>
+                  <span>•</span>
+                  <span class="meta-sold">Đã bán ${product.sold || product.soldCount || 120}</span>
                 </div>
 
                 <!-- Price Box -->
                 <div class="detail-price-box">
                   <div class="price-header">
-                    <span class="price-label">GiÃ¡ Æ¯u ÄÃ£i Äá»™c Quyá»n</span>
-                    <span class="deal-pill">âš¡ FLASH SALE TIáº¾T KIá»†M</span>
+                    <span class="price-label">Giá Ưu Đãi Độc Quyền</span>
+                    <span class="deal-pill">⚡ FLASH SALE TIẾT KIỆM</span>
                   </div>
                   <div class="price-numbers">
                     <span class="detail-current-price">${formatCurrency(product.price)}</span>
                     <span class="detail-original-price">${formatCurrency(product.originalPrice)}</span>
-                    <span class="detail-save-badge">Tiáº¿t kiá»‡m ${formatCurrency(product.originalPrice - product.price)} (${product.discount})</span>
+                    <span class="detail-save-badge">Tiết kiệm ${formatCurrency(product.originalPrice - product.price)} (${product.discount})</span>
                   </div>
                   <div class="price-voucher-notice">
-                    ðŸŽ Táº·ng Voucher 100K cho thÃ nh viÃªn VIP â€¢ Miá»…n phÃ­ váº­n chuyá»ƒn toÃ n quá»‘c
+                    🎁 Tặng Voucher 100K cho thành viên VIP • Miễn phí vận chuyển toàn quốc
                   </div>
                 </div>
 
-                <!-- Variant: MÃ u Sáº¯c -->
+                <!-- Variant: Màu Sắc -->
                 <div class="variant-section">
                   <div class="variant-title">
-                    <span>Chá»n MÃ u Sáº¯c:</span>
+                    <span>Chọn Màu Sắc:</span>
                     <strong id="selectedColorLabel">${extra.colors[0]}</strong>
                   </div>
                   <div class="variant-options">
@@ -939,56 +939,56 @@
                   </div>
                 </div>
 
-                <!-- Variant: PhiÃªn Báº£n -->
+                <!-- Variant: Phiên Bản -->
                 <div class="variant-section">
                   <div class="variant-title">
-                    <span>PhiÃªn Báº£n / Dung LÆ°á»£ng:</span>
-                    <strong id="selectedVersionLabel">Báº£n TiÃªu Chuáº©n (Fullbox)</strong>
+                    <span>Phiên Bản / Dung Lượng:</span>
+                    <strong id="selectedVersionLabel">Bản Tiêu Chuẩn (Fullbox)</strong>
                   </div>
                   <div class="variant-options">
-                    <button class="variant-btn active" onclick="selectVariant(this, 'selectedVersionLabel', 'Báº£n TiÃªu Chuáº©n (Fullbox)')">
-                      Báº£n TiÃªu Chuáº©n (Fullbox)
+                    <button class="variant-btn active" onclick="selectVariant(this, 'selectedVersionLabel', 'Bản Tiêu Chuẩn (Fullbox)')">
+                      Bản Tiêu Chuẩn (Fullbox)
                     </button>
-                    <button class="variant-btn" onclick="selectVariant(this, 'selectedVersionLabel', 'Báº£n NÃ¢ng Cáº¥p KÃ¨m QuÃ  Táº·ng')">
-                      Báº£n NÃ¢ng Cáº¥p KÃ¨m QuÃ  Táº·ng
+                    <button class="variant-btn" onclick="selectVariant(this, 'selectedVersionLabel', 'Bản Nâng Cấp Kèm Quà Tặng')">
+                      Bản Nâng Cấp Kèm Quà Tặng
                     </button>
                   </div>
                 </div>
 
                 <!-- Quantity Picker -->
                 <div class="quantity-section">
-                  <span class="qty-label">Sá»‘ LÆ°á»£ng:</span>
+                  <span class="qty-label">Số Lượng:</span>
                   <div class="qty-picker">
-                    <button type="button" onclick="changeDetailQty(-1)">âˆ’</button>
+                    <button type="button" onclick="changeDetailQty(-1)">−</button>
                     <input type="number" id="detailQtyInput" value="1" min="1" max="10" readonly>
                     <button type="button" onclick="changeDetailQty(1)">+</button>
                   </div>
-                  <span class="stock-remain">CÃ²n láº¡i <strong>${product.totalStock || 45}</strong> sáº£n pháº©m trong kho</span>
+                  <span class="stock-remain">Còn lại <strong>${product.totalStock || 45}</strong> sản phẩm trong kho</span>
                 </div>
 
                 <!-- CTA Action Buttons -->
                 <div class="detail-actions-row">
                   <button class="btn-detail-add-cart" onclick="addCurrentDetailToCart()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                    ThÃªm VÃ o Giá» HÃ ng
+                    Thêm Vào Giỏ Hàng
                   </button>
                   <button class="btn-detail-buy-now" onclick="buyCurrentDetailNow()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    Mua Ngay Vá»›i GiÃ¡ Æ¯u ÄÃ£i
+                    Mua Ngay Với Giá Ưu Đãi
                   </button>
                 </div>
 
                 <!-- Shipping Summary Box -->
                 <div class="shipping-info-card">
                   <div class="shipping-row">
-                    <span>ðŸ“ Äá»‹a chá»‰ nháº­n hÃ ng:</span>
-                    <strong>TÃ²a nhÃ  Discovery Complex, Cáº§u Giáº¥y, HÃ  Ná»™i</strong>
-                    <a href="#" onclick="showToast('Vá»‹ trÃ­', 'Cáº­p nháº­t Ä‘á»‹a chá»‰ nháº­n hÃ ng'); return false;" style="color: var(--primary); font-weight: 600; margin-left: auto;">Thay Ä‘á»•i</a>
+                    <span>📍 Địa chỉ nhận hàng:</span>
+                    <strong>Tòa nhà Discovery Complex, Cầu Giấy, Hà Nội</strong>
+                    <a href="#" onclick="showToast('Vị trí', 'Cập nhật địa chỉ nhận hàng'); return false;" style="color: var(--primary); font-weight: 600; margin-left: auto;">Thay đổi</a>
                   </div>
                   <div class="shipping-row">
-                    <span>ðŸšš Váº­n chuyá»ƒn:</span>
-                    <strong style="color: var(--success);">Miá»…n phÃ­ váº­n chuyá»ƒn há»a tá»‘c</strong>
-                    <span style="color: var(--text-muted);">(Dá»± kiáº¿n nháº­n hÃ ng trong ngÃ y mai)</span>
+                    <span>🚚 Vận chuyển:</span>
+                    <strong style="color: var(--success);">Miễn phí vận chuyển hỏa tốc</strong>
+                    <span style="color: var(--text-muted);">(Dự kiến nhận hàng trong ngày mai)</span>
                   </div>
                 </div>
               </div>
@@ -997,25 +997,25 @@
             <!-- Tabbed Detailed Info Section -->
             <div class="detail-tabs-section">
               <div class="detail-tab-nav">
-                <button class="detail-tab-btn active" onclick="switchDetailTab('tab-desc', this)">MÃ´ Táº£ Sáº£n Pháº©m</button>
-                <button class="detail-tab-btn" onclick="switchDetailTab('tab-specs', this)">ThÃ´ng Sá»‘ Ká»¹ Thuáº­t</button>
-                <button class="detail-tab-btn" onclick="switchDetailTab('tab-reviews', this)">ÄÃ¡nh GiÃ¡ KhÃ¡ch HÃ ng (184)</button>
-                <button class="detail-tab-btn" onclick="switchDetailTab('tab-policy', this)">ChÃ­nh SÃ¡ch & Báº£o HÃ nh</button>
+                <button class="detail-tab-btn active" onclick="switchDetailTab('tab-desc', this)">Mô Tả Sản Phẩm</button>
+                <button class="detail-tab-btn" onclick="switchDetailTab('tab-specs', this)">Thông Số Kỹ Thuật</button>
+                <button class="detail-tab-btn" onclick="switchDetailTab('tab-reviews', this)">Đánh Giá Khách Hàng (184)</button>
+                <button class="detail-tab-btn" onclick="switchDetailTab('tab-policy', this)">Chính Sách & Bảo Hành</button>
               </div>
 
-              <!-- Tab 1: MÃ´ táº£ -->
+              <!-- Tab 1: Mô tả -->
               <div id="tab-desc" class="detail-tab-pane active">
                 <p style="margin-bottom: 16px; font-size: 15px;">${extra.desc}</p>
-                <h4 style="font-size: 16px; font-weight: 700; color: var(--secondary); margin: 20px 0 10px;">Äáº·c Äiá»ƒm Ná»•i Báº­t</h4>
+                <h4 style="font-size: 16px; font-weight: 700; color: var(--secondary); margin: 20px 0 10px;">Đặc Điểm Nổi Bật</h4>
                 <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
-                  <li>Thiáº¿t káº¿ cÃ´ng thÃ¡i há»c hiá»‡n Ä‘áº¡i, tÃ´n vinh Ä‘áº³ng cáº¥p ngÆ°á»i sá»­ dá»¥ng.</li>
-                  <li>Sá»­ dá»¥ng linh kiá»‡n cao cáº¥p tá»« nhÃ  sáº£n xuáº¥t uy tÃ­n toÃ n cáº§u.</li>
-                  <li>Kiá»ƒm Ä‘á»‹nh cháº¥t lÆ°á»£ng nghiÃªm ngáº·t trÆ°á»›c khi xuáº¥t xÆ°á»Ÿng vÃ  giao Ä‘áº¿n tay ngÆ°á»i tiÃªu dÃ¹ng.</li>
-                  <li>TÃ­ch há»£p Ä‘áº§y Ä‘á»§ phá»¥ kiá»‡n chÃ­nh hÃ£ng nguyÃªn há»™p.</li>
+                  <li>Thiết kế công thái học hiện đại, tôn vinh đẳng cấp người sử dụng.</li>
+                  <li>Sử dụng linh kiện cao cấp từ nhà sản xuất uy tín toàn cầu.</li>
+                  <li>Kiểm định chất lượng nghiêm ngặt trước khi xuất xưởng và giao đến tay người tiêu dùng.</li>
+                  <li>Tích hợp đầy đủ phụ kiện chính hãng nguyên hộp.</li>
                 </ul>
               </div>
 
-              <!-- Tab 2: ThÃ´ng sá»‘ ká»¹ thuáº­t -->
+              <!-- Tab 2: Thông số kỹ thuật -->
               <div id="tab-specs" class="detail-tab-pane">
                 <table class="spec-table">
                   <tbody>
@@ -1033,49 +1033,49 @@
                 </table>
               </div>
 
-              <!-- Tab 3: ÄÃ¡nh giÃ¡ -->
+              <!-- Tab 3: Đánh giá -->
               <div id="tab-reviews" class="detail-tab-pane">
                 <div style="display: flex; align-items: center; gap: 20px; background: var(--surface-dim); padding: 18px; border-radius: 12px; margin-bottom: 20px;">
                   <div style="font-size: 38px; font-weight: 800; color: var(--secondary); line-height: 1;">4.9<span style="font-size: 18px; color: var(--text-muted); font-weight: 500;">/5</span></div>
                   <div>
-                    <div style="color: #f59e0b; font-size: 16px; margin-bottom: 4px;">â˜…â˜…â˜…â˜…â˜…</div>
-                    <div style="font-size: 12px; color: var(--text-muted);">Dá»±a trÃªn 184 lÆ°á»£t Ä‘Ã¡nh giÃ¡ tá»« ngÆ°á»i mua Ä‘Ã£ xÃ¡c thá»±c</div>
+                    <div style="color: #f59e0b; font-size: 16px; margin-bottom: 4px;">★★★★★</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Dựa trên 184 lượt đánh giá từ người mua đã xác thực</div>
                   </div>
                 </div>
 
                 <div class="review-card">
                   <div class="review-header">
-                    <span class="reviewer-name">Nguyá»…n VÄƒn HoÃ ng <span class="verified-badge">âœ“ ÄÃ£ mua hÃ ng táº¡i JML Store</span></span>
-                    <span class="review-date">3 ngÃ y trÆ°á»›c</span>
+                    <span class="reviewer-name">Nguyễn Văn Hoàng <span class="verified-badge">✓ Đã mua hàng tại JML Store</span></span>
+                    <span class="review-date">3 ngày trước</span>
                   </div>
-                  <div class="review-stars">â˜…â˜…â˜…â˜…â˜…</div>
-                  <p>HÃ ng chÃ­nh hÃ£ng Ä‘Ã³ng gÃ³i ráº¥t ká»¹ lÆ°á»¡ng. Giao hÃ ng chá»‰ máº¥t 2 tiáº¿ng á»Ÿ HÃ  Ná»™i, Ä‘Ãºng chuáº©n mÃ´ táº£ vÃ  mÃ u sáº¯c trÃªn áº£nh. Ráº¥t hÃ i lÃ²ng!</p>
+                  <div class="review-stars">★★★★★</div>
+                  <p>Hàng chính hãng đóng gói rất kỹ lưỡng. Giao hàng chỉ mất 2 tiếng ở Hà Nội, đúng chuẩn mô tả và màu sắc trên ảnh. Rất hài lòng!</p>
                 </div>
 
                 <div class="review-card">
                   <div class="review-header">
-                    <span class="reviewer-name">Tráº§n ThÃ¹y Linh <span class="verified-badge">âœ“ ÄÃ£ mua hÃ ng táº¡i JML Store</span></span>
-                    <span class="review-date">1 tuáº§n trÆ°á»›c</span>
+                    <span class="reviewer-name">Trần Thùy Linh <span class="verified-badge">✓ Đã mua hàng tại JML Store</span></span>
+                    <span class="review-date">1 tuần trước</span>
                   </div>
-                  <div class="review-stars">â˜…â˜…â˜…â˜…â˜…</div>
-                  <p>Sáº£n pháº©m cao cáº¥p, cháº¥t lÆ°á»£ng hoÃ n thiá»‡n tuyá»‡t vá»i. NhÃ¢n viÃªn há»— trá»£ tÆ° váº¥n ráº¥t nhiá»‡t tÃ¬nh vÃ  kÃ­ch hoáº¡t báº£o hÃ nh Ä‘iá»‡n tá»­ nhanh chÃ³ng.</p>
+                  <div class="review-stars">★★★★★</div>
+                  <p>Sản phẩm cao cấp, chất lượng hoàn thiện tuyệt vời. Nhân viên hỗ trợ tư vấn rất nhiệt tình và kích hoạt bảo hành điện tử nhanh chóng.</p>
                 </div>
               </div>
 
-              <!-- Tab 4: ChÃ­nh sÃ¡ch -->
+              <!-- Tab 4: Chính sách -->
               <div id="tab-policy" class="detail-tab-pane">
                 <div style="display: flex; flex-direction: column; gap: 14px;">
                   <div>
-                    <strong style="color: var(--secondary);">1. ChÃ­nh sÃ¡ch báº£o hÃ nh chÃ­nh hÃ£ng:</strong>
-                    <p style="margin-top: 4px;">Báº£o hÃ nh 12 - 24 thÃ¡ng theo quy chuáº©n cá»§a nhÃ  sáº£n xuáº¥t. KÃ­ch hoáº¡t báº£o hÃ nh Ä‘iá»‡n tá»­ thÃ´ng minh qua sá»‘ Ä‘iá»‡n thoáº¡i mua hÃ ng.</p>
+                    <strong style="color: var(--secondary);">1. Chính sách bảo hành chính hãng:</strong>
+                    <p style="margin-top: 4px;">Bảo hành 12 - 24 tháng theo quy chuẩn của nhà sản xuất. Kích hoạt bảo hành điện tử thông minh qua số điện thoại mua hàng.</p>
                   </div>
                   <div>
-                    <strong style="color: var(--secondary);">2. ChÃ­nh sÃ¡ch Ä‘á»•i má»›i 30 ngÃ y:</strong>
-                    <p style="margin-top: 4px;">Äá»•i má»›i 1:1 miá»…n phÃ­ trong 30 ngÃ y Ä‘áº§u tiÃªn náº¿u sáº£n pháº©m phÃ¡t sinh lá»—i tá»« nhÃ  sáº£n xuáº¥t (yÃªu cáº§u giá»¯ nguyÃªn há»™p vÃ  phá»¥ kiá»‡n).</p>
+                    <strong style="color: var(--secondary);">2. Chính sách đổi mới 30 ngày:</strong>
+                    <p style="margin-top: 4px;">Đổi mới 1:1 miễn phí trong 30 ngày đầu tiên nếu sản phẩm phát sinh lỗi từ nhà sản xuất (yêu cầu giữ nguyên hộp và phụ kiện).</p>
                   </div>
                   <div>
-                    <strong style="color: var(--secondary);">3. Cam káº¿t nguá»“n gá»‘c:</strong>
-                    <p style="margin-top: 4px;">100% sáº£n pháº©m phÃ¢n phá»‘i bá»Ÿi JML Store lÃ  hÃ ng chÃ­nh ngáº¡ch cÃ³ hÃ³a Ä‘Æ¡n VAT vÃ  tem chá»‘ng hÃ ng giáº£ cá»§a Bá»™ CÃ´ng An.</p>
+                    <strong style="color: var(--secondary);">3. Cam kết nguồn gốc:</strong>
+                    <p style="margin-top: 4px;">100% sản phẩm phân phối bởi JML Store là hàng chính ngạch có hóa đơn VAT và tem chống hàng giả của Bộ Công An.</p>
                   </div>
                 </div>
               </div>
@@ -1085,8 +1085,8 @@
             <div class="related-products-section">
               <div class="section-title-wrap">
                 <div>
-                  <h2 class="section-title">Sáº£n Pháº©m CÃ¹ng Bá»™ SÆ°u Táº­p</h2>
-                  <p class="section-subtitle">Gá»£i Ã½ sáº£n pháº©m tÆ°Æ¡ng tá»± cÃ³ thá»ƒ báº¡n cÅ©ng quan tÃ¢m</p>
+                  <h2 class="section-title">Sản Phẩm Cùng Bộ Sưu Tập</h2>
+                  <p class="section-subtitle">Gợi ý sản phẩm tương tự có thể bạn cũng quan tâm</p>
                 </div>
               </div>
               <div class="recommend-grid">${relatedCardsHtml}</div>
@@ -1094,13 +1094,13 @@
           </div>
         `;
 
-        // Chuyá»ƒn SPA view
+        // Chuyển SPA view
         homeContainer.classList.remove("active");
         detailContainer.classList.add("active");
         window.location.hash = "product/" + product.id;
         window.scrollTo({ top: 0, behavior: "smooth" });
 
-        // Gáº¯n listener hover cho cÃ¡c card liÃªn quan
+        // Gắn listener hover cho các card liên quan
         attachHoverCarouselListeners(detailContainer);
       }
 
@@ -1158,7 +1158,7 @@
         const mainImg = currentDetailProduct.images
           ? currentDetailProduct.images[0]
           : currentDetailProduct.image;
-        const titleWithVariant = `${currentDetailProduct.title} (${currentSelectedColor || "TiÃªu chuáº©n"})`;
+        const titleWithVariant = `${currentDetailProduct.title} (${currentSelectedColor || "Tiêu chuẩn"})`;
         const shopName = currentDetailProduct.shopName || "Trungshop";
 
         for (let i = 0; i < currentDetailQty; i++) {
@@ -1179,7 +1179,7 @@
         }
 
         showToast(
-          "ÄÃ£ thÃªm vÃ o giá» hÃ ng!",
+          "Đã thêm vào giỏ hàng!",
           `${currentDetailQty}x ${titleWithVariant}`,
         );
       }
@@ -1202,7 +1202,7 @@
         if (target) target.classList.add("active");
       }
 
-      // Xá»­ lÃ½ URL hash Ä‘á»ƒ Ä‘á»“ng bá»™ SPA (nÃºt Back/Forward cá»§a trÃ¬nh duyá»‡t)
+      // Xử lý URL hash để đồng bộ SPA (nút Back/Forward của trình duyệt)
       function checkUrlHash() {
         const hash = window.location.hash;
         if (hash.startsWith("#product/")) {
@@ -1336,7 +1336,7 @@
       updateCountdown();
 
       // --------------------------------------------------------------------------
-      // 5. GIá»Ž HÃ€NG (SHOPPING CART) & HIá»†U á»¨NG BOUNCE BADGE
+      // 5. GIỎ HÀNG (SHOPPING CART) & HIỆU ỨNG BOUNCE BADGE
       // --------------------------------------------------------------------------
       const cartCountBadge = document.getElementById("cartCountBadge");
       const cartCountHeader = document.getElementById("cartCountHeader");
@@ -1383,14 +1383,14 @@
         });
       }
 
-      // NgÄƒn cháº·n sá»± kiá»‡n click bÃªn trong dropdown lÃ m Ä‘Ã³ng chÃ­nh nÃ³
+      // Ngăn chặn sự kiện click bên trong dropdown làm đóng chính nó
       [cartDropdown, notifDropdown, userDropdown].forEach((dd) => {
         if (dd) {
           dd.addEventListener("click", (e) => e.stopPropagation());
         }
       });
 
-      // Click ra bÃªn ngoÃ i Ä‘á»ƒ Ä‘Ã³ng toÃ n bá»™ popups/dropdowns
+      // Click ra bên ngoài để đóng toàn bộ popups/dropdowns
       document.addEventListener("click", () => {
         closeAllDropdowns();
       });
@@ -1411,21 +1411,21 @@
         }
         updateCartDisplay();
 
-        // KÃ­ch hoáº¡t hiá»‡u á»©ng náº£y icon giá» hÃ ng
+        // Kích hoạt hiệu ứng nảy icon giỏ hàng
         if (cartCountBadge) {
           cartCountBadge.classList.remove("bounce");
           void cartCountBadge.offsetWidth; // Trigger reflow
           cartCountBadge.classList.add("bounce");
         }
 
-        // Báº­t Toast notification
-        showToast("ÄÃ£ thÃªm vÃ o giá» hÃ ng!", title);
+        // Bật Toast notification
+        showToast("Đã thêm vào giỏ hàng!", title);
       }
 
       function removeFromCart(index) {
         const removed = cartItems.splice(index, 1)[0];
         updateCartDisplay();
-        showToast("ÄÃ£ xÃ³a khá»i giá»", removed ? removed.title : "");
+        showToast("Đã xóa khỏi giỏ", removed ? removed.title : "");
       }
 
       function updateCartDisplay() {
@@ -1435,14 +1435,14 @@
         );
         if (cartCountBadge) cartCountBadge.textContent = totalQty;
         if (cartCountHeader)
-          cartCountHeader.textContent = `${totalQty} sáº£n pháº©m`;
+          cartCountHeader.textContent = `${totalQty} sản phẩm`;
 
         if (!cartItemsList || !cartTotalSum) return;
 
         if (cartItems.length === 0) {
           cartItemsList.innerHTML =
-            '<p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 24px 0;">ChÆ°a cÃ³ sáº£n pháº©m nÃ o trong giá» hÃ ng</p>';
-          cartTotalSum.textContent = "0 â‚«";
+            '<p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 24px 0;">Chưa có sản phẩm nào trong giỏ hàng</p>';
+          cartTotalSum.textContent = "0 ₫";
           return;
         }
 
@@ -1461,7 +1461,7 @@
             <div style="font-weight: 600; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 170px;" title="${item.title}">${item.title}</div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
               <span class="cart-item-price">${formatCurrency(item.price)} ${item.qty > 1 ? `<span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">x${item.qty}</span>` : ""}</span>
-              <button onclick="removeFromCart(${idx})" title="XÃ³a khá»i giá»" style="color: #ef4444; font-size: 14px; padding: 2px 6px; cursor: pointer; border-radius: 4px;">âœ•</button>
+              <button onclick="removeFromCart(${idx})" title="Xóa khỏi giỏ" style="color: #ef4444; font-size: 14px; padding: 2px 6px; cursor: pointer; border-radius: 4px;">✕</button>
             </div>
           </div>
         </div>
@@ -1473,8 +1473,8 @@
       function handleCheckout() {
         if (cartItems.length === 0) {
           showToast(
-            "ThÃ´ng bÃ¡o",
-            "Giá» hÃ ng Ä‘ang trá»‘ng! Vui lÃ²ng chá»n sáº£n pháº©m trÆ°á»›c khi thanh toÃ¡n.",
+            "Thông báo",
+            "Giỏ hàng đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.",
           );
           return;
         }
@@ -1505,8 +1505,8 @@
                   user.role === "admin"
                     ? "Admin"
                     : user.role === "seller"
-                      ? "Chá»§ Shop"
-                      : user.rank || "ThÃ nh viÃªn";
+                      ? "Chủ Shop"
+                      : user.rank || "Thành viên";
                 dropNameEl.textContent = `${user.full_name} (${roleLabel})`;
               }
               return;
@@ -1514,16 +1514,16 @@
           } catch (e) {}
         }
         if (avatarEl) avatarEl.textContent = "KH";
-        if (nameEl) nameEl.textContent = "ÄÄƒng nháº­p";
+        if (nameEl) nameEl.textContent = "Đăng nhập";
         if (dropNameEl)
-          dropNameEl.textContent = "KhÃ¡ch vÃ£ng lai (ChÆ°a Ä‘Äƒng nháº­p)";
+          dropNameEl.textContent = "Khách vãng lai (Chưa đăng nhập)";
       }
 
       function handleUserLogout() {
         localStorage.removeItem("JML_CUSTOMER_USER");
         localStorage.removeItem("JML_AUTH_USER");
         syncCustomerAuthHeader();
-        showToast("ÄÄƒng xuáº¥t", "Báº¡n Ä‘Ã£ Ä‘Äƒng xuáº¥t tÃ i khoáº£n thÃ nh cÃ´ng!");
+        showToast("Đăng xuất", "Bạn đã đăng xuất tài khoản thành công!");
       }
 
       function openCustomerAuthModal(mode = "login") {
@@ -1585,21 +1585,21 @@
             alertEl.style.background = "#fef2f2";
             alertEl.style.color = "#ef4444";
             alertEl.style.border = "1px solid #fecaca";
-            alertEl.textContent = data.detail || "ÄÄƒng nháº­p tháº¥t báº¡i!";
+            alertEl.textContent = data.detail || "Đăng nhập thất bại!";
             return;
           }
           localStorage.setItem("JML_CUSTOMER_USER", JSON.stringify(data.user));
           syncCustomerAuthHeader();
           closeCustomerAuthModal();
           showToast(
-            "ÄÄƒng nháº­p thÃ nh cÃ´ng",
-            `ChÃ o má»«ng ${data.user.full_name} quay trá»Ÿ láº¡i!`,
+            "Đăng nhập thành công",
+            `Chào mừng ${data.user.full_name} quay trở lại!`,
           );
         } catch (err) {
           alertEl.style.display = "block";
           alertEl.style.background = "#fef2f2";
           alertEl.style.color = "#ef4444";
-          alertEl.textContent = "KhÃ´ng thá»ƒ káº¿t ná»‘i mÃ¡y chá»§!";
+          alertEl.textContent = "Không thể kết nối máy chủ!";
         }
       }
 
@@ -1631,21 +1631,21 @@
             alertEl.style.background = "#fef2f2";
             alertEl.style.color = "#ef4444";
             alertEl.style.border = "1px solid #fecaca";
-            alertEl.textContent = data.detail || "ÄÄƒng kÃ½ tháº¥t báº¡i!";
+            alertEl.textContent = data.detail || "Đăng ký thất bại!";
             return;
           }
           localStorage.setItem("JML_CUSTOMER_USER", JSON.stringify(data.user));
           syncCustomerAuthHeader();
           closeCustomerAuthModal();
           showToast(
-            "ÄÄƒng kÃ½ thÃ nh cÃ´ng",
-            `ChÃºc má»«ng ${data.user.full_name} Ä‘Ã£ táº¡o tÃ i khoáº£n thÃ nh cÃ´ng!`,
+            "Đăng ký thành công",
+            `Chúc mừng ${data.user.full_name} đã tạo tài khoản thành công!`,
           );
         } catch (err) {
           alertEl.style.display = "block";
           alertEl.style.background = "#fef2f2";
           alertEl.style.color = "#ef4444";
-          alertEl.textContent = "KhÃ´ng thá»ƒ káº¿t ná»‘i mÃ¡y chá»§!";
+          alertEl.textContent = "Không thể kết nối máy chủ!";
         }
       }
 
@@ -1653,21 +1653,21 @@
         syncCustomerAuthHeader();
       });
 
-      // Quáº£n lÃ½ Voucher & PhÆ°Æ¡ng Thá»©c Váº­n Chuyá»ƒn
+      // Quản lý Voucher & Phương Thức Vận Chuyển
       let appliedVoucher = null;
 
       const AVAILABLE_VOUCHERS = {
         FREESHIP: {
           code: "FREESHIP",
           type: "shipping",
-          desc: "Miá»…n phÃ­ 100% tiá»n váº­n chuyá»ƒn",
+          desc: "Miễn phí 100% tiền vận chuyển",
           minOrder: 0,
         },
         JML50K: {
           code: "JML50K",
           type: "fixed",
           amount: 50000,
-          desc: "Giáº£m ngay 50.000 â‚«",
+          desc: "Giảm ngay 50.000 ₫",
           minOrder: 100000,
         },
         GIAM10: {
@@ -1675,14 +1675,14 @@
           type: "percent",
           percent: 10,
           maxAmount: 100000,
-          desc: "Giáº£m 10% (tá»‘i Ä‘a 100.000 â‚«)",
+          desc: "Giảm 10% (tối đa 100.000 ₫)",
           minOrder: 0,
         },
         VIP100K: {
           code: "VIP100K",
           type: "fixed",
           amount: 100000,
-          desc: "Giáº£m 100.000 â‚« cho Ä‘Æ¡n tá»« 1.000.000 â‚«",
+          desc: "Giảm 100.000 ₫ cho đơn từ 1.000.000 ₫",
           minOrder: 1000000,
         },
       };
@@ -1701,7 +1701,7 @@
           vStatus.textContent = "";
         }
 
-        // Tá»± Ä‘á»™ng Ä‘iá»n thÃ´ng tin KhÃ¡ch hÃ ng Ä‘ang Ä‘Äƒng nháº­p náº¿u cÃ³
+        // Tự động điền thông tin Khách hàng đang đăng nhập nếu có
         const rawCust =
           localStorage.getItem("JML_CUSTOMER_USER") ||
           localStorage.getItem("JML_AUTH_USER");
@@ -1741,8 +1741,8 @@
           ? parseInt(selectedOpt.getAttribute("data-fee") || "15000")
           : 15000;
         let shipName = selectedOpt
-          ? selectedOpt.getAttribute("data-name") || "TiÃªu Chuáº©n (GHN Express)"
-          : "TiÃªu Chuáº©n (GHN Express)";
+          ? selectedOpt.getAttribute("data-name") || "Tiêu Chuẩn (GHN Express)"
+          : "Tiêu Chuẩn (GHN Express)";
 
         let discountAmount = 0;
         let isFreeShipping = false;
@@ -1767,19 +1767,19 @@
         const effectiveShipFee = isFreeShipping ? 0 : baseShipFee;
         const finalTotal = Math.max(0, subtotal + baseShipFee - discountAmount);
 
-        // Cáº­p nháº­t giao diá»‡n tÃ³m táº¯t
+        // Cập nhật giao diện tóm tắt
         const countEl = document.getElementById("checkoutModalItemCount");
         if (countEl)
-          countEl.textContent = `${count} sáº£n pháº©m â€¢ ${formatCurrency(subtotal)}`;
+          countEl.textContent = `${count} sản phẩm • ${formatCurrency(subtotal)}`;
 
         const shipLabelEl = document.getElementById("checkoutShippingLabel");
         if (shipLabelEl)
-          shipLabelEl.textContent = `Váº­n chuyá»ƒn (${shipName.split(" ")[0]}):`;
+          shipLabelEl.textContent = `Vận chuyển (${shipName.split(" ")[0]}):`;
 
         const shipFeeEl = document.getElementById("checkoutShippingFeeText");
         if (shipFeeEl) {
           if (isFreeShipping) {
-            shipFeeEl.innerHTML = `<span style="color: #10b981; font-weight: 700;">Miá»…n phÃ­ (${appliedVoucher.code})</span>`;
+            shipFeeEl.innerHTML = `<span style="color: #10b981; font-weight: 700;">Miễn phí (${appliedVoucher.code})</span>`;
           } else {
             shipFeeEl.textContent = formatCurrency(baseShipFee);
           }
@@ -1794,7 +1794,7 @@
           if (appliedVoucher && discountAmount > 0) {
             discountRow.style.display = "flex";
             if (discountLabel)
-              discountLabel.textContent = `MÃ£ giáº£m (${appliedVoucher.code}):`;
+              discountLabel.textContent = `Mã giảm (${appliedVoucher.code}):`;
             if (discountAmountEl)
               discountAmountEl.textContent = `-${formatCurrency(discountAmount)}`;
           } else {
@@ -1838,7 +1838,7 @@
           if (statusEl) {
             statusEl.style.display = "inline";
             statusEl.style.color = "#ef4444";
-            statusEl.textContent = "âœ• MÃ£ khÃ´ng tá»“n táº¡i hoáº·c Ä‘Ã£ háº¿t lÆ°á»£t!";
+            statusEl.textContent = "✕ Mã không tồn tại hoặc đã hết lượt!";
           }
           appliedVoucher = null;
           updateCheckoutTotals();
@@ -1853,7 +1853,7 @@
           if (statusEl) {
             statusEl.style.display = "inline";
             statusEl.style.color = "#ef4444";
-            statusEl.textContent = `âœ• MÃ£ ${code} chá»‰ Ã¡p dá»¥ng cho Ä‘Æ¡n tá»« ${formatCurrency(v.minOrder)}!`;
+            statusEl.textContent = `✕ Mã ${code} chỉ áp dụng cho đơn từ ${formatCurrency(v.minOrder)}!`;
           }
           appliedVoucher = null;
           updateCheckoutTotals();
@@ -1864,12 +1864,12 @@
         if (statusEl) {
           statusEl.style.display = "inline";
           statusEl.style.color = "#10b981";
-          statusEl.innerHTML = `âœ“ ÄÃ£ Ã¡p dá»¥ng <strong>${code}</strong> <button type="button" onclick="cancelVoucher()" style="background: none; border: none; color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">Há»§y mÃ£</button>`;
+          statusEl.innerHTML = `✓ Đã áp dụng <strong>${code}</strong> <button type="button" onclick="cancelVoucher()" style="background: none; border: none; color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">Hủy mã</button>`;
         }
         updateCheckoutTotals();
         showToast(
-          "Ãp dá»¥ng mÃ£ thÃ nh cÃ´ng",
-          `MÃ£ ${code} Ä‘Ã£ Ä‘Æ°á»£c Ã¡p dá»¥ng: ${v.desc}!`,
+          "Áp dụng mã thành công",
+          `Mã ${code} đã được áp dụng: ${v.desc}!`,
         );
       }
 
@@ -1880,7 +1880,7 @@
         const statusEl = document.getElementById("voucherStatusText");
         if (statusEl) statusEl.style.display = "none";
         updateCheckoutTotals();
-        showToast("ÄÃ£ há»§y voucher", "ÄÃ£ gá»¡ bá» mÃ£ giáº£m giÃ¡ khá»i Ä‘Æ¡n hÃ ng.");
+        showToast("Đã hủy voucher", "Đã gỡ bỏ mã giảm giá khỏi đơn hàng.");
       }
 
       async function confirmCheckoutOrder(e) {
@@ -1888,14 +1888,14 @@
 
         const name = (
           document.getElementById("checkoutBuyerName")?.value ||
-          "KhÃ¡ch mua hÃ ng"
+          "Khách mua hàng"
         ).trim();
         const phone = (
           document.getElementById("checkoutBuyerPhone")?.value || "0908123456"
         ).trim();
         const address = (
           document.getElementById("checkoutBuyerAddress")?.value ||
-          "Quáº­n 1, TP.HCM"
+          "Quận 1, TP.HCM"
         ).trim();
 
         const totals = updateCheckoutTotals();
@@ -1913,7 +1913,7 @@
 
         const itemsPayload = cartItems.map((item) => ({
           name: item.title,
-          variant: "ChÃ­nh hÃ£ng â€¢ Shop: " + (item.shopName || orderShopName),
+          variant: "Chính hãng • Shop: " + (item.shopName || orderShopName),
           price: formatCurrency(item.price),
           qty: String(item.qty || 1),
           subtotal: formatCurrency(item.price * (item.qty || 1)),
@@ -1921,7 +1921,7 @@
 
         let orderId = "#MP-" + Math.floor(1000 + Math.random() * 9000);
 
-        // 1. Gá»i FastAPI lÆ°u Ä‘Æ¡n hÃ ng vÃ o Database
+        // 1. Gọi FastAPI lưu đơn hàng vào Database
         try {
           const res = await fetch(`${API_BASE_URL}/api/orders`, {
             method: "POST",
@@ -1947,9 +1947,9 @@
           if (res.status === 403) {
             const errData = await res.json();
             alert(
-              "âŒ TÃ€I KHOáº¢N ÄÃƒ Bá»Š KHÃ“A!\n\n" +
+              "❌ TÀI KHOẢN ĐÃ BỊ KHÓA!\n\n" +
                 (errData.detail ||
-                  "TÃ i khoáº£n nÃ y Ä‘Ã£ bá»‹ Ban Quáº£n Trá»‹ SÃ n khÃ³a."),
+                  "Tài khoản này đã bị Ban Quản Trị Sàn khóa."),
             );
             return;
           }
@@ -1959,34 +1959,34 @@
             if (data.order_id) orderId = data.order_id;
           }
         } catch (err) {
-          // Fallback kiá»ƒm tra banned trong localStorage náº¿u chÆ°a báº­t port 8000
+          // Fallback kiểm tra banned trong localStorage nếu chưa bật port 8000
           const bannedList = JSON.parse(
             localStorage.getItem("JML_BANNED_CUSTOMERS") || "[]",
           );
           if (bannedList.includes(phone) || bannedList.includes(name)) {
             alert(
-              "âŒ TÃ€I KHOáº¢N ÄÃƒ Bá»Š KHÃ“A!\n\nSá»‘ Ä‘iá»‡n thoáº¡i/TÃ i khoáº£n (" +
+              "❌ TÀI KHOẢN ĐÃ BỊ KHÓA!\n\nSố điện thoại/Tài khoản (" +
                 phone +
-                ") Ä‘Ã£ bá»‹ Ban Quáº£n Trá»‹ SÃ n táº¡m khÃ³a.",
+                ") đã bị Ban Quản Trị Sàn tạm khóa.",
             );
             return;
           }
         }
 
-        // 2. Äá»“ng bá»™ dá»± phÃ²ng vÃ o localStorage Ä‘á»ƒ tab Admin nháº­n tÃ­n hiá»‡u tá»©c thÃ¬
+        // 2. Đồng bộ dự phòng vào localStorage để tab Admin nhận tín hiệu tức thì
         const newOrder = {
           id: orderId,
           key: orderId.replace("#", ""),
-          escrowBadge: "ðŸ”’ SÃ n Ä‘ang giá»¯ tiá»n",
+          escrowBadge: "🔒 Sàn đang giữ tiền",
           escrowClass: "bg-primary-50 text-primary-500",
           time:
-            "Thá»i gian Ä‘áº·t: " +
+            "Thời gian đặt: " +
             new Date().toLocaleString("vi-VN") +
-            " â€¢ Váº­n chuyá»ƒn: " +
+            " • Vận chuyển: " +
             shippingMethod +
-            (voucherCode ? " â€¢ Voucher: " + voucherCode : ""),
+            (voucherCode ? " • Voucher: " + voucherCode : ""),
           shopName: orderShopName,
-          shopAddress: "Kho láº¥y hÃ ng: Nguyá»…n Thá»‹ Minh Khai, Quáº­n 1, TP.HCM",
+          shopAddress: "Kho lấy hàng: Nguyễn Thị Minh Khai, Quận 1, TP.HCM",
           buyerName: name + " (" + phone + ")",
           buyerPhone: phone,
           buyerAddress: address,
@@ -2011,14 +2011,14 @@
         if (cartDropdown) cartDropdown.classList.remove("active");
 
         showToast(
-          "Äáº·t hÃ ng thÃ nh cÃ´ng",
-          `ÄÆ¡n hÃ ng ${orderId} (${totalFormatted}) Ä‘Ã£ Ä‘Æ°á»£c lÆ°u vÃ o há»‡ thá»‘ng!`,
+          "Đặt hàng thành công",
+          `Đơn hàng ${orderId} (${totalFormatted}) đã được lưu vào hệ thống!`,
         );
         openUserOrdersModal();
       }
 
       // --------------------------------------------------------------------------
-      // MODAL: Lá»ŠCH Sá»¬ ÄÆ N HÃ€NG ÄÃƒ Äáº¶T Cá»¦A KHÃCH HÃ€NG
+      // MODAL: LỊCH SỬ ĐƠN HÀNG ĐÃ ĐẶT CỦA KHÁCH HÀNG
       // --------------------------------------------------------------------------
       async function openUserOrdersModal() {
         const modal = document.getElementById("userOrdersModal");
@@ -2038,8 +2038,8 @@
 
         container.innerHTML = `
           <div style="padding: 40px; text-align: center; color: #94a3b8;">
-            <div style="font-size: 24px; margin-bottom: 8px;">â³</div>
-            <p style="font-size: 13px;">Äang táº£i lá»‹ch sá»­ Ä‘Æ¡n hÃ ng cá»§a báº¡n...</p>
+            <div style="font-size: 24px; margin-bottom: 8px;">⏳</div>
+            <p style="font-size: 13px;">Đang tải lịch sử đơn hàng của bạn...</p>
           </div>
         `;
 
@@ -2067,7 +2067,7 @@
           }
         } catch (err) {}
 
-        // Fallback tá»« localStorage
+        // Fallback từ localStorage
         const localOrders = JSON.parse(
           localStorage.getItem("JML_ORDERS") || "[]",
         );
@@ -2075,10 +2075,10 @@
           localOrders.map((o) => ({
             order_key: o.key,
             id_display: o.id,
-            created_at: o.time || "HÃ´m nay",
+            created_at: o.time || "Hôm nay",
             shop_name: o.shopName,
             status: o.status || "preparing",
-            escrow_badge: o.escrowBadge || "ðŸ“¦ Shop Ä‘ang chuáº©n bá»‹ Ä‘Æ¡n",
+            escrow_badge: o.escrowBadge || "📦 Shop đang chuẩn bị đơn",
             total: o.total,
             items: o.items || [],
           })),
@@ -2088,16 +2088,16 @@
       function renderUserOrders(orders) {
         const container = document.getElementById("userOrdersListBody");
         const countBadge = document.getElementById("userOrdersTotalCount");
-        if (countBadge) countBadge.textContent = `${orders.length} Ä‘Æ¡n hÃ ng`;
+        if (countBadge) countBadge.textContent = `${orders.length} đơn hàng`;
 
         if (!container) return;
 
         if (!orders || orders.length === 0) {
           container.innerHTML = `
             <div style="padding: 48px 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
-              <div style="font-size: 36px; margin-bottom: 10px;">ðŸ“¦</div>
-              <p style="font-weight: 700; font-size: 14px; color: #1e293b; margin-bottom: 4px;">Báº¡n chÆ°a cÃ³ Ä‘Æ¡n hÃ ng nÃ o</p>
-              <p style="font-size: 12px; color: #94a3b8;">HÃ£y dáº¡o má»™t vÃ²ng trang chá»§ vÃ  chá»n mÃ³n Ä‘á»“ yÃªu thÃ­ch Ä‘á»ƒ Ä‘áº·t hÃ ng ngay!</p>
+              <div style="font-size: 36px; margin-bottom: 10px;">📦</div>
+              <p style="font-weight: 700; font-size: 14px; color: #1e293b; margin-bottom: 4px;">Bạn chưa có đơn hàng nào</p>
+              <p style="font-size: 12px; color: #94a3b8;">Hãy dạo một vòng trang chủ và chọn món đồ yêu thích để đặt hàng ngay!</p>
             </div>
           `;
           return;
@@ -2105,37 +2105,37 @@
 
         container.innerHTML = orders
           .map((o) => {
-            // Tráº¡ng thÃ¡i theo phong cÃ¡ch Shopee
-            let badgeText = o.escrow_badge || "ðŸ“¦ Shop Ä‘ang chuáº©n bá»‹ Ä‘Æ¡n";
+            // Trạng thái theo phong cách Shopee
+            let badgeText = o.escrow_badge || "📦 Shop đang chuẩn bị đơn";
             let badgeBg = "#fffbeb";
             let badgeColor = "#d97706";
             let badgeBorder = "#fde68a";
 
-            if (o.status === "shipping" || badgeText.includes("váº­n chuyá»ƒn")) {
-              badgeText = "ðŸšš Äang váº­n chuyá»ƒn";
+            if (o.status === "shipping" || badgeText.includes("vận chuyển")) {
+              badgeText = "🚚 Đang vận chuyển";
               badgeBg = "#eff6ff";
               badgeColor = "#2563eb";
               badgeBorder = "#bfdbfe";
             } else if (
               o.status === "delivered" ||
               o.status === "released" ||
-              badgeText.includes("giao hÃ ng") ||
-              badgeText.includes("hoÃ n táº¥t")
+              badgeText.includes("giao hàng") ||
+              badgeText.includes("hoàn tất")
             ) {
-              badgeText = "âœ“ ÄÃ£ giao hÃ ng thÃ nh cÃ´ng";
+              badgeText = "✓ Đã giao hàng thành công";
               badgeBg = "#ecfdf5";
               badgeColor = "#059669";
               badgeBorder = "#a7f3d0";
             } else if (
               o.status === "dispute" ||
-              badgeText.includes("tranh cháº¥p")
+              badgeText.includes("tranh chấp")
             ) {
-              badgeText = "âš ï¸ Äang xá»­ lÃ½ khiáº¿u náº¡i";
+              badgeText = "⚠️ Đang xử lý khiếu nại";
               badgeBg = "#fef2f2";
               badgeColor = "#dc2626";
               badgeBorder = "#fecaca";
             } else {
-              badgeText = "ðŸ“¦ Shop Ä‘ang chuáº©n bá»‹ Ä‘Æ¡n";
+              badgeText = "📦 Shop đang chuẩn bị đơn";
               badgeBg = "#fffbeb";
               badgeColor = "#d97706";
               badgeBorder = "#fde68a";
@@ -2147,7 +2147,7 @@
               <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span style="font-weight: 800; color: #0f172a;">${o.id_display || "#" + o.order_key}</span>
-                  <span style="color: #cbd5e1;">â€¢</span>
+                  <span style="color: #cbd5e1;">•</span>
                   <span style="color: #64748b;">Shop: <strong style="color: #ea580c;">${o.shop_name || "Trungshop"}</strong></span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -2165,7 +2165,7 @@
                   <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px;">
                     <div style="min-width: 0;">
                       <p style="font-weight: 700; color: #1e293b; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${it.name}</p>
-                      <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${it.variant || "ChÃ­nh hÃ£ng"} â€¢ Sá»‘ lÆ°á»£ng: <strong>x${it.qty || 1}</strong></p>
+                      <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${it.variant || "Chính hãng"} • Số lượng: <strong>x${it.qty || 1}</strong></p>
                     </div>
                     <span style="font-weight: 700; color: #0f172a; white-space: nowrap;">${it.subtotal || it.price}</span>
                   </div>
@@ -2179,27 +2179,27 @@
                 <span style="color: #64748b;">${o.time_info || o.created_at || ""}</span>
                 <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
                   <div>
-                    <span style="color: #64748b; margin-right: 6px;">Tá»•ng thanh toÃ¡n:</span>
+                    <span style="color: #64748b; margin-right: 6px;">Tổng thanh toán:</span>
                     <strong style="font-size: 15px; color: #ea580c; font-weight: 800;">${o.total}</strong>
                   </div>
-                  <!-- Duy Nháº¥t 1 NÃºt XÃ¡c Nháº­n á»ž ChÃ¢n ÄÆ¡n HÃ ng -->
+                  <!-- Duy Nhất 1 Nút Xác Nhận Ở Chân Đơn Hàng -->
                   ${
                     o.status === "shipping" ||
-                    (o.escrow_badge && o.escrow_badge.includes("váº­n chuyá»ƒn"))
+                    (o.escrow_badge && o.escrow_badge.includes("vận chuyển"))
                       ? `
                     <button onclick="handleUserConfirmReceived(this, '${o.order_key}')" style="padding: 7px 16px; border-radius: 8px; border: none; background: #16a34a; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(22,163,74,0.3); display: inline-flex; align-items: center; gap: 5px;">
-                      <span>âœ“ ÄÃ£ Nháº­n ÄÆ°á»£c HÃ ng</span>
+                      <span>✓ Đã Nhận Được Hàng</span>
                     </button>
                   `
                       : o.status === "delivered" || o.status === "released"
                         ? `
                     <span style="padding: 4px 10px; border-radius: 6px; background: #ecfdf5; color: #15803d; font-weight: 700; font-size: 11px; border: 1px solid #bbf7d0;">
-                      âœ“ ÄÃ£ nháº­n hÃ ng thÃ nh cÃ´ng
+                      ✓ Đã nhận hàng thành công
                     </span>
                   `
                         : `
                     <span style="padding: 4px 10px; border-radius: 6px; background: #fef3c7; color: #b45309; font-weight: 600; font-size: 11px;">
-                      Chá» shop gá»­i hÃ ng
+                      Chờ shop gửi hàng
                     </span>
                   `
                   }
@@ -2227,11 +2227,11 @@
               `.user-order-card[data-order-key="${orderKey}"]`,
             );
 
-        // Cáº­p nháº­t tráº¡ng thÃ¡i trá»±c tiáº¿p trÃªn giao diá»‡n tá»©c thÃ¬ (KHÃ”NG reload láº¡i modal)
+        // Cập nhật trạng thái trực tiếp trên giao diện tức thì (KHÔNG reload lại modal)
         if (btn) {
           btn.outerHTML = `
             <span style="padding: 5px 12px; border-radius: 8px; background: #ecfdf5; color: #15803d; font-weight: 700; font-size: 12px; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; gap: 4px;">
-              <span>âœ“ ÄÃ£ nháº­n hÃ ng thÃ nh cÃ´ng</span>
+              <span>✓ Đã nhận hàng thành công</span>
             </span>
           `;
         }
@@ -2239,17 +2239,17 @@
         if (card) {
           const badge = card.querySelector(".order-status-badge");
           if (badge) {
-            badge.textContent = "âœ“ ÄÃ£ giao hÃ ng thÃ nh cÃ´ng";
+            badge.textContent = "✓ Đã giao hàng thành công";
             badge.style.background = "#ecfdf5";
             badge.style.color = "#059669";
             badge.style.border = "1px solid #a7f3d0";
           }
         }
 
-        showToast("ThÃ nh cÃ´ng", "Báº¡n Ä‘Ã£ xÃ¡c nháº­n nháº­n hÃ ng thÃ nh cÃ´ng!");
+        showToast("Thành công", "Bạn đã xác nhận nhận hàng thành công!");
         window.dispatchEvent(new Event("storage"));
 
-        // Gá»­i lá»‡nh ngáº§m Ä‘áº¿n FastAPI Backend
+        // Gửi lệnh ngầm đến FastAPI Backend
         try {
           await fetch(
             `${API_BASE_URL}/api/user/orders/${orderKey}/confirm-received`,
@@ -2270,12 +2270,12 @@
         const toast = document.createElement("div");
         toast.className = "toast";
         toast.innerHTML = `
-        <div class="toast-icon">âœ“</div>
+        <div class="toast-icon">✓</div>
         <div class="toast-content">
           <div class="toast-title">${title}</div>
           <div class="toast-msg">${message}</div>
         </div>
-        <button style="border: none; background: transparent; color: #94a3b8; font-size: 14px; cursor: pointer; padding: 2px 6px;">âœ•</button>
+        <button style="border: none; background: transparent; color: #94a3b8; font-size: 14px; cursor: pointer; padding: 2px 6px;">✕</button>
       `;
 
         toast.onclick = () => {
@@ -2325,13 +2325,13 @@
       });
 
       // --------------------------------------------------------------------------
-      // 8. TÃŒM KIáº¾M THÃ”NG MINH
+      // 8. TÌM KIẾM THÔNG MINH
       // --------------------------------------------------------------------------
       function handleSearch() {
         const input = document.getElementById("searchInput");
         const query = (input ? input.value : "").trim().toLowerCase();
 
-        // Äáº£m báº£o Ä‘ang á»Ÿ view home khi tÃ¬m kiáº¿m
+        // Đảm bảo đang ở view home khi tìm kiếm
         showHomeView();
 
         if (!query) {
@@ -2350,9 +2350,9 @@
           if (matched.length === 0) {
             container.innerHTML = `
               <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #fff; border-radius: var(--radius-md); border: 1px dashed var(--border);">
-                <div style="font-size: 36px; margin-bottom: 12px;">ðŸ”</div>
-                <h3 style="font-size: 16px; font-weight: 700; color: var(--secondary);">KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m phÃ¹ há»£p</h3>
-                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Thá»­ tÃ¬m vá»›i tá»« khÃ³a: "ipad", "tai nghe", "Ä‘á»“ng há»“", "vÃ­ da", "loa"...</p>
+                <div style="font-size: 36px; margin-bottom: 12px;">🔍</div>
+                <h3 style="font-size: 16px; font-weight: 700; color: var(--secondary);">Không tìm thấy sản phẩm phù hợp</h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Thử tìm với từ khóa: "ipad", "tai nghe", "đồng hồ", "ví da", "loa"...</p>
               </div>
             `;
           } else {
@@ -2367,8 +2367,8 @@
                 <div class="product-body">
                   <h3 class="product-title" title="${product.title}">${product.title}</h3>
                   <div class="product-meta">
-                    <span class="rating-stars">â˜… ${product.rating}</span>
-                    <span>â€¢ ÄÃ£ bÃ¡n ${product.soldCount}</span>
+                    <span class="rating-stars">★ ${product.rating}</span>
+                    <span>• Đã bán ${product.soldCount}</span>
                   </div>
                   <div class="price-row">
                     <span class="current-price">${formatCurrency(product.price)}</span>
@@ -2377,7 +2377,7 @@
                   <div style="margin-top: auto;">
                     <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${product.title.replace(/'/g, "\\'")}', ${product.price}, '${mainImg}', '${(product.shopName || "").replace(/'/g, "\\'")}')">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                      ThÃªm VÃ o Giá»
+                      Thêm Vào Giỏ
                     </button>
                   </div>
                 </div>
@@ -2390,7 +2390,7 @@
         }
 
         scrollToRecommend();
-        showToast("TÃ¬m kiáº¿m", `TÃ¬m tháº¥y ${matched.length} sáº£n pháº©m phÃ¹ há»£p`);
+        showToast("Tìm kiếm", `Tìm thấy ${matched.length} sản phẩm phù hợp`);
       }
 
       function applyQuickSearch(term) {
@@ -2401,12 +2401,12 @@
         }
       }
 
-      // Khá»Ÿi cháº¡y render ban Ä‘áº§u vÃ  Ä‘á»“ng bá»™ dá»¯ liá»‡u tá»« FastAPI + SQL
+      // Khởi chạy render ban đầu và đồng bộ dữ liệu từ FastAPI + SQL
       renderFlashSaleProducts();
       renderRecommendProducts("all");
       loadProductsFromFastAPI();
 
-      // Kiá»ƒm tra URL hash khi má»Ÿ trang láº§n Ä‘áº§u
+      // Kiểm tra URL hash khi mở trang lần đầu
       if (window.location.hash.startsWith("#product/")) {
         checkUrlHash();
       }
