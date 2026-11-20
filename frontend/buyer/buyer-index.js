@@ -489,6 +489,27 @@
 
       // Trạng thái Giỏ hàng (Cart state)
       let cartItems = [];
+      const CART_STORAGE_KEY = "JML_CART_ITEMS";
+
+      function readStoredCart() {
+        try {
+          const storedCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+          return Array.isArray(storedCart) ? storedCart : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function restoreCartFromStorage() {
+        cartItems = readStoredCart();
+        updateCartDisplay();
+      }
+
+      function syncCartAfterLogin() {
+        // Giỏ của khách được lưu cục bộ trước khi đăng nhập. Nạp lại nó sau khi
+        // xác thực để header và dropdown luôn dùng cùng một nguồn dữ liệu.
+        restoreCartFromStorage();
+      }
 
       // Helper format tiền tệ VNĐ
       function formatCurrency(amount) {
@@ -1440,6 +1461,7 @@
       }
 
       function updateCartDisplay() {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
         const totalQty = cartItems.reduce(
           (acc, item) => acc + (item.qty || 1),
           0,
@@ -1605,6 +1627,7 @@
           }
           localStorage.setItem("JML_CUSTOMER_USER", JSON.stringify(data.user));
           syncCustomerAuthHeader();
+          syncCartAfterLogin();
           closeCustomerAuthModal();
           showToast(
             "Đăng nhập thành công",
@@ -1651,6 +1674,7 @@
           }
           localStorage.setItem("JML_CUSTOMER_USER", JSON.stringify(data.user));
           syncCustomerAuthHeader();
+          syncCartAfterLogin();
           closeCustomerAuthModal();
           showToast(
             "Đăng ký thành công",
@@ -1666,6 +1690,11 @@
 
       document.addEventListener("DOMContentLoaded", () => {
         syncCustomerAuthHeader();
+        restoreCartFromStorage();
+      });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key === CART_STORAGE_KEY) restoreCartFromStorage();
       });
 
       // Quản lý Voucher & Phương Thức Vận Chuyển
