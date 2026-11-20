@@ -1044,10 +1044,104 @@ function restoreCartFromStorage() {
   updateCartDisplay();
 }
 
-function syncCartAfterLogin() {
-  // Giỏ của khách được lưu cục bộ trước khi đăng nhập. Nạp lại nó sau khi
-  // xác thực để header và dropdown luôn dùng cùng một nguồn dữ liệu.
-  restoreCartFromStorage();
+function parseCartItemImg(raw) {
+  const fallback =
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=60";
+  if (!raw) return fallback;
+  try {
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : fallback;
+  } catch (e) {
+    return typeof raw === "string" ? raw : fallback;
+  }
+}
+
+function triggerCartBadgeBounce() {
+  const badges = [
+    document.getElementById("cartCountBadge"),
+    document.getElementById("cartBadgeCount"),
+  ];
+  badges.forEach((badge) => {
+    if (badge) {
+      badge.classList.remove("bounce");
+      void badge.offsetWidth; // Trigger reflow
+      badge.classList.add("bounce");
+    }
+  });
+}
+
+async function syncCartAfterLogin() {
+  // TF17097: Đồng bộ giỏ hàng và biểu tượng giỏ ở header sau khi đăng nhập
+  const user =
+    (typeof Auth !== "undefined" ? Auth.getUser() : null) ||
+    JSON.parse(localStorage.getItem("JML_CUSTOMER_USER") || "null") ||
+    JSON.parse(localStorage.getItem("JML_AUTH_USER") || "null");
+
+  // 1. Nếu chưa đăng nhập: Khôi phục giỏ hàng cục bộ (guest cart)
+  if (!user || !user.id) {
+    restoreCartFromStorage();
+    return;
+  }
+
+  const localItems = readStoredCart();
+
+  try {
+    // 2. Nếu khách có món trong giỏ trước khi đăng nhập, đẩy đồng bộ lên API backend
+    if (localItems.length > 0) {
+      for (const it of localItems) {
+        const prodId = it.id || it.product_id;
+        const qty = it.qty || it.quantity || 1;
+        if (prodId) {
+          try {
+            await fetch(`${API_BASE_URL}/api/cart/items`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                user_id: user.id,
+                product_id: prodId,
+                quantity: qty,
+              }),
+            });
+          } catch (e) {
+            // Bỏ qua lỗi nếu 1 sản phẩm không thể thêm (hết hàng, ...)
+          }
+        }
+      }
+    }
+
+    // 3. Tải giỏ hàng cập nhật nhất từ Backend API
+    const res = await fetch(`${API_BASE_URL}/api/cart/${user.id}`);
+    if (res.ok) {
+      const data = await res.json();
+      const serverItems = data.items || [];
+      cartItems = serverItems.map((it) => ({
+        id: it.product_id,
+        product_id: it.product_id,
+        cartItemId: it.cart_item_id,
+        title: it.title,
+        price: it.price || it.unit_price || it.cart_price,
+        originalPrice: it.price || it.unit_price,
+        image: it.images_json ? parseCartItemImg(it.images_json) : (it.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=60"),
+        qty: it.quantity,
+        shopName: it.shop_name || "JML Store",
+      }));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    } else {
+      restoreCartFromStorage();
+    }
+  } catch (err) {
+    console.warn("Không thể kết nối API giỏ hàng, giữ giỏ cục bộ:", err);
+    restoreCartFromStorage();
+  }
+
+  // 4. Cập nhật số lượng món trên biểu tượng giỏ ở header và dropdown
+  updateCartDisplay();
+  triggerCartBadgeBounce();
+
+  // Đồng bộ lại view cart SPA nếu đang hiển thị
+  if (typeof cvRender === "function") {
+    cvRender();
+  }
 }
 
 // Helper format tiền tệ VNĐ
@@ -2005,6 +2099,8 @@ function updateCartDisplay() {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
   const totalQty = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
   if (cartCountBadge) cartCountBadge.textContent = totalQty;
+  const secondaryBadge = document.getElementById("cartBadgeCount");
+  if (secondaryBadge) secondaryBadge.textContent = totalQty;
   if (cartCountHeader) cartCountHeader.textContent = `${totalQty} sản phẩm`;
 
   if (!cartItemsList || !cartTotalSum) return;
@@ -2095,7 +2191,11 @@ function syncCustomerAuthHeader() {
 function handleUserLogout() {
   localStorage.removeItem("JML_CUSTOMER_USER");
   localStorage.removeItem("JML_AUTH_USER");
+  localStorage.removeItem(CART_STORAGE_KEY);
+  cartItems = [];
+  updateCartDisplay();
   syncCustomerAuthHeader();
+  if (typeof cvRender === "function") cvRender();
   showToast("Đăng xuất", "Bạn đã đăng xuất tài khoản thành công!");
 }
 
@@ -2226,11 +2326,21 @@ async function handleCustomerRegisterSubmit(e) {
 
 document.addEventListener("DOMContentLoaded", () => {
   syncCustomerAuthHeader();
-  restoreCartFromStorage();
+  syncCartAfterLogin();
+});
+
+// Lắng nghe sự kiện đăng nhập / đăng xuất để đồng bộ biểu tượng giỏ hàng tức thì
+window.addEventListener("auth_state_changed", () => {
+  syncCustomerAuthHeader();
+  syncCartAfterLogin();
 });
 
 window.addEventListener("storage", (event) => {
   if (event.key === CART_STORAGE_KEY) restoreCartFromStorage();
+  if (event.key === "JML_CUSTOMER_USER" || event.key === "JML_AUTH_USER") {
+    syncCustomerAuthHeader();
+    syncCartAfterLogin();
+  }
 });
 
 // Quản lý Voucher & Phương Thức Vận Chuyển
