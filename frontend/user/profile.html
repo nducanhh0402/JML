@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ cá nhân | JML Store</title>
+  <link rel="icon" type="image/svg+xml" href="jml-store-icon.svg">
+  <link rel="stylesheet" href="../shared/css/shared.css">
+  <script src="../shared/js/api.js"></script>
+  <script src="../shared/js/auth.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--neutral-50); color: var(--neutral-900); }
+    .topbar { background: #fff; border-bottom: 1px solid var(--neutral-200); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar a { text-decoration: none; color: var(--primary); font-weight: 700; font-size: 14px; }
+    .brand { font-size: 18px; font-weight: 800; color: var(--neutral-900) !important; }
+    .container { max-width: 960px; margin: 28px auto; padding: 0 16px; display: grid; gap: 20px; grid-template-columns: 1fr; }
+    @media (min-width: 840px) { .container { grid-template-columns: 300px 1fr; align-items: start; } }
+    .card { background: #fff; border: 1px solid var(--neutral-200); border-radius: 14px; padding: 22px; }
+    .card h2 { margin: 0 0 4px; font-size: 17px; }
+    .card .sub { margin: 0 0 18px; color: var(--neutral-500); font-size: 13px; }
+    .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 28px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .info-name { font-size: 18px; font-weight: 800; margin: 0; word-break: break-word; }
+    .badge { display: inline-block; margin: 6px 0 14px; padding: 2px 10px; border-radius: 9999px; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 700; }
+    .info-row { display: flex; flex-direction: column; padding: 9px 0; border-top: 1px solid var(--neutral-100); font-size: 13px; }
+    .info-row span:first-child { color: var(--neutral-500); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+    .info-row span:last-child { font-weight: 600; word-break: break-word; }
+    .stack { display: grid; gap: 20px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .field label small { color: var(--danger); }
+    .input-wrap { position: relative; }
+    input, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--neutral-200); border-radius: 10px; font: inherit; font-size: 14px; background: #fff; }
+    input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    input.invalid, textarea.invalid { border-color: var(--danger); background: var(--danger-light); }
+    input[readonly] { background: var(--neutral-100); color: var(--neutral-500); }
+    .toggle-pw { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: 0; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--primary); }
+    .input-wrap input.has-toggle { padding-right: 58px; }
+    .error-text { color: var(--danger); font-size: 12px; margin-top: 4px; min-height: 0; }
+    .alert { display: none; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+    .alert.show { display: block; }
+    .alert.success { background: var(--success-light); color: #047857; border: 1px solid #a7f3d0; }
+    .alert.error { background: var(--danger-light); color: #b91c1c; border: 1px solid #fecaca; }
+    .btn { background: var(--primary); color: #fff; border: 0; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .btn.secondary { background: var(--neutral-100); color: var(--neutral-700); margin-left: 8px; }
+    .btn.secondary:hover { background: var(--neutral-200); }
+    .strength { height: 5px; border-radius: 99px; background: var(--neutral-100); margin-top: 8px; overflow: hidden; }
+    .strength > div { height: 100%; width: 0; transition: width .2s, background .2s; }
+    .strength-label { font-size: 11px; color: var(--neutral-500); margin-top: 3px; }
+    .loading { text-align: center; color: var(--neutral-500); padding: 40px 0; grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="index.html">🛍️ JML Store</a>
+    <div>
+      <a href="index.html">← Về trang chủ</a>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Đang tải hồ sơ...</div>
+
+  <main class="container" id="content" style="display:none">
+    <!-- Thông tin hiện tại -->
+    <aside class="card" aria-label="Thông tin tài khoản">
+      <div class="avatar" id="avatar">?</div>
+      <p class="info-name" id="infoName"></p>
+      <span class="badge" id="infoRole"></span>
+      <div class="info-row"><span>Tên đăng nhập</span><span id="infoUsername"></span></div>
+      <div class="info-row"><span>Số điện thoại</span><span id="infoPhone"></span></div>
+      <div class="info-row"><span>Email</span><span id="infoEmail"></span></div>
+      <div class="info-row"><span>Địa chỉ</span><span id="infoAddress"></span></div>
+      <div class="info-row"><span>Ngày tạo</span><span id="infoCreated"></span></div>
+    </aside>
+
+    <div class="stack">
+      <!-- Form sửa hồ sơ -->
+      <section class="card">
+        <h2>Chỉnh sửa thông tin cá nhân</h2>
+        <p class="sub">Cập nhật họ tên, số điện thoại, email và địa chỉ nhận hàng.</p>
+        <div id="profileAlert" class="alert" role="alert"></div>
+        <form id="profileForm" novalidate>
+          <div class="field">
+            <label for="fullName">Họ và tên <small>*</small></label>
+            <input id="fullName" name="full_name" type="text" maxlength="255" autocomplete="name">
+            <div class="error-text" id="fullNameErr"></div>
+          </div>
+          <div class="field">
+            <label for="phone">Số điện thoại <small>*</small></label>
+            <input id="phone" name="phone" type="tel" maxlength="15" autocomplete="tel">
+            <div class="error-text" id="phoneErr"></div>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" maxlength="100" autocomplete="email">
+            <div class="error-text" id="emailErr"></div>
+          </div>
+          <div class="field">
+            <label for="address">Địa chỉ</label>
+            <textarea id="address" name="address" rows="2" maxlength="500" autocomplete="street-address"></textarea>
+            <div class="error-text" id="addressErr"></div>
+          </div>
+          <button type="submit" class="btn" id="profileBtn">Lưu thay đổi</button>
+          <button type="button" class="btn secondary" id="profileReset">Hoàn tác</button>
+        </form>
+      </section>
+
+      <!-- Form đổi mật khẩu -->
+      <section class="card">
+        <h2>Đổi mật khẩu</h2>
+        <p class="sub">Nhập mật khẩu hiện tại để xác nhận trước khi đặt mật khẩu mới.</p>
+        <div id="pwAlert" class="alert" role="alert"></div>
+        <form id="pwForm" novalidate>
+          <div class="field">
+            <label for="oldPassword">Mật khẩu hiện tại <small>*</small></label>
+            <div class="input-wrap">
+              <input id="oldPassword" type="password" class="has-toggle" autocomplete="current-password">
+              <button type="button" class="toggle-pw" data-target="oldPassword">Hiện</button>
+            </div>
+            <div class="error-text" id="oldPasswordErr"></div>
+          </div>
+          <div class="field">
+            <label for="newPassword">Mật khẩu mới <small>*</small></label>
+            <div class="input-wrap">
+              <input id="newPassword" type="password" class="has-toggle" autocomplete="new-password">
+              <button type="button" class="toggle-pw" data-target="newPassword">Hiện</button>
+            </div>
+            <div class="strength"><div id="strengthBar"></div></div>
+            <div class="strength-label" id="strengthLabel">Tối thiểu 6 ký tự</div>
+            <div class="error-text" id="newPasswordErr"></div>
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Nhập lại mật khẩu mới <small>*</small></label>
+            <div class="input-wrap">
+              <input id="confirmPassword" type="password" class="has-toggle" autocomplete="new-password">
+              <button type="button" class="toggle-pw" data-target="confirmPassword">Hiện</button>
+            </div>
+            <div class="error-text" id="confirmPasswordErr"></div>
+          </div>
+          <button type="submit" class="btn" id="pwBtn">Đổi mật khẩu</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <div class="shared-toast-container" id="toastContainer"></div>
+
+  <script>
+  (function () {
+    'use strict';
+    var MIN_PASSWORD = 6;
+    var PHONE_RE = /^(0|\+84)\d{9,10}$/;
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var currentUser = null;
+
+    var $ = function (id) { return document.getElementById(id); };
+
+    function toast(msg, type) {
+      var el = document.createElement('div');
+      el.className = 'shared-toast';
+      el.style.borderLeft = '4px solid ' + (type === 'error' ? 'var(--danger)' : 'var(--success)');
+      el.textContent = msg;
+      $('toastContainer').appendChild(el);
+      setTimeout(function () { el.remove(); }, 3500);
+    }
+
+    function showAlert(id, type, msg) {
+      var el = $(id);
+      el.className = 'alert show ' + type;
+      el.textContent = msg;
+    }
+    function hideAlert(id) { $(id).className = 'alert'; }
+
+    function setError(inputId, msg) {
+      var input = $(inputId);
+      var err = $(inputId + 'Err');
+      if (msg) { input.classList.add('invalid'); err.textContent = msg; }
+      else { input.classList.remove('invalid'); err.textContent = ''; }
+      return !msg;
+    }
+
+    function redirectToLogin() {
+      Auth.logout('../auth/index.html?error=unauthorized');
+    }
+
+    function isTokenError(message) {
+      return /token|hết hạn|xác thực/i.test(message || '') && !/mật khẩu cũ/i.test(message || '');
+    }
+
+    // ---------- Hiển thị thông tin ----------
+    function renderInfo(u) {
+      currentUser = u;
+      var name = u.full_name || u.username || '';
+      $('avatar').textContent = (name.trim().charAt(0) || '?').toUpperCase();
+      $('infoName').textContent = name;
+      var roles = { admin: 'Quản trị viên', seller: 'Chủ cửa hàng', customer: 'Khách mua hàng' };
+      $('infoRole').textContent = roles[String(u.role).toLowerCase()] || u.role || '';
+      $('infoUsername').textContent = u.username || '—';
+      $('infoPhone').textContent = u.phone || '—';
+      $('infoEmail').textContent = u.email || 'Chưa cập nhật';
+      $('infoAddress').textContent = u.address || 'Chưa cập nhật';
+      $('infoCreated').textContent = u.created_at || '—';
+    }
+
+    function fillForm(u) {
+      $('fullName').value = u.full_name || '';
+      $('phone').value = u.phone || '';
+      $('email').value = u.email || '';
+      $('address').value = u.address || '';
+      ['fullName', 'phone', 'email', 'address'].forEach(function (f) { setError(f, ''); });
+    }
+
+    // ---------- Validate form hồ sơ ----------
+    function validateProfile() {
+      var name = $('fullName').value.trim();
+      var phone = $('phone').value.trim();
+      var email = $('email').value.trim();
+      var ok = true;
+      ok = setError('fullName', name ? '' : 'Vui lòng nhập họ và tên.') && ok;
+      ok = setError('phone', !phone ? 'Vui lòng nhập số điện thoại.' :
+        (PHONE_RE.test(phone) ? '' : 'Số điện thoại không hợp lệ (VD: 0912345678).')) && ok;
+      ok = setError('email', !email || EMAIL_RE.test(email) ? '' : 'Email không hợp lệ.') && ok;
+      return ok;
+    }
+
+    // ---------- Validate form mật khẩu ----------
+    function validatePassword() {
+      var oldPw = $('oldPassword').value;
+      var newPw = $('newPassword').value;
+      var confirmPw = $('confirmPassword').value;
+      var ok = true;
+      ok = setError('oldPassword', oldPw ? '' : 'Vui lòng nhập mật khẩu hiện tại.') && ok;
+      var newMsg = '';
+      if (!newPw) newMsg = 'Vui lòng nhập mật khẩu mới.';
+      else if (newPw.length < MIN_PASSWORD) newMsg = 'Mật khẩu mới phải có ít nhất ' + MIN_PASSWORD + ' ký tự.';
+      else if (newPw === oldPw) newMsg = 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+      ok = setError('newPassword', newMsg) && ok;
+      ok = setError('confirmPassword', !confirmPw ? 'Vui lòng nhập lại mật khẩu mới.' :
+        (confirmPw === newPw ? '' : 'Mật khẩu nhập lại không khớp.')) && ok;
+      return ok;
+    }
+
+    function updateStrength() {
+      var pw = $('newPassword').value;
+      var score = 0;
+      if (pw.length >= MIN_PASSWORD) score++;
+      if (pw.length >= 10) score++;
+      if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+      if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+      var levels = [
+        { w: '0%', c: 'transparent', t: 'Tối thiểu ' + MIN_PASSWORD + ' ký tự' },
+        { w: '25%', c: 'var(--danger)', t: 'Yếu' },
+        { w: '50%', c: 'var(--warning)', t: 'Trung bình' },
+        { w: '75%', c: 'var(--primary)', t: 'Khá mạnh' },
+        { w: '100%', c: 'var(--success)', t: 'Mạnh' }
+      ];
+      var lv = pw ? levels[Math.max(score, 1)] : levels[0];
+      $('strengthBar').style.width = lv.w;
+      $('strengthBar').style.background = lv.c;
+      $('strengthLabel').textContent = lv.t;
+    }
+
+    // ---------- Gọi API ----------
+    function loadProfile() {
+      return API.get('/api/user/me').then(function (data) {
+        renderInfo(data.user);
+        fillForm(data.user);
+        $('loading').style.display = 'none';
+        $('content').style.display = '';
+      }).catch(function (err) {
+        if (isTokenError(err.message)) return redirectToLogin();
+        $('loading').textContent = '⚠️ Không tải được hồ sơ: ' + err.message;
+      });
+    }
+
+    function onProfileSubmit(e) {
+      e.preventDefault();
+      hideAlert('profileAlert');
+      if (!validateProfile()) {
+        showAlert('profileAlert', 'error', 'Vui lòng kiểm tra lại các trường được đánh dấu.');
+        return;
+      }
+      var btn = $('profileBtn');
+      btn.disabled = true; btn.textContent = 'Đang lưu...';
+      API.put('/api/user/me', {
+        full_name: $('fullName').value.trim(),
+        phone: $('phone').value.trim(),
+        email: $('email').value.trim(),
+        address: $('address').value.trim()
+      }).then(function (data) {
+        renderInfo(data.user);
+        fillForm(data.user);
+        // Đồng bộ phiên đăng nhập cục bộ để header hiển thị tên mới
+        var merged = Object.assign({}, Auth.getUser() || {}, data.user);
+        Auth.setSession(merged);
+        showAlert('profileAlert', 'success', data.message || 'Cập nhật hồ sơ thành công!');
+        toast('✅ Cập nhật hồ sơ thành công!');
+      }).catch(function (err) {
+        if (isTokenError(err.message)) return redirectToLogin();
+        showAlert('profileAlert', 'error', err.message);
+        toast('❌ ' + err.message, 'error');
+      }).then(function () {
+        btn.disabled = false; btn.textContent = 'Lưu thay đổi';
+      });
+    }
+
+    function onPasswordSubmit(e) {
+      e.preventDefault();
+      hideAlert('pwAlert');
+      if (!validatePassword()) {
+        showAlert('pwAlert', 'error', 'Vui lòng kiểm tra lại các trường được đánh dấu.');
+        return;
+      }
+      var btn = $('pwBtn');
+      btn.disabled = true; btn.textContent = 'Đang xử lý...';
+      API.put('/api/user/change-password', {
+        old_password: $('oldPassword').value,
+        new_password: $('newPassword').value
+      }).then(function (data) {
+        $('pwForm').reset();
+        updateStrength();
+        showAlert('pwAlert', 'success', data.message || 'Đổi mật khẩu thành công!');
+        toast('✅ Đổi mật khẩu thành công!');
+      }).catch(function (err) {
+        if (isTokenError(err.message)) return redirectToLogin();
+        // Sai mật khẩu cũ -> báo ngay tại ô nhập
+        if (/mật khẩu cũ/i.test(err.message)) setError('oldPassword', err.message);
+        showAlert('pwAlert', 'error', err.message);
+        toast('❌ ' + err.message, 'error');
+      }).then(function () {
+        btn.disabled = false; btn.textContent = 'Đổi mật khẩu';
+      });
+    }
+
+    // ---------- Khởi tạo ----------
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!Auth.isAuthenticated()) {
+        window.location.href = '../auth/index.html?error=unauthorized';
+        return;
+      }
+      $('profileForm').addEventListener('submit', onProfileSubmit);
+      $('pwForm').addEventListener('submit', onPasswordSubmit);
+      $('profileReset').addEventListener('click', function () {
+        if (currentUser) fillForm(currentUser);
+        hideAlert('profileAlert');
+      });
+      $('newPassword').addEventListener('input', updateStrength);
+      ['fullName', 'phone', 'email'].forEach(function (id) {
+        $(id).addEventListener('input', function () { setError(id, ''); });
+      });
+      ['oldPassword', 'newPassword', 'confirmPassword'].forEach(function (id) {
+        $(id).addEventListener('input', function () { setError(id, ''); });
+      });
+      document.querySelectorAll('.toggle-pw').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var input = $(b.getAttribute('data-target'));
+          var show = input.type === 'password';
+          input.type = show ? 'text' : 'password';
+          b.textContent = show ? 'Ẩn' : 'Hiện';
+        });
+      });
+      loadProfile();
+    });
+  })();
+  </script>
+</body>
+</html>
