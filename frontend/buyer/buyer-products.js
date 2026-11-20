@@ -417,6 +417,10 @@
 
       function executeSearch() {
         applyAllFilters();
+        const searchEl = document.getElementById("searchInput");
+        if (searchEl && window.innerWidth <= 900) {
+          searchEl.blur();
+        }
         if (window.innerWidth <= 900) closeFilterDrawer();
       }
 
@@ -482,6 +486,8 @@
 
         // Cập nhật số lượng & thanh chip bộ lọc
         document.getElementById("productCountText").textContent = filteredProducts.length;
+        const drawerCountEl = document.getElementById("drawerResultCount");
+        if (drawerCountEl) drawerCountEl.textContent = filteredProducts.length;
         document.getElementById("countAll").textContent = allProducts.length;
 
         const activeChips = getActiveFilterChips();
@@ -758,22 +764,41 @@
         updatePagination();
       }
 
+      function getVisiblePages(current, total, isCompact) {
+        if (total <= (isCompact ? 5 : 7)) {
+          return Array.from({ length: total }, (_, idx) => idx + 1);
+        }
+        const radius = isCompact ? 1 : 2;
+        const pages = [1];
+        const start = Math.max(2, current - radius);
+        const end = Math.min(total - 1, current + radius);
+
+        if (start > 2) pages.push("...");
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (end < total - 1) pages.push("...");
+        pages.push(total);
+        return pages;
+      }
+
       function updatePagination() {
         const totalPages = Math.ceil(filteredProducts.length / pageSize) || 1;
-        const prevBtn = document.getElementById("btnPrevPage");
-        const nextBtn = document.getElementById("btnNextPage");
-
-        if (prevBtn) prevBtn.disabled = (currentPage === 1);
-        if (nextBtn) nextBtn.disabled = (currentPage === totalPages);
-
         const pagWrapper = document.getElementById("paginationWrapper");
-        let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">‹</button>`;
+        if (!pagWrapper) return;
 
-        for (let i = 1; i <= totalPages; i++) {
-          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-        }
+        const isCompact = window.innerWidth <= 640;
+        const visiblePages = getVisiblePages(currentPage, totalPages, isCompact);
 
-        html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">›</button>`;
+        let html = `<button class="page-btn" aria-label="Trang trước" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">‹</button>`;
+
+        visiblePages.forEach(p => {
+          if (p === "...") {
+            html += `<span class="page-ellipsis" aria-hidden="true">…</span>`;
+          } else {
+            html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" aria-label="Trang ${p}" ${p === currentPage ? 'aria-current="page"' : ''} onclick="changePage(${p})">${p}</button>`;
+          }
+        });
+
+        html += `<button class="page-btn" aria-label="Trang sau" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">›</button>`;
         pagWrapper.innerHTML = html;
       }
 
@@ -791,18 +816,39 @@
       function openFilterDrawer() {
         const sidebar = document.getElementById("filterSidebar");
         const backdrop = document.getElementById("drawerBackdrop");
+        const triggerBtn = document.querySelector(".btn-mobile-filter");
         if (sidebar) sidebar.classList.add("drawer-open");
         if (backdrop) backdrop.classList.add("active");
+        if (triggerBtn) triggerBtn.setAttribute("aria-expanded", "true");
         document.body.style.overflow = "hidden"; // Khóa cuộn trang khi drawer mở
       }
 
       function closeFilterDrawer() {
         const sidebar = document.getElementById("filterSidebar");
         const backdrop = document.getElementById("drawerBackdrop");
+        const triggerBtn = document.querySelector(".btn-mobile-filter");
         if (sidebar) sidebar.classList.remove("drawer-open");
         if (backdrop) backdrop.classList.remove("active");
+        if (triggerBtn) triggerBtn.setAttribute("aria-expanded", "false");
         document.body.style.overflow = ""; // Mở lại cuộn trang
       }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const sidebar = document.getElementById("filterSidebar");
+          if (sidebar && sidebar.classList.contains("drawer-open")) {
+            closeFilterDrawer();
+          }
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 900) {
+          closeFilterDrawer();
+        } else if (filteredProducts && filteredProducts.length > 0) {
+          updatePagination();
+        }
+      });
 
       // =========================================================================
       // TIỆN ÍCH & GIỎ HÀNG
