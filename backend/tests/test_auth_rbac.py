@@ -200,6 +200,28 @@ class TestAuthRBACMiddleware(unittest.TestCase):
         self.assertEqual(res_auth.status_code, 200)
         self.assertEqual(res_auth.json()["user"]["username"], "admin")
 
+    def test_08f_admin_orders_filter_search_pagination(self):
+        """Admin gọi API đơn với trạng thái, ngày, tìm mã đơn và phân trang."""
+        response = self.client.get(
+            "/api/admin/orders",
+            params={"status": "preparing", "date_from": "2026-11-01", "date_to": "2026-11-30", "search": "MP", "page": 1, "limit": 10},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("orders", data)
+        self.assertEqual(data["pagination"]["page"], 1)
+        self.assertEqual(data["pagination"]["limit"], 10)
+
+    def test_08g_admin_orders_reject_invalid_date_range(self):
+        """date_from lớn hơn date_to phải trả HTTP 400."""
+        response = self.client.get(
+            "/api/admin/orders",
+            params={"date_from": "2026-11-30", "date_to": "2026-11-01"},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(response.status_code, 400)
+
 
 if __name__ == "__main__":
     unittest.main()
