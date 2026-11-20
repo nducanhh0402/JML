@@ -94,6 +94,19 @@ class TestFrontendRBACAndGuards(unittest.TestCase):
         self.assertIn("/status", js)
         self.assertIn("/history", js)
 
+    def test_09_admin_dashboard_stats_and_top_products(self):
+        """Dashboard có biểu đồ doanh thu và card Top sản phẩm động."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("revenueChart", html)
+        self.assertIn("topProductsDashboardContainer", html)
+        self.assertIn("loadTopProductsDashboard", js)
+        self.assertIn("/reports/top-products", js)
+        self.assertIn("initRevenueChart", js)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -123,6 +123,7 @@ async function syncWithFastAPI() {
     renderFullOrders();
     renderCustomers();
     updateAdminMetrics(serverMetrics);
+    loadTopProductsDashboard();
 }
 
 /**
@@ -1621,7 +1622,7 @@ async function deleteCustomerDirect(arg1, arg2, arg3) {
     if (btn) {
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
-        btn.innerHTML = `<span class="inline-flex items-center gap-1.5"><svg class="animate-spin h-3 w-3 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="00 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Đang xóa...</span>`;
+        btn.innerHTML = `<span class="inline-flex items-center gap-1.5"><svg class="animate-spin h-3 w-3 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Đang xóa...</span>`;
     }
 
     if (statusCell) {
@@ -1664,5 +1665,38 @@ async function deleteCustomerDirect(arg1, arg2, arg3) {
             btn.textContent = 'Xóa';
         }
         if (tr) tr.classList.remove('opacity-50');
+    }
+}
+
+/**
+ * Load danh sách Top sản phẩm bán chạy trên Dashboard
+ */
+async function loadTopProductsDashboard() {
+    const container = document.getElementById('topProductsDashboardContainer');
+    if (!container) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/reports/top-products?limit=5`, {
+            headers: getAdminAuthHeaders()
+        });
+        if (!response.ok) throw new Error('Không tải được top sản phẩm');
+        const data = await response.json();
+        const products = data.top_products || [];
+        if (!products.length) {
+            container.innerHTML = '<div class="py-6 text-center text-neutral-400 text-xs md:col-span-2 xl:col-span-5">Chưa có dữ liệu bán hàng.</div>';
+            return;
+        }
+        container.innerHTML = products.map((product, index) => `
+            <div class="p-3 rounded-xl border border-neutral-200 bg-neutral-50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="w-7 h-7 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center">${index + 1}</span>
+                    <span class="text-xs font-bold text-emerald-600">${product.sold_quantity} lượt</span>
+                </div>
+                <p class="font-bold text-xs text-neutral-900 truncate" title="${product.name}">${product.name}</p>
+                <p class="text-[11px] text-neutral-500 mt-1">${product.order_count} đơn • ${product.revenue.toLocaleString('vi-VN')} ₫</p>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<div class="py-6 text-center text-danger-500 text-xs md:col-span-2 xl:col-span-5">Không tải được dữ liệu top sản phẩm.</div>';
     }
 }
