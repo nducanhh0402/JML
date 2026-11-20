@@ -8,6 +8,8 @@ from backend.src.middlewares.auth_middleware import create_access_token, get_cur
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
+DEFAULT_AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80"
+
 
 # ==============================================================================
 # HÀM TIỆN ÍCH: HASH & KIỂM TRA MẬT KHẨU (BCRYPT)
@@ -173,8 +175,8 @@ def auth_register(payload: RegisterRequest):
 
     cursor.execute("""
         INSERT INTO customers (cust_key, id_display, name, phone, email, avatar, `rank`, rank_badge, joined, orders_count, total_spent, status, status_badge, address, is_banned)
-        VALUES (?, ?, ?, ?, ?, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80', 'Đồng', 'bg-neutral-100 text-neutral-600 border-neutral-200', ?, 0, '0 ₫', 'Hoạt động', 'bg-emerald-50 text-emerald-600', '', 0);
-    """, (cust_key, f"#{cust_key}", payload.full_name.strip(), payload.phone.strip(), payload.email.strip(), date_only))
+        VALUES (?, ?, ?, ?, ?, ?, 'Đồng', 'bg-neutral-100 text-neutral-600 border-neutral-200', ?, 0, '0 ₫', 'Hoạt động', 'bg-emerald-50 text-emerald-600', '', 0);
+    """, (cust_key, f"#{cust_key}", payload.full_name.strip(), payload.phone.strip(), payload.email.strip(), DEFAULT_AVATAR, date_only))
 
     conn.commit()
     conn.close()

@@ -163,6 +163,13 @@ const Auth = {
     // -------------------------------------------------------------------------
     // 4. HIỂN THỊ MENU ĐIỀU HƯỚNG THEO VAI TRÒ (DYNAMIC ROLE-BASED NAVIGATION)
     // -------------------------------------------------------------------------
+    getProfilePath: function() {
+        const p = window.location.pathname;
+        if (p.includes('/user/')) return 'profile.html';
+        if (p.includes('/buyer/') || p.includes('/admin/') || p.includes('/seller/')) return '../user/profile.html';
+        return 'frontend/user/profile.html';
+    },
+
     renderUserTopLinks: function(targetElementId = 'topAuthLinks') {
         const container = document.getElementById(targetElementId);
         if (!container) return;
@@ -229,6 +236,8 @@ const Auth = {
             </div>
             <span style="opacity: 0.3;">|</span>
             ${roleLinks}
+            <span style="opacity: 0.3;">|</span>
+            <a href="${this.getProfilePath()}" style="text-decoration: none; color: #cbd5e1;">Hồ Sơ</a>
             <span style="opacity: 0.3;">|</span>
             <button type="button" onclick="Auth.logout('${authPath}?message=logged_out')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.15)'; this.style.color='#fca5a5';">
                 🚪 Đăng Xuất
@@ -322,6 +331,9 @@ const Auth = {
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 2px;">
+                <a href="${this.getProfilePath()}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #334155; text-decoration: none; font-size: 12px;">
+                    👤 Hồ Sơ Cá Nhân &amp; Đổi Mật Khẩu
+                </a>
                 ${specialLinks}
                 <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 6px 0;">
                 <button type="button" onclick="Auth.logout('${authPath}?message=logged_out')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: 8px; background: #fee2e2; color: #dc2626; border: 0; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s;">

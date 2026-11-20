@@ -513,6 +513,10 @@ tailwind.config = {
                             <option value="shipping">🚚 Đang vận chuyển</option>
                             <option value="delivered">✓ Đã giao / nhận hàng</option>
                         </select>
+                        <input id="fullOrderSearchFilter" oninput="filterFullOrders()" type="text" placeholder="Tìm mã đơn hoặc khách hàng" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-xs text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500 w-44">
+                        <input id="fullOrderDateFrom" onchange="filterFullOrders()" type="date" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-xs text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <input id="fullOrderDateTo" onchange="filterFullOrders()" type="date" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-xs text-neutral-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <span id="fullOrderResultCount" class="px-2.5 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-semibold">0 đơn</span>
                     </div>
                 </div>
 

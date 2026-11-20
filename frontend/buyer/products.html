@@ -497,6 +497,97 @@
         cursor: pointer;
       }
 
+      /* Active Filter Chips Bar (TF16EBF) */
+      .active-filters-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow-sm);
+      }
+      .active-filters-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 2px;
+      }
+      .active-filters-count {
+        background: var(--primary);
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 1px 6px;
+        border-radius: 99px;
+      }
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 8px 5px 12px;
+        border-radius: 99px;
+        background: var(--primary-light);
+        border: 1px solid #fed7aa;
+        color: #c2410c;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+        transition: var(--transition);
+      }
+      .filter-chip:hover {
+        border-color: var(--primary);
+        background: #ffedd5;
+      }
+      .filter-chip-remove {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(234, 88, 12, 0.14);
+        color: #c2410c;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        padding: 0;
+      }
+      .filter-chip-remove:hover {
+        background: var(--primary);
+        color: #ffffff;
+        transform: scale(1.08);
+      }
+      .btn-clear-all-chips {
+        margin-left: auto;
+        padding: 5px 12px;
+        border-radius: 99px;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: var(--transition);
+      }
+      .btn-clear-all-chips:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+      }
+
       /* Products Grid */
       .products-grid {
         display: grid;
@@ -635,42 +726,130 @@
         color: #fff;
       }
 
-      /* Empty State */
+      /* Empty State (TF16EBF) */
       .empty-state {
         grid-column: 1 / -1;
-        background: #fff;
-        border: 1px dashed var(--border);
-        border-radius: var(--radius-md);
-        padding: 48px 20px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1.5px dashed #cbd5e1;
+        border-radius: var(--radius-lg);
+        padding: 52px 24px;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
       .empty-state-icon {
-        font-size: 40px;
-        margin-bottom: 12px;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        border: 1px solid #fed7aa;
+        box-shadow: 0 8px 20px -6px rgba(234, 88, 12, 0.22);
       }
       .empty-state-title {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 18px;
+        font-weight: 800;
         color: var(--secondary);
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
       .empty-state-desc {
-        font-size: 13px;
+        font-size: 13.5px;
         color: var(--text-muted);
-        margin-bottom: 16px;
+        max-width: 460px;
+        line-height: 1.55;
+        margin-bottom: 14px;
+      }
+      .empty-state-summary {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 20px;
+      }
+      .empty-state-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .btn-empty-primary {
+        padding: 10px 22px;
+        border-radius: 99px;
+        border: none;
+        background: linear-gradient(135deg, var(--primary), #f97316);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(234, 88, 12, 0.25);
+        transition: var(--transition);
+      }
+      .btn-empty-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(234, 88, 12, 0.35);
+      }
+      .btn-empty-secondary {
+        padding: 10px 18px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        background: #ffffff;
+        color: var(--secondary);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-empty-secondary:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .empty-state-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--border);
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .empty-suggest-pill {
+        padding: 4px 12px;
+        border-radius: 99px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .empty-suggest-pill:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--primary-light);
       }
 
-      /* Pagination */
+      /* Pagination (Responsive + Ellipsis TF16ED9) */
       .pagination {
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-wrap: wrap;
         gap: 6px;
         margin-top: 24px;
       }
       .page-btn {
-        width: 36px;
-        height: 36px;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 8px;
         border-radius: var(--radius-sm);
         border: 1px solid var(--border);
         background: #fff;
@@ -678,12 +857,12 @@
         font-weight: 600;
         color: var(--text-main);
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         transition: var(--transition);
       }
-      .page-btn:hover {
+      .page-btn:hover:not(:disabled) {
         border-color: var(--primary);
         color: var(--primary);
       }
@@ -696,9 +875,19 @@
         opacity: 0.4;
         cursor: not-allowed;
       }
+      .page-ellipsis {
+        min-width: 24px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-weight: 700;
+        user-select: none;
+      }
 
       /* ==========================================================================
-         6. MOBILE DRAWER TRANSFORMATION (YÊU CẦU ĐỀ BÀI TASK TF16CEB)
+         6. MOBILE DRAWER & RESPONSIVE (TF16ED9)
          ========================================================================== */
       .drawer-backdrop {
         display: none;
@@ -710,6 +899,9 @@
         opacity: 0;
         transition: opacity 0.3s ease;
       }
+      .drawer-footer-actions {
+        display: none;
+      }
 
       @media (max-width: 900px) {
         .products-layout {
@@ -718,21 +910,26 @@
 
         .btn-mobile-filter {
           display: inline-flex;
+          min-height: 36px;
         }
 
         /* Thu Panel Bộ Lọc thành Drawer trượt ra từ cạnh trái */
         .filter-panel {
           position: fixed;
           top: 0;
-          left: -320px;
-          width: 300px;
+          left: calc(-1 * min(310px, 86vw) - 24px);
+          width: min(310px, 86vw);
           height: 100vh;
-          max-height: 100vh;
+          height: 100dvh;
+          max-height: 100dvh;
           z-index: 9999;
           border-radius: 0;
           overflow-y: auto;
-          box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+          overscroll-behavior: contain;
+          box-shadow: 4px 0 24px rgba(0, 0, 0, 0.22);
           transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
+          flex-direction: column;
         }
 
         .filter-panel.drawer-open {
@@ -745,17 +942,89 @@
         }
 
         .filter-drawer-close {
-          display: block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .drawer-footer-actions {
+          display: flex;
+          gap: 8px;
+          position: sticky;
+          bottom: -18px;
+          background: #ffffff;
+          padding: 12px 0 4px;
+          margin-top: auto;
+          border-top: 1px solid var(--border);
+          z-index: 2;
+        }
+        .btn-drawer-reset {
+          flex: 0 0 auto;
+          padding: 10px 14px;
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border);
+          background: #f8fafc;
+          color: var(--secondary);
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .btn-drawer-apply {
+          flex: 1;
+          padding: 10px 12px;
+          border-radius: var(--radius-sm);
+          border: none;
+          background: var(--primary);
+          color: #ffffff;
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
         }
       }
 
       @media (max-width: 640px) {
+        .top-links {
+          display: none;
+        }
+        .header-inner {
+          flex-wrap: wrap;
+          gap: 10px;
+          padding: 10px 0;
+        }
+        .search-box {
+          order: 3;
+          flex: 1 1 100%;
+          max-width: 100%;
+          width: 100%;
+        }
+        .search-input {
+          min-width: 0;
+          font-size: 16px;
+          padding: 9px 14px;
+        }
+        .search-btn {
+          padding: 0 16px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .sort-bar {
+          padding: 10px 12px;
+          gap: 8px;
+        }
+        .sort-left {
+          width: 100%;
+        }
+        .sort-label {
+          display: none;
+        }
+        .sort-right {
+          width: 100%;
+          justify-content: flex-end;
+          font-size: 12px;
+        }
         .products-grid {
           grid-template-columns: repeat(2, 1fr);
           gap: 10px;
-        }
-        .sort-bar {
-          padding: 10px 14px;
         }
       }
 
@@ -809,8 +1078,10 @@
             type="text"
             id="searchInput"
             class="search-input"
+            aria-label="Tìm kiếm sản phẩm"
             placeholder="Tìm kiếm sản phẩm trong danh mục..."
             oninput="handleSearch(this.value)"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeSearch(); }"
           />
           <button class="search-btn" type="button" onclick="executeSearch()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -985,6 +1256,14 @@
               <span>🛡️ Hàng Chính Hãng 100%</span>
             </label>
           </div>
+
+          <!-- Thanh nút hành động cố định dưới đáy Mobile Drawer (TF16ED9) -->
+          <div class="drawer-footer-actions">
+            <button type="button" class="btn-drawer-reset" onclick="resetAllFilters()">Đặt lại</button>
+            <button type="button" class="btn-drawer-apply" onclick="closeFilterDrawer()">
+              Xem (<span id="drawerResultCount">0</span>) sản phẩm
+            </button>
+          </div>
         </aside>
 
         <!-- 2. CỘT PHẢI: LƯỚI KẾT QUẢ SẢN PHẨM & THANH SẮP XẾP -->
@@ -1015,6 +1294,11 @@
             <div class="sort-right">
               <span>Tìm thấy: <strong class="product-count-badge" id="productCountText">0</strong> sản phẩm</span>
             </div>
+          </div>
+
+          <!-- Thanh Chip Bộ Lọc Đang Áp Dụng (TF16EBF) -->
+          <div class="active-filters-bar" id="activeFiltersBar" style="display: none;" aria-live="polite">
+            <!-- Rendered by JavaScript -->
           </div>
 
           <!-- Lưới sản phẩm (Product Grid) -->
