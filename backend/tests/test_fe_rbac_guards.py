@@ -94,6 +94,25 @@ class TestFrontendRBACAndGuards(unittest.TestCase):
         self.assertIn("/status", js)
         self.assertIn("/history", js)
 
+    def test_08_admin_order_ui_desktop_and_mobile_controls(self):
+        """Kiểm tra modal đơn, nút đổi trạng thái và responsive mobile tồn tại."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        mobile_css_path = os.path.join(os.path.dirname(self.admin_html_path), "mobile-responsive.css")
+        with open(mobile_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+
+        self.assertIn("orderDetailModal", html)
+        self.assertIn("modalOrderStatusSelect", html)
+        self.assertIn("modalOrderStatusHistory", html)
+        self.assertIn("changeOrderStatusFromModal", js)
+        self.assertIn("releaseEscrow", js)
+        self.assertIn("freezeEscrow", js)
+        self.assertIn("@media (max-width:", css)
+
 
 if __name__ == "__main__":
     unittest.main()
