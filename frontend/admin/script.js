@@ -798,8 +798,11 @@ function renderFullOrders() {
         const isReleased = order.status === 'released';
         const orderKey = order.key || order.id.replace('#', '');
 
+        const orderDateMatch = (order.time || order.createdAt || '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        const orderDate = orderDateMatch ? `${orderDateMatch[3]}-${orderDateMatch[2]}-${orderDateMatch[1]}` : '';
+
         return `
-            <div data-shop="${order.shopName}" data-status="${order.status}" class="order-card bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+            <div data-shop="${order.shopName}" data-status="${order.status}" data-date="${orderDate}" data-search="${`${order.id} ${orderKey} ${order.buyerName}`.toLowerCase().replace(/"/g, '&quot;')}" class="order-card bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
                 <div class="px-5 py-3 bg-neutral-50 border-b border-neutral-200 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
                         <span class="px-2 py-0.5 bg-danger-500 text-white text-[10px] font-bold rounded uppercase">JML Mall</span>
@@ -889,17 +892,31 @@ function renderFullOrders() {
 function filterFullOrders() {
     const shopFilter = document.getElementById('fullOrderShopFilter')?.value || 'all';
     const statusFilter = document.getElementById('fullOrderStatusFilter')?.value || 'all';
+    const searchFilter = (document.getElementById('fullOrderSearchFilter')?.value || '').trim().toLowerCase();
+    const dateFrom = document.getElementById('fullOrderDateFrom')?.value || '';
+    const dateTo = document.getElementById('fullOrderDateTo')?.value || '';
     const cards = document.querySelectorAll('#fullOrdersContainer .order-card');
+    let visibleCount = 0;
 
     cards.forEach(card => {
         const cardShop = card.getAttribute('data-shop') || '';
         const cardStatus = card.getAttribute('data-status') || '';
+        const cardSearch = card.getAttribute('data-search') || '';
+        const cardDate = card.getAttribute('data-date') || '';
 
         const matchShop = (shopFilter === 'all') || cardShop.includes(shopFilter);
         const matchStatus = (statusFilter === 'all') || (cardStatus === statusFilter);
+        const matchSearch = !searchFilter || cardSearch.includes(searchFilter);
+        const matchDateFrom = !dateFrom || !cardDate || cardDate >= dateFrom;
+        const matchDateTo = !dateTo || !cardDate || cardDate <= dateTo;
 
-        card.style.display = (matchShop && matchStatus) ? '' : 'none';
+        const visible = matchShop && matchStatus && matchSearch && matchDateFrom && matchDateTo;
+        card.style.display = visible ? '' : 'none';
+        if (visible) visibleCount++;
     });
+
+    const count = document.getElementById('fullOrderResultCount');
+    if (count) count.textContent = `${visibleCount} đơn`;
 }
 
 /**

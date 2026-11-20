@@ -94,6 +94,20 @@ class TestFrontendRBACAndGuards(unittest.TestCase):
         self.assertIn("/status", js)
         self.assertIn("/history", js)
 
+    def test_07_admin_order_list_filters_exist(self):
+        """Trang admin có tìm mã/khách, khoảng ngày và bộ đếm kết quả."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("fullOrderSearchFilter", html)
+        self.assertIn("fullOrderDateFrom", html)
+        self.assertIn("fullOrderDateTo", html)
+        self.assertIn("fullOrderResultCount", html)
+        self.assertIn("function filterFullOrders", js)
+        self.assertIn("data-date", js)
+
 
 if __name__ == "__main__":
     unittest.main()
