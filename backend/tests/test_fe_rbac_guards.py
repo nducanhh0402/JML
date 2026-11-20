@@ -81,6 +81,19 @@ class TestFrontendRBACAndGuards(unittest.TestCase):
         self.assertIn("checkUrlAuthParams", html)
         self.assertIn("shared/js/auth.js", html)
 
+    def test_06_admin_order_management_controls_exist(self):
+        """Trang admin có bộ điều khiển đổi trạng thái, lịch sử và nút gọi API."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("modalOrderStatusSelect", html)
+        self.assertIn("modalOrderStatusHistory", html)
+        self.assertIn("changeOrderStatusFromModal", js)
+        self.assertIn("/status", js)
+        self.assertIn("/history", js)
+
 
 if __name__ == "__main__":
     unittest.main()
