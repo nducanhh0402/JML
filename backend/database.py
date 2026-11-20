@@ -322,6 +322,18 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
+    # TF175F0: Index tối ưu lọc trạng thái, khoảng ngày và lịch sử đơn
+    for index_sql in (
+        "CREATE INDEX idx_order_status_created ON orders (status, created_at)",
+        "CREATE INDEX idx_order_created_status ON orders (created_at, status)",
+        "CREATE INDEX idx_order_item_order_name ON order_items (order_key, name)",
+        "CREATE INDEX idx_history_order_created ON order_status_history (order_key, created_at)",
+    ):
+        try:
+            cursor.execute(index_sql)
+        except Exception:
+            pass
+
     # Tạo sẵn tài khoản Super Admin mặc định nếu chưa có (admin / 123456)
     cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin';")
     if cursor.fetchone()[0] == 0:
