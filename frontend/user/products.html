@@ -2065,7 +2065,11 @@
                 <div class="cart-item-title">${it.title}</div>
                 <div class="cart-item-price">${formatCurrency(it.price)}</div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-                  <span style="font-size: 12px; color: var(--text-muted);">Số lượng: <strong>${it.qty || 1}</strong></span>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" onclick="changeCartItemQty(${idx}, -1)" aria-label="Giảm số lượng" style="width: 24px; height: 24px; border: 1px solid #d1d5db; border-radius: 5px; background: #fff; cursor: pointer; font-size: 16px; line-height: 1;">−</button>
+                    <span style="font-size: 12px; color: var(--text-muted);">SL: <strong>${it.qty || 1}</strong></span>
+                    <button type="button" onclick="changeCartItemQty(${idx}, 1)" aria-label="Tăng số lượng" style="width: 24px; height: 24px; border: 1px solid #d1d5db; border-radius: 5px; background: #fff; cursor: pointer; font-size: 16px; line-height: 1;">+</button>
+                  </div>
                   <button onclick="removeCartItem(${idx})" style="background: none; border: none; color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer;">Xóa</button>
                 </div>
               </div>
@@ -2084,10 +2088,21 @@
         updateCartBadge();
       }
 
+      function changeCartItemQty(idx, change) {
+        const cart = JSON.parse(localStorage.getItem("JML_CART_ITEMS") || "[]");
+        if (!cart[idx]) return;
+        const nextQty = (cart[idx].qty || 1) + change;
+        if (nextQty <= 0) cart.splice(idx, 1);
+        else cart[idx].qty = nextQty;
+        localStorage.setItem("JML_CART_ITEMS", JSON.stringify(cart));
+        renderCartDrawer();
+        updateCartBadge();
+      }
+
       function updateCartBadge() {
         const cart = JSON.parse(localStorage.getItem("JML_CART_ITEMS") || "[]");
         const badge = document.getElementById("cartBadgeCount");
-        if (badge) badge.textContent = cart.length;
+        if (badge) badge.textContent = cart.reduce((total, item) => total + (item.qty || 1), 0);
       }
 
       function checkoutNow() {

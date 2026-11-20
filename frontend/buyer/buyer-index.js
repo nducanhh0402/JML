@@ -1428,6 +1428,17 @@
         showToast("Đã xóa khỏi giỏ", removed ? removed.title : "");
       }
 
+      function changeCartQuantity(index, change) {
+        const item = cartItems[index];
+        if (!item) return;
+        const nextQty = (item.qty || 1) + change;
+        if (nextQty <= 0) removeFromCart(index);
+        else {
+          item.qty = nextQty;
+          updateCartDisplay();
+        }
+      }
+
       function updateCartDisplay() {
         const totalQty = cartItems.reduce(
           (acc, item) => acc + (item.qty || 1),
@@ -1460,7 +1471,11 @@
           <div class="cart-item-info">
             <div style="font-weight: 600; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 170px;" title="${item.title}">${item.title}</div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-              <span class="cart-item-price">${formatCurrency(item.price)} ${item.qty > 1 ? `<span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">x${item.qty}</span>` : ""}</span>
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <button type="button" onclick="changeCartQuantity(${idx}, -1)" aria-label="Giảm số lượng" style="width: 24px; height: 24px; border: 1px solid #d1d5db; border-radius: 5px; background: #fff; cursor: pointer; font-size: 16px; line-height: 1;">−</button>
+                <span class="cart-item-price">${formatCurrency(item.price)} <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">x${item.qty || 1}</span></span>
+                <button type="button" onclick="changeCartQuantity(${idx}, 1)" aria-label="Tăng số lượng" style="width: 24px; height: 24px; border: 1px solid #d1d5db; border-radius: 5px; background: #fff; cursor: pointer; font-size: 16px; line-height: 1;">+</button>
+              </div>
               <button onclick="removeFromCart(${idx})" title="Xóa khỏi giỏ" style="color: #ef4444; font-size: 14px; padding: 2px 6px; cursor: pointer; border-radius: 4px;">✕</button>
             </div>
           </div>
