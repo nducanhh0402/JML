@@ -1,0 +1,2220 @@
+<!-- =============================================================== -->
+<!-- Trần Gia Huy task TF173E6 [FE] Trang lịch sử đơn hàng và trạng thái đơn -->
+<!-- =============================================================== -->
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Lịch Sử Đơn Hàng | JML Store</title>
+    <link rel="icon" type="image/svg+xml" href="jml-store-icon.svg" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Auth & RBAC Controller -->
+    <script src="../shared/js/auth.js"></script>
+    <style>
+      /* ==========================================================================
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ VỚI INDEX.HTML & CHECKOUT.HTML)
+         ========================================================================== */
+      :root {
+        --primary: #ea580c;
+        --primary-hover: #c2410c;
+        --primary-light: #ffedd5;
+        --secondary: #111827;
+        --secondary-light: #4b5563;
+        --accent: #f97316;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --info: #3b82f6;
+        --info-light: #dbeafe;
+        --background: #f8f9fa;
+        --surface: #ffffff;
+        --surface-dim: #f3f4f6;
+        --border: #e5e7eb;
+        --border-focus: #fdba74;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.16);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: var(--background);
+        color: var(--text-main);
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+
+      /* ==========================================================================
+         2. TOPBAR & HEADER
+         ========================================================================== */
+      .top-bar {
+        background-color: var(--secondary);
+        color: #94a3b8;
+        font-size: 12px;
+        padding: 7px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .top-bar-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .top-links {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .top-links a:hover { color: #fff; }
+
+      .header-main {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-sm);
+      }
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        gap: 24px;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--secondary);
+      }
+      .logo-badge {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #fff;
+        padding: 4px 9px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .header-divider {
+        width: 1px;
+        height: 24px;
+        background: var(--border);
+      }
+      .page-title-badge {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--secondary);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-back:hover {
+        background: var(--surface-dim);
+        border-color: var(--secondary);
+      }
+
+      /* ==========================================================================
+         3. BREADCRUMB
+         ========================================================================== */
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-muted);
+        padding: 14px 0 0;
+      }
+      .breadcrumb a { color: var(--text-muted); transition: var(--transition); }
+      .breadcrumb a:hover { color: var(--primary); }
+      .breadcrumb-sep { color: #cbd5e1; font-size: 11px; }
+      .breadcrumb-current { color: var(--text-main); font-weight: 600; }
+
+      /* ==========================================================================
+         4. PAGE LAYOUT
+         ========================================================================== */
+      .page-wrapper {
+        padding: 24px 0 60px;
+        min-height: calc(100vh - 120px);
+      }
+
+      .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .page-heading {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .page-heading-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+      .page-subheading {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 4px;
+        font-weight: 500;
+      }
+
+      /* ==========================================================================
+         5. FILTER TABS (STATUS BADGE TABS)
+         ========================================================================== */
+      .filter-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+        box-shadow: var(--shadow-sm);
+      }
+      .tab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 99px;
+        font-size: 13px;
+        font-weight: 700;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        background: var(--surface-dim);
+        color: var(--text-muted);
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+      .tab-btn:hover {
+        background: var(--primary-light);
+        color: var(--primary);
+        border-color: var(--border-focus);
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+      .tab-count {
+        background: rgba(255,255,255,0.3);
+        font-size: 11px;
+        font-weight: 800;
+        padding: 1px 6px;
+        border-radius: 99px;
+        min-width: 20px;
+        text-align: center;
+      }
+      .tab-btn:not(.active) .tab-count {
+        background: rgba(0,0,0,0.08);
+        color: var(--text-muted);
+      }
+
+      /* ==========================================================================
+         6. SEARCH & TOOLS BAR
+         ========================================================================== */
+      .tools-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .search-wrap {
+        flex: 1;
+        min-width: 220px;
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        color: var(--text-muted);
+        font-size: 15px;
+        pointer-events: none;
+      }
+      .search-input {
+        width: 100%;
+        padding: 10px 40px 10px 36px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13.5px;
+        font-family: inherit;
+        outline: none;
+        background: var(--surface);
+        transition: var(--transition);
+      }
+      .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.12);
+      }
+      .search-clear {
+        position: absolute;
+        right: 10px;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 15px;
+        padding: 2px;
+        display: none;
+      }
+      .search-clear.visible { display: block; }
+
+      .btn-refresh {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--secondary);
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+      .btn-refresh:hover {
+        background: var(--surface-dim);
+        border-color: var(--secondary);
+      }
+      .btn-refresh.spinning svg { animation: spin 0.8s linear infinite; }
+
+      /* ==========================================================================
+         7. ORDER CARDS LIST
+         ========================================================================== */
+      .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .order-card {
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: var(--transition);
+        cursor: pointer;
+      }
+      .order-card:hover {
+        border-color: var(--border-focus);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+
+      /* Card Header */
+      .order-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: var(--surface-dim);
+        border-bottom: 1px solid var(--border);
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .order-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .order-id {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--secondary);
+        font-family: "Courier New", monospace;
+      }
+      .order-date {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .order-head-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Status Badge */
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1.5px solid;
+        white-space: nowrap;
+        letter-spacing: 0.2px;
+      }
+      .status-badge.preparing {
+        background: #fffbeb;
+        color: #92400e;
+        border-color: #fde68a;
+      }
+      .status-badge.shipping {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+      }
+      .status-badge.delivered {
+        background: #f0fdf4;
+        color: #166534;
+        border-color: #bbf7d0;
+      }
+      .status-badge.cancelled {
+        background: #fff1f2;
+        color: #9f1239;
+        border-color: #fecdd3;
+      }
+      .status-badge.dispute {
+        background: #fff7ed;
+        color: #9a3412;
+        border-color: #fed7aa;
+      }
+      .status-badge.escrow {
+        background: #f5f3ff;
+        color: #5b21b6;
+        border-color: #ddd6fe;
+      }
+      .status-badge.released {
+        background: #f0fdf4;
+        color: #166534;
+        border-color: #bbf7d0;
+      }
+
+      /* Card Body */
+      .order-card-body {
+        padding: 16px 20px;
+      }
+      .order-items-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .order-item-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13.5px;
+      }
+      .item-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary);
+        flex-shrink: 0;
+      }
+      .item-name {
+        flex: 1;
+        font-weight: 600;
+        color: var(--text-main);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .item-qty {
+        font-size: 12px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        font-weight: 500;
+      }
+      .item-price {
+        font-weight: 700;
+        color: var(--secondary);
+        white-space: nowrap;
+        min-width: 100px;
+        text-align: right;
+      }
+      .items-more {
+        font-size: 12.5px;
+        color: var(--primary);
+        font-weight: 700;
+        margin-left: 16px;
+      }
+
+      /* Card Footer */
+      .order-card-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px dashed var(--border);
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .order-total-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .order-total-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .order-total-value {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+      .order-items-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        background: var(--surface-dim);
+        border-radius: 99px;
+        padding: 3px 10px;
+        font-weight: 600;
+      }
+      .order-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn-detail {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1.5px solid var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+      .btn-detail:hover {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1.5px solid #fca5a5;
+        background: #fff1f2;
+        color: #be123c;
+      }
+      .btn-cancel:hover {
+        background: #be123c;
+        color: #fff;
+        border-color: #be123c;
+      }
+      .btn-received {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1.5px solid #6ee7b7;
+        background: var(--success-light);
+        color: #065f46;
+      }
+      .btn-received:hover {
+        background: var(--success);
+        color: #fff;
+        border-color: var(--success);
+      }
+
+      /* ==========================================================================
+         8. EMPTY STATE
+         ========================================================================== */
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+      }
+      .empty-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        display: block;
+        line-height: 1;
+      }
+      .empty-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: 8px;
+      }
+      .empty-desc {
+        font-size: 14px;
+        color: var(--text-muted);
+        max-width: 380px;
+        margin: 0 auto 20px;
+        line-height: 1.6;
+      }
+      .btn-shop-now {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 12px 24px;
+        background: var(--primary);
+        color: #fff;
+        border-radius: var(--radius-sm);
+        font-weight: 800;
+        font-size: 14px;
+        transition: var(--transition);
+      }
+      .btn-shop-now:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+      /* ==========================================================================
+         9. SKELETON LOADER
+         ========================================================================== */
+      .skeleton-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .skeleton-card {
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 0;
+        overflow: hidden;
+      }
+      .skeleton-head {
+        padding: 14px 20px;
+        background: var(--surface-dim);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .skeleton-body { padding: 16px 20px; }
+      .sk {
+        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s ease-in-out infinite;
+        border-radius: 6px;
+      }
+      .sk-h16 { height: 16px; }
+      .sk-h12 { height: 12px; }
+      .sk-h10 { height: 10px; }
+      .sk-h24 { height: 24px; }
+      .sk-w100 { width: 100px; }
+      .sk-w140 { width: 140px; }
+      .sk-w80 { width: 80px; }
+      .sk-wfull { width: 100%; }
+      .sk-w60p { width: 60%; }
+      .sk-w40p { width: 40%; }
+      .sk-w30p { width: 30%; }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+
+      /* ==========================================================================
+         10. MODAL - CHI TIẾT ĐƠN HÀNG
+         ========================================================================== */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(17,24,39,0.6);
+        z-index: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .modal-backdrop.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal-box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 680px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-lg);
+        transform: scale(0.96) translateY(8px);
+        transition: transform 0.25s ease;
+      }
+      .modal-backdrop.active .modal-box {
+        transform: scale(1) translateY(0);
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        background: var(--surface);
+        z-index: 2;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .modal-close-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        background: var(--surface-dim);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        color: var(--text-muted);
+        transition: var(--transition);
+      }
+      .modal-close-btn:hover { background: var(--danger-light); color: var(--danger); border-color: #fca5a5; }
+
+      .modal-body { padding: 20px 24px; }
+
+      /* Detail Sections */
+      .detail-section {
+        margin-bottom: 20px;
+      }
+      .detail-section-title {
+        font-size: 11.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .detail-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .detail-item.full { grid-column: 1 / -1; }
+      .detail-label {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .detail-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+
+      /* Order items in modal */
+      .modal-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .modal-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        background: var(--surface-dim);
+        border-radius: var(--radius-sm);
+        gap: 8px;
+      }
+      .modal-item-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+      }
+      .modal-item-num {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+      .modal-item-info { min-width: 0; }
+      .modal-item-name {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text-main);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .modal-item-variant {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+      .modal-item-right { text-align: right; flex-shrink: 0; }
+      .modal-item-price {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--secondary);
+      }
+      .modal-item-qty {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+
+      /* Total row */
+      .modal-total-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0 0;
+        margin-top: 4px;
+        border-top: 1.5px dashed var(--border);
+      }
+      .modal-total-label {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-muted);
+      }
+      .modal-total-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+
+      /* Status Timeline */
+      .status-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        position: relative;
+        padding-left: 20px;
+      }
+      .timeline-item {
+        position: relative;
+        padding: 0 0 16px 20px;
+      }
+      .timeline-item:last-child { padding-bottom: 0; }
+      .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 7px;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+      }
+      .timeline-item:last-child::before { display: none; }
+      .timeline-dot {
+        position: absolute;
+        left: -5px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: var(--surface);
+        z-index: 1;
+      }
+      .timeline-item.latest .timeline-dot {
+        background: var(--primary);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(234,88,12,0.2);
+      }
+      .timeline-status {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+      .timeline-note {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .timeline-date {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        margin-top: 3px;
+      }
+
+      /* Modal Footer */
+      .modal-footer {
+        padding: 16px 24px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+      .btn-modal-cancel {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 18px; border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 700; cursor: pointer; transition: var(--transition);
+        border: 1.5px solid #fca5a5; background: #fff1f2; color: #be123c;
+      }
+      .btn-modal-cancel:hover { background: #be123c; color: #fff; border-color: #be123c; }
+      .btn-modal-received {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 18px; border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 700; cursor: pointer; transition: var(--transition);
+        border: 1.5px solid var(--success); background: var(--success-light); color: #065f46;
+      }
+      .btn-modal-received:hover { background: var(--success); color: #fff; }
+      .btn-modal-close {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 18px; border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 700; cursor: pointer; transition: var(--transition);
+        border: 1.5px solid var(--border); background: var(--surface-dim); color: var(--secondary);
+      }
+      .btn-modal-close:hover { background: var(--border); }
+
+      /* ==========================================================================
+         11. CANCEL CONFIRM MODAL
+         ========================================================================== */
+      .cancel-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(17,24,39,0.7);
+        z-index: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .cancel-modal-backdrop.active { opacity: 1; pointer-events: all; }
+      .cancel-modal-box {
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        width: 100%;
+        max-width: 420px;
+        padding: 28px;
+        box-shadow: var(--shadow-lg);
+        transform: scale(0.95);
+        transition: transform 0.2s ease;
+      }
+      .cancel-modal-backdrop.active .cancel-modal-box { transform: scale(1); }
+      .cancel-modal-icon { font-size: 48px; text-align: center; display: block; margin-bottom: 12px; }
+      .cancel-modal-title { font-size: 18px; font-weight: 800; color: var(--secondary); text-align: center; margin-bottom: 8px; }
+      .cancel-modal-desc { font-size: 13.5px; color: var(--text-muted); text-align: center; margin-bottom: 20px; line-height: 1.6; }
+      .cancel-reason-label { font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; display: block; }
+      .cancel-reason-select {
+        width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm); font-size: 13.5px; font-family: inherit;
+        outline: none; background: var(--surface); margin-bottom: 16px; cursor: pointer;
+        transition: var(--transition);
+      }
+      .cancel-reason-select:focus { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+      .cancel-modal-actions { display: flex; gap: 10px; }
+      .btn-confirm-cancel {
+        flex: 1; padding: 11px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 800;
+        cursor: pointer; transition: var(--transition); border: none;
+        background: #be123c; color: #fff;
+      }
+      .btn-confirm-cancel:hover { background: #9f1239; }
+      .btn-keep-order {
+        flex: 1; padding: 11px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: var(--transition); border: 1.5px solid var(--border);
+        background: var(--surface); color: var(--secondary);
+      }
+      .btn-keep-order:hover { background: var(--surface-dim); }
+
+      /* ==========================================================================
+         12. AUTH REQUIRED STATE
+         ========================================================================== */
+      .auth-required {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+      }
+      .auth-required-icon { font-size: 56px; display: block; margin-bottom: 16px; }
+      .auth-required-title { font-size: 22px; font-weight: 800; color: var(--secondary); margin-bottom: 8px; }
+      .auth-required-desc { font-size: 14px; color: var(--text-muted); max-width: 360px; margin: 0 auto 24px; line-height: 1.6; }
+      .btn-login {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 13px 28px; background: var(--primary); color: #fff;
+        border-radius: var(--radius-sm); font-weight: 800; font-size: 15px;
+        transition: var(--transition);
+      }
+      .btn-login:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+      /* ==========================================================================
+         13. TOAST NOTIFICATION
+         ========================================================================== */
+      .toast-box {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        background: var(--secondary);
+        color: #fff;
+        padding: 13px 18px;
+        border-radius: var(--radius-sm);
+        font-size: 13.5px;
+        font-weight: 600;
+        box-shadow: var(--shadow-lg);
+        display: none;
+        align-items: center;
+        gap: 10px;
+        max-width: 360px;
+        animation: slideInToast 0.3s ease;
+      }
+      .toast-box.error { background: #be123c; }
+      .toast-box.success { background: #065f46; }
+      @keyframes slideInToast {
+        from { transform: translateY(16px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      /* ==========================================================================
+         14. PAGINATION
+         ========================================================================== */
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .page-btn {
+        min-width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text-main);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        padding: 0 8px;
+      }
+      .page-btn:hover { background: var(--primary-light); border-color: var(--border-focus); color: var(--primary); }
+      .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+      .page-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+      /* ==========================================================================
+         15. FOOTER
+         ========================================================================== */
+      .site-footer {
+        background: var(--secondary);
+        color: #94a3b8;
+        padding: 24px 0;
+        font-size: 13px;
+        margin-top: auto;
+      }
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .footer-brand {
+        font-size: 15px;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .footer-links {
+        display: flex;
+        gap: 16px;
+      }
+      .footer-links a { color: #94a3b8; transition: var(--transition); }
+      .footer-links a:hover { color: #fff; }
+
+      /* ==========================================================================
+         16. RESPONSIVE
+         ========================================================================== */
+      @media (max-width: 768px) {
+        .detail-grid { grid-template-columns: 1fr; }
+        .order-card-head { flex-direction: column; align-items: flex-start; }
+        .order-card-foot { flex-direction: column; align-items: flex-start; }
+        .order-actions { width: 100%; }
+        .btn-detail, .btn-cancel, .btn-received { flex: 1; justify-content: center; }
+        .modal-footer { justify-content: stretch; }
+        .btn-modal-cancel, .btn-modal-received, .btn-modal-close { flex: 1; justify-content: center; }
+        .page-header { flex-direction: column; align-items: flex-start; }
+        .filter-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+      }
+      @media (max-width: 480px) {
+        .header-inner { padding: 10px 12px; }
+        .modal-box { max-height: 95vh; }
+        .modal-header, .modal-body, .modal-footer { padding-left: 16px; padding-right: 16px; }
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============================= TOPBAR ============================= -->
+    <div class="top-bar">
+      <div class="container">
+        <div class="top-bar-inner">
+          <div class="top-links">
+            <span>🛡️ Mua sắm an toàn, bảo mật tuyệt đối</span>
+            <a href="#">Hỗ trợ 24/7</a>
+            <a href="#">Chính sách đổi trả</a>
+          </div>
+          <div class="top-links">
+            <a href="index.html">🏠 Trang Chủ</a>
+            <a href="#" id="topAuthLink">Đăng Nhập</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= HEADER ============================= -->
+    <header class="header-main">
+      <div class="container">
+        <div class="header-inner">
+          <div class="header-left">
+            <a class="logo" href="index.html">
+              <span class="logo-badge">JML</span>
+              <span>Store</span>
+            </a>
+            <div class="header-divider"></div>
+            <div class="page-title-badge">
+              <span>📦</span>
+              <span>Lịch Sử Đơn Hàng</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <a class="btn-back" href="index.html">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              Tiếp tục mua sắm
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================= MAIN ============================= -->
+    <main>
+      <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+          <a href="index.html">🏠 Trang Chủ</a>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Lịch Sử Đơn Hàng</span>
+        </nav>
+
+        <div class="page-wrapper">
+          <!-- Page Header -->
+          <div class="page-header">
+            <div>
+              <div class="page-heading">
+                <div class="page-heading-icon">📋</div>
+                <span>Lịch Sử Đơn Hàng</span>
+              </div>
+              <div class="page-subheading" id="subheadingText">
+                Quản lý và theo dõi tất cả đơn hàng của bạn
+              </div>
+            </div>
+          </div>
+
+          <!-- MAIN CONTENT (Auth Required / Orders List) -->
+          <div id="mainContent">
+            <!-- Skeleton loading state -->
+            <div class="skeleton-wrap" id="skeletonLoader">
+              <div class="skeleton-card">
+                <div class="skeleton-head">
+                  <div class="sk sk-h16 sk-w140"></div>
+                  <div class="sk sk-h12 sk-w80" style="margin-left:auto;"></div>
+                </div>
+                <div class="skeleton-body">
+                  <div class="sk sk-h12 sk-wfull" style="margin-bottom:8px;"></div>
+                  <div class="sk sk-h12 sk-w60p" style="margin-bottom:16px;"></div>
+                  <div class="sk sk-h16 sk-w100"></div>
+                </div>
+              </div>
+              <div class="skeleton-card">
+                <div class="skeleton-head">
+                  <div class="sk sk-h16 sk-w140"></div>
+                  <div class="sk sk-h12 sk-w80" style="margin-left:auto;"></div>
+                </div>
+                <div class="skeleton-body">
+                  <div class="sk sk-h12 sk-wfull" style="margin-bottom:8px;"></div>
+                  <div class="sk sk-h12 sk-w40p" style="margin-bottom:16px;"></div>
+                  <div class="sk sk-h16 sk-w100"></div>
+                </div>
+              </div>
+              <div class="skeleton-card">
+                <div class="skeleton-head">
+                  <div class="sk sk-h16 sk-w140"></div>
+                  <div class="sk sk-h12 sk-w80" style="margin-left:auto;"></div>
+                </div>
+                <div class="skeleton-body">
+                  <div class="sk sk-h12 sk-wfull" style="margin-bottom:8px;"></div>
+                  <div class="sk sk-h12 sk-w30p" style="margin-bottom:16px;"></div>
+                  <div class="sk sk-h16 sk-w100"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ============================= FOOTER ============================= -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-inner">
+          <div class="footer-brand">
+            <span style="background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;padding:3px 8px;border-radius:6px;font-size:12px;">JML</span>
+            Store &copy; 2026
+          </div>
+          <div class="footer-links">
+            <a href="#">Điều khoản</a>
+            <a href="#">Chính sách bảo mật</a>
+            <a href="#">Liên hệ</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ============================= ORDER DETAIL MODAL ============================= -->
+    <div class="modal-backdrop" id="detailModal" role="dialog" aria-modal="true">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span>📋</span>
+            <span id="modalOrderId">Chi Tiết Đơn Hàng</span>
+          </div>
+          <button class="modal-close-btn" onclick="closeDetailModal()" aria-label="Đóng">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Nội dung được inject bằng JS -->
+        </div>
+        <div class="modal-footer" id="modalFooter">
+          <button class="btn-modal-close" onclick="closeDetailModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================= CANCEL CONFIRM MODAL ============================= -->
+    <div class="cancel-modal-backdrop" id="cancelModal">
+      <div class="cancel-modal-box">
+        <span class="cancel-modal-icon">🗑️</span>
+        <div class="cancel-modal-title">Xác Nhận Hủy Đơn</div>
+        <div class="cancel-modal-desc">Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.</div>
+        <label class="cancel-reason-label">Lý do hủy đơn:</label>
+        <select class="cancel-reason-select" id="cancelReasonSelect">
+          <option value="Tôi muốn thay đổi sản phẩm">Tôi muốn thay đổi sản phẩm</option>
+          <option value="Tôi đặt nhầm sản phẩm">Tôi đặt nhầm sản phẩm</option>
+          <option value="Tôi muốn thay đổi địa chỉ giao hàng">Tôi muốn thay đổi địa chỉ giao hàng</option>
+          <option value="Tìm thấy giá tốt hơn ở nơi khác">Tìm thấy giá tốt hơn ở nơi khác</option>
+          <option value="Không còn nhu cầu mua nữa">Không còn nhu cầu mua nữa</option>
+          <option value="Khác">Lý do khác</option>
+        </select>
+        <div class="cancel-modal-actions">
+          <button class="btn-keep-order" onclick="closeCancelModal()">Giữ Đơn</button>
+          <button class="btn-confirm-cancel" onclick="confirmCancel()">Hủy Đơn</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-box" id="toastBox">
+      <span id="toastIcon">✓</span>
+      <span id="toastMsg"></span>
+    </div>
+
+    <!-- ============================= SCRIPTS ============================= -->
+    <script>
+      // =========================================================================
+      // CONFIG & STATE
+      // =========================================================================
+      const API_BASE = "http://127.0.0.1:8000";
+      const STATUS_CONFIG = {
+        all:       { label: "Tất cả",         icon: "📋", cls: "" },
+        preparing: { label: "Đang chuẩn bị",  icon: "🔄", cls: "preparing" },
+        shipping:  { label: "Đang giao",       icon: "🚚", cls: "shipping"  },
+        delivered: { label: "Đã nhận",         icon: "✅", cls: "delivered" },
+        released:  { label: "Đã nhận",         icon: "✅", cls: "released"  },
+        cancelled: { label: "Đã hủy",          icon: "❌", cls: "cancelled" },
+        dispute:   { label: "Khiếu nại",       icon: "⚠️", cls: "dispute"   },
+        escrow:    { label: "Chờ xử lý",       icon: "🔒", cls: "escrow"    },
+      };
+
+      let state = {
+        orders: [],
+        filteredOrders: [],
+        currentTab: "all",
+        searchQuery: "",
+        currentPage: 1,
+        pageSize: 10,
+        total: 0,
+        loading: false,
+        apiConnected: false,
+        cancelTargetKey: null,
+        openDetailKey: null,
+      };
+
+      // =========================================================================
+      // INIT
+      // =========================================================================
+      document.addEventListener("DOMContentLoaded", () => {
+        updateTopAuthLink();
+        initPage();
+      });
+
+      function updateTopAuthLink() {
+        const link = document.getElementById("topAuthLink");
+        if (!link) return;
+        const user = Auth.getUser();
+        if (user) {
+          link.textContent = `👤 ${user.username || user.name || "Tài khoản"}`;
+          link.href = "#";
+        } else {
+          link.textContent = "Đăng Nhập";
+          link.href = "#";
+        }
+      }
+
+      function initPage() {
+        const user = Auth.getUser();
+        const token = Auth.getToken();
+
+        if (!user && !token) {
+          showAuthRequired();
+          return;
+        }
+
+        // Render filter tabs + tools
+        renderFilterTabs();
+        renderToolsBar();
+
+        // Fetch orders
+        fetchOrders();
+      }
+
+      // =========================================================================
+      // FETCH ORDERS
+      // =========================================================================
+      async function fetchOrders(resetPage = true) {
+        if (state.loading) return;
+        state.loading = true;
+        if (resetPage) state.currentPage = 1;
+
+        showSkeleton();
+
+        const user = Auth.getUser();
+        const token = Auth.getToken();
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (user && user.id) headers["X-User-Id"] = String(user.id);
+
+        const params = new URLSearchParams({
+          page: String(state.currentPage),
+          limit: String(state.pageSize),
+        });
+
+        const statusVal = state.currentTab !== "all" ? state.currentTab : "";
+        if (statusVal) params.set("status", statusVal);
+        if (state.searchQuery) params.set("name", state.searchQuery);
+
+        try {
+          const url = `${API_BASE}/api/user/orders?${params.toString()}`;
+          const res = await fetch(url, { headers, signal: AbortSignal.timeout(8000) });
+
+          if (!res.ok) {
+            if (res.status === 401) {
+              showAuthRequired("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+              return;
+            }
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.detail || `HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          state.orders = data.orders || [];
+          state.total = data.total || 0;
+          state.apiConnected = true;
+          renderOrdersPage();
+
+        } catch (err) {
+          if (err.name === "TimeoutError" || err.name === "AbortError" || err.message.includes("fetch")) {
+            // Offline fallback: load from localStorage
+            loadOfflineOrders();
+          } else {
+            showErrorState(err.message);
+          }
+        } finally {
+          state.loading = false;
+        }
+      }
+
+      function loadOfflineOrders() {
+        // Hiển thị empty state với thông báo offline
+        state.orders = [];
+        state.total = 0;
+        state.apiConnected = false;
+        renderOrdersPage();
+        showToast("⚠️ Không thể kết nối máy chủ. Hiển thị dữ liệu giới hạn.", false);
+      }
+
+      // =========================================================================
+      // RENDER FILTER TABS
+      // =========================================================================
+      function renderFilterTabs() {
+        const tabs = ["all", "preparing", "shipping", "delivered", "cancelled", "dispute", "escrow"];
+        const container = document.createElement("div");
+        container.className = "filter-tabs";
+        container.id = "filterTabs";
+
+        tabs.forEach(tab => {
+          const cfg = STATUS_CONFIG[tab] || { label: tab, icon: "📦" };
+          const btn = document.createElement("button");
+          btn.className = "tab-btn" + (tab === state.currentTab ? " active" : "");
+          btn.dataset.tab = tab;
+          btn.innerHTML = `<span>${cfg.icon}</span><span>${cfg.label}</span><span class="tab-count" id="tabCount_${tab}">...</span>`;
+          btn.addEventListener("click", () => switchTab(tab));
+          container.appendChild(btn);
+        });
+
+        insertBeforeContent(container, "filterTabs");
+      }
+
+      function switchTab(tab) {
+        state.currentTab = tab;
+        state.searchQuery = "";
+        const searchInput = document.getElementById("searchInput");
+        if (searchInput) searchInput.value = "";
+        document.querySelectorAll(".tab-btn").forEach(b => {
+          b.classList.toggle("active", b.dataset.tab === tab);
+        });
+        fetchOrders(true);
+      }
+
+      function updateTabCounts() {
+        const tabs = ["all", "preparing", "shipping", "delivered", "cancelled", "dispute", "escrow"];
+
+        // If api connected, we can't get counts for all statuses in one call
+        // Show current total on current tab
+        tabs.forEach(tab => {
+          const el = document.getElementById(`tabCount_${tab}`);
+          if (!el) return;
+          if (tab === state.currentTab) {
+            el.textContent = state.total;
+          } else {
+            el.textContent = "";
+          }
+        });
+      }
+
+      // =========================================================================
+      // RENDER TOOLS BAR
+      // =========================================================================
+      function renderToolsBar() {
+        const bar = document.createElement("div");
+        bar.className = "tools-bar";
+        bar.id = "toolsBar";
+        bar.innerHTML = `
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              class="search-input"
+              id="searchInput"
+              placeholder="Tìm theo mã đơn, tên sản phẩm..."
+              value="${state.searchQuery}"
+            />
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" title="Xóa tìm kiếm">✕</button>
+          </div>
+          <button class="btn-refresh" id="btnRefresh" onclick="refreshOrders()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            Làm mới
+          </button>
+        `;
+        insertBeforeContent(bar, "toolsBar");
+
+        // Search on enter/debounce
+        const input = bar.querySelector("#searchInput");
+        let debounce;
+        input.addEventListener("input", () => {
+          const val = input.value.trim();
+          const clearBtn = document.getElementById("searchClear");
+          if (clearBtn) clearBtn.classList.toggle("visible", val.length > 0);
+          state.searchQuery = val;
+          clearTimeout(debounce);
+          debounce = setTimeout(() => fetchOrders(true), 500);
+        });
+        input.addEventListener("keydown", e => {
+          if (e.key === "Enter") { clearTimeout(debounce); fetchOrders(true); }
+        });
+      }
+
+      function clearSearch() {
+        const input = document.getElementById("searchInput");
+        if (input) { input.value = ""; input.focus(); }
+        const clearBtn = document.getElementById("searchClear");
+        if (clearBtn) clearBtn.classList.remove("visible");
+        state.searchQuery = "";
+        fetchOrders(true);
+      }
+
+      function refreshOrders() {
+        const btn = document.getElementById("btnRefresh");
+        if (btn) btn.classList.add("spinning");
+        fetchOrders(true).finally(() => {
+          setTimeout(() => { if (btn) btn.classList.remove("spinning"); }, 600);
+        });
+      }
+
+      // =========================================================================
+      // RENDER ORDERS PAGE
+      // =========================================================================
+      function renderOrdersPage() {
+        updateTabCounts();
+        const content = document.getElementById("mainContent");
+
+        if (state.orders.length === 0) {
+          renderEmptyState(content);
+          return;
+        }
+
+        // Build orders list
+        let html = `<div class="orders-list">`;
+
+        state.orders.forEach(order => {
+          html += buildOrderCardHTML(order);
+        });
+
+        html += `</div>`;
+
+        // Pagination
+        const totalPages = Math.ceil(state.total / state.pageSize);
+        if (totalPages > 1) {
+          html += buildPaginationHTML(totalPages);
+        }
+
+        content.innerHTML = html;
+
+        // Attach event listeners
+        attachCardEvents();
+      }
+
+      function buildOrderCardHTML(order) {
+        const statusKey = (order.status || "").toLowerCase();
+        const cfg = STATUS_CONFIG[statusKey] || { label: order.status || "Không rõ", icon: "📦", cls: "" };
+
+        // Format date
+        const dateStr = formatDateTime(order.created_at || order.time_info);
+
+        // Items preview (max 2)
+        const items = order.items || [];
+        const previewItems = items.slice(0, 2);
+        const extraCount = items.length - 2;
+
+        let itemsHTML = "";
+        previewItems.forEach(it => {
+          itemsHTML += `
+            <div class="order-item-row">
+              <div class="item-dot"></div>
+              <span class="item-name" title="${escHtml(it.name || '')}">${escHtml(it.name || "Sản phẩm")}</span>
+              <span class="item-qty">x${it.qty || 1}</span>
+              <span class="item-price">${escHtml(it.subtotal || it.price || "")}</span>
+            </div>`;
+        });
+        if (extraCount > 0) {
+          itemsHTML += `<div class="items-more">+${extraCount} sản phẩm khác</div>`;
+        }
+
+        // Action buttons
+        let actionBtns = `
+          <button class="btn-detail" data-key="${escHtml(order.order_key)}" onclick="openDetailModal('${escHtml(order.order_key)}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Xem chi tiết
+          </button>`;
+
+        const canCancel = ["preparing", "escrow"].includes(statusKey);
+        const canReceive = statusKey === "shipping";
+
+        if (canCancel) {
+          actionBtns += `
+            <button class="btn-cancel" onclick="openCancelModal('${escHtml(order.order_key)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              Hủy đơn
+            </button>`;
+        }
+        if (canReceive) {
+          actionBtns += `
+            <button class="btn-received" onclick="confirmReceived('${escHtml(order.order_key)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Đã nhận hàng
+            </button>`;
+        }
+
+        return `
+          <div class="order-card" data-key="${escHtml(order.order_key)}">
+            <div class="order-card-head">
+              <div class="order-meta">
+                <span class="order-id">${escHtml(order.id_display || order.order_key)}</span>
+                <span class="order-date">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  ${dateStr}
+                </span>
+                <span class="order-items-count">${items.length} sản phẩm</span>
+              </div>
+              <div class="order-head-right">
+                <span class="status-badge ${cfg.cls}">${cfg.icon} ${cfg.label}</span>
+              </div>
+            </div>
+            <div class="order-card-body">
+              <div class="order-items-preview">
+                ${itemsHTML || '<div class="order-item-row"><div class="item-dot"></div><span class="item-name" style="color:var(--text-muted)">Chưa có thông tin sản phẩm</span></div>'}
+              </div>
+              <div class="order-card-foot">
+                <div class="order-total-wrap">
+                  <span class="order-total-label">Tổng thanh toán:</span>
+                  <span class="order-total-value">${escHtml(order.total || "")}</span>
+                </div>
+                <div class="order-actions">
+                  ${actionBtns}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function attachCardEvents() {
+        // Click on card body opens detail
+        document.querySelectorAll(".order-card").forEach(card => {
+          card.addEventListener("click", (e) => {
+            if (e.target.closest("button")) return; // Don't open modal if button clicked
+            const key = card.dataset.key;
+            if (key) openDetailModal(key);
+          });
+        });
+      }
+
+      function buildPaginationHTML(totalPages) {
+        let html = `<div class="pagination">`;
+        html += `<button class="page-btn" onclick="goToPage(${state.currentPage - 1})" ${state.currentPage <= 1 ? "disabled" : ""}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>`;
+
+        // Page numbers
+        const range = getPageRange(state.currentPage, totalPages);
+        range.forEach(p => {
+          if (p === "...") {
+            html += `<span class="page-btn" style="cursor:default;border:none;background:none;color:var(--text-muted);">…</span>`;
+          } else {
+            html += `<button class="page-btn ${p === state.currentPage ? "active" : ""}" onclick="goToPage(${p})">${p}</button>`;
+          }
+        });
+
+        html += `<button class="page-btn" onclick="goToPage(${state.currentPage + 1})" ${state.currentPage >= totalPages ? "disabled" : ""}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>`;
+        html += `</div>`;
+        return html;
+      }
+
+      function getPageRange(current, total) {
+        if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+        const pages = [];
+        pages.push(1);
+        if (current > 3) pages.push("...");
+        for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+        if (current < total - 2) pages.push("...");
+        pages.push(total);
+        return pages;
+      }
+
+      function goToPage(page) {
+        const totalPages = Math.ceil(state.total / state.pageSize);
+        if (page < 1 || page > totalPages) return;
+        state.currentPage = page;
+        fetchOrders(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // =========================================================================
+      // DETAIL MODAL
+      // =========================================================================
+      async function openDetailModal(orderKey) {
+        state.openDetailKey = orderKey;
+        const modal = document.getElementById("detailModal");
+        modal.classList.add("active");
+        document.getElementById("modalOrderId").textContent = `Chi Tiết Đơn #${orderKey}`;
+        document.getElementById("modalBody").innerHTML = `
+          <div style="text-align:center;padding:40px 0;">
+            <div style="font-size:32px;margin-bottom:12px;">⏳</div>
+            <div style="color:var(--text-muted);font-size:14px;">Đang tải thông tin đơn hàng...</div>
+          </div>`;
+        document.getElementById("modalFooter").innerHTML = `
+          <button class="btn-modal-close" onclick="closeDetailModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Đóng
+          </button>`;
+
+        // Try to find in local state first
+        let order = state.orders.find(o => o.order_key === orderKey);
+
+        // If not found or needs full data, fetch from API
+        if (!order || !order.status_history) {
+          try {
+            const token = Auth.getToken();
+            const user = Auth.getUser();
+            const headers = { "Content-Type": "application/json" };
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+            if (user && user.id) headers["X-User-Id"] = String(user.id);
+
+            const res = await fetch(`${API_BASE}/api/user/orders/${orderKey}`, {
+              headers,
+              signal: AbortSignal.timeout(6000),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.order) order = data.order;
+            }
+          } catch (e) {
+            // Use local data if fetch fails
+          }
+        }
+
+        if (!order) {
+          document.getElementById("modalBody").innerHTML = `
+            <div style="text-align:center;padding:40px 0;">
+              <div style="font-size:40px;margin-bottom:12px;">❌</div>
+              <div style="font-weight:700;color:var(--secondary);margin-bottom:8px;">Không tìm thấy đơn hàng</div>
+              <div style="color:var(--text-muted);font-size:13.5px;">Mã đơn <strong>#${escHtml(orderKey)}</strong> không tồn tại hoặc bạn không có quyền truy cập.</div>
+            </div>`;
+          return;
+        }
+
+        renderDetailModalBody(order);
+      }
+
+      function renderDetailModalBody(order) {
+        const statusKey = (order.status || "").toLowerCase();
+        const cfg = STATUS_CONFIG[statusKey] || { label: order.status, icon: "📦", cls: "" };
+        const items = order.items || [];
+        const payments = order.payments || [];
+        const statusHistory = order.status_history || [];
+
+        // Items
+        let itemsHTML = "";
+        items.forEach((it, idx) => {
+          itemsHTML += `
+            <div class="modal-item-row">
+              <div class="modal-item-left">
+                <div class="modal-item-num">${idx + 1}</div>
+                <div class="modal-item-info">
+                  <div class="modal-item-name" title="${escHtml(it.name || '')}">${escHtml(it.name || "Sản phẩm")}</div>
+                  <div class="modal-item-variant">${escHtml(it.variant || "Tiêu chuẩn")}</div>
+                </div>
+              </div>
+              <div class="modal-item-right">
+                <div class="modal-item-price">${escHtml(it.subtotal || it.price || "")}</div>
+                <div class="modal-item-qty">x${it.qty || 1}</div>
+              </div>
+            </div>`;
+        });
+
+        // Payments
+        let paymentsHTML = "";
+        if (payments.length > 0) {
+          payments.forEach(p => {
+            paymentsHTML += `
+              <div class="detail-item full">
+                <div class="detail-label">Phương thức</div>
+                <div class="detail-value">${escHtml(p.payment_method || "COD")} · <span style="color:${p.payment_status === 'paid' ? 'var(--success)' : 'var(--warning)'}">${escHtml(p.payment_status || "")}</span></div>
+              </div>`;
+            if (p.transaction_code) {
+              paymentsHTML += `
+                <div class="detail-item full">
+                  <div class="detail-label">Mã giao dịch</div>
+                  <div class="detail-value" style="font-family:monospace;">${escHtml(p.transaction_code)}</div>
+                </div>`;
+            }
+          });
+        } else {
+          paymentsHTML = `<div class="detail-item full"><div class="detail-value" style="color:var(--text-muted);">Thanh toán khi nhận hàng (COD)</div></div>`;
+        }
+
+        // Status timeline
+        let timelineHTML = "";
+        if (statusHistory.length > 0) {
+          timelineHTML = `<div class="status-timeline">`;
+          statusHistory.forEach((h, idx) => {
+            const isLatest = idx === statusHistory.length - 1;
+            const statusCfg = STATUS_CONFIG[h.new_status?.toLowerCase()] || { label: h.new_status, icon: "📌" };
+            timelineHTML += `
+              <div class="timeline-item${isLatest ? " latest" : ""}">
+                <div class="timeline-dot"></div>
+                <div class="timeline-status">${statusCfg.icon} ${statusCfg.label}</div>
+                ${h.note ? `<div class="timeline-note">${escHtml(h.note)}</div>` : ""}
+                <div class="timeline-date">${formatDateTime(h.created_at)}</div>
+              </div>`;
+          });
+          timelineHTML += `</div>`;
+        } else {
+          const statusCfg = STATUS_CONFIG[statusKey] || { label: order.status, icon: "📌" };
+          timelineHTML = `
+            <div class="status-timeline">
+              <div class="timeline-item latest">
+                <div class="timeline-dot"></div>
+                <div class="timeline-status">${statusCfg.icon} ${statusCfg.label}</div>
+                <div class="timeline-date">${formatDateTime(order.created_at || order.time_info)}</div>
+              </div>
+            </div>`;
+        }
+
+        const modalBody = document.getElementById("modalBody");
+        modalBody.innerHTML = `
+          <!-- Status & Order Info -->
+          <div class="detail-section">
+            <div class="detail-section-title">📋 Thông Tin Đơn Hàng</div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Mã đơn</div>
+                <div class="detail-value" style="font-family:monospace;">${escHtml(order.id_display || order.order_key)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Trạng thái</div>
+                <div class="detail-value"><span class="status-badge ${cfg.cls}">${cfg.icon} ${cfg.label}</span></div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Ngày đặt</div>
+                <div class="detail-value">${formatDateTime(order.created_at || order.time_info)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Shop</div>
+                <div class="detail-value">${escHtml(order.shop_name || "JML Mall")}</div>
+              </div>
+              ${order.escrow_badge ? `
+              <div class="detail-item full">
+                <div class="detail-label">Escrow / Bảo đảm</div>
+                <div class="detail-value">${escHtml(order.escrow_badge)}</div>
+              </div>` : ""}
+            </div>
+          </div>
+
+          <!-- Buyer Info -->
+          <div class="detail-section">
+            <div class="detail-section-title">👤 Thông Tin Người Nhận</div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Họ tên</div>
+                <div class="detail-value">${escHtml(order.buyer_name || "")}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Số điện thoại</div>
+                <div class="detail-value">${escHtml(order.buyer_phone || "")}</div>
+              </div>
+              <div class="detail-item full">
+                <div class="detail-label">Địa chỉ nhận hàng</div>
+                <div class="detail-value">${escHtml(order.buyer_address || "")}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products -->
+          <div class="detail-section">
+            <div class="detail-section-title">🛍️ Sản Phẩm Đã Đặt (${items.length})</div>
+            <div class="modal-items-list">
+              ${itemsHTML || '<div style="color:var(--text-muted);font-size:13.5px;padding:10px 0;">Không có thông tin sản phẩm.</div>'}
+            </div>
+            <div class="modal-total-row">
+              <div class="modal-total-label">Tổng Thanh Toán</div>
+              <div class="modal-total-value">${escHtml(order.total || "")}</div>
+            </div>
+          </div>
+
+          <!-- Payment Info -->
+          <div class="detail-section">
+            <div class="detail-section-title">💳 Thanh Toán</div>
+            <div class="detail-grid">
+              ${paymentsHTML}
+            </div>
+          </div>
+
+          <!-- Status Timeline -->
+          <div class="detail-section">
+            <div class="detail-section-title">📍 Lịch Sử Trạng Thái</div>
+            ${timelineHTML}
+          </div>
+        `;
+
+        // Render footer buttons
+        const footer = document.getElementById("modalFooter");
+        const canCancel = ["preparing", "escrow"].includes(statusKey);
+        const canReceive = statusKey === "shipping";
+
+        let footerHTML = `<button class="btn-modal-close" onclick="closeDetailModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          Đóng
+        </button>`;
+
+        if (canCancel) {
+          footerHTML = `<button class="btn-modal-cancel" onclick="openCancelModal('${escHtml(order.order_key)}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Hủy đơn hàng
+          </button>` + footerHTML;
+        }
+        if (canReceive) {
+          footerHTML = `<button class="btn-modal-received" onclick="confirmReceived('${escHtml(order.order_key)}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Xác nhận đã nhận hàng
+          </button>` + footerHTML;
+        }
+
+        footer.innerHTML = footerHTML;
+      }
+
+      function closeDetailModal() {
+        document.getElementById("detailModal").classList.remove("active");
+        state.openDetailKey = null;
+      }
+
+      // =========================================================================
+      // CANCEL ORDER
+      // =========================================================================
+      function openCancelModal(orderKey) {
+        state.cancelTargetKey = orderKey;
+        document.getElementById("cancelModal").classList.add("active");
+      }
+      function closeCancelModal() {
+        document.getElementById("cancelModal").classList.remove("active");
+        state.cancelTargetKey = null;
+      }
+
+      async function confirmCancel() {
+        const orderKey = state.cancelTargetKey;
+        const reason = document.getElementById("cancelReasonSelect").value;
+        if (!orderKey) return;
+
+        closeCancelModal();
+        closeDetailModal();
+
+        const token = Auth.getToken();
+        const user = Auth.getUser();
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (user && user.id) headers["X-User-Id"] = String(user.id);
+
+        try {
+          const res = await fetch(`${API_BASE}/api/user/orders/${orderKey}/cancel`, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify({ reason }),
+            signal: AbortSignal.timeout(8000),
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            showToast(`✅ Hủy đơn hàng #${orderKey} thành công!`, "success");
+            await fetchOrders(false);
+          } else {
+            showToast(`❌ ${data.detail || "Không thể hủy đơn hàng!"}`, "error");
+          }
+        } catch (err) {
+          showToast(`⚠️ Lỗi kết nối: ${err.message}`, "error");
+        }
+      }
+
+      // =========================================================================
+      // CONFIRM RECEIVED
+      // =========================================================================
+      async function confirmReceived(orderKey) {
+        closeDetailModal();
+
+        const token = Auth.getToken();
+        const user = Auth.getUser();
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (user && user.id) headers["X-User-Id"] = String(user.id);
+
+        try {
+          const res = await fetch(`${API_BASE}/api/user/orders/${orderKey}/receive`, {
+            method: "PUT",
+            headers,
+            signal: AbortSignal.timeout(8000),
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            showToast(`✅ Đã xác nhận nhận hàng thành công!`, "success");
+            await fetchOrders(false);
+          } else {
+            showToast(`❌ ${data.detail || "Không thể xác nhận!"}`, "error");
+          }
+        } catch (err) {
+          showToast(`⚠️ Lỗi kết nối: ${err.message}`, "error");
+        }
+      }
+
+      // =========================================================================
+      // EMPTY / AUTH / ERROR STATES
+      // =========================================================================
+      function showAuthRequired(msg) {
+        const content = document.getElementById("mainContent");
+        content.innerHTML = `
+          <div class="auth-required">
+            <span class="auth-required-icon">🔒</span>
+            <div class="auth-required-title">Yêu Cầu Đăng Nhập</div>
+            <div class="auth-required-desc">${msg || "Vui lòng đăng nhập để xem lịch sử đơn hàng của bạn."}</div>
+            <a class="btn-login" href="../admin/login.html">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              Đăng Nhập Ngay
+            </a>
+          </div>`;
+        document.getElementById("skeletonLoader") && hideSkeleton();
+      }
+
+      function renderEmptyState(container) {
+        const tab = state.currentTab;
+        const cfg = STATUS_CONFIG[tab] || { label: tab, icon: "📦" };
+        const isFiltered = tab !== "all" || state.searchQuery;
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">${isFiltered ? "🔍" : "🛒"}</span>
+            <div class="empty-title">${isFiltered ? "Không tìm thấy đơn hàng" : "Bạn chưa có đơn hàng nào"}</div>
+            <div class="empty-desc">
+              ${isFiltered
+                ? `Không có đơn hàng nào ${tab !== "all" ? `ở trạng thái "${cfg.label}"` : ""} ${state.searchQuery ? `khớp với "${state.searchQuery}"` : ""}. Hãy thử bộ lọc khác.`
+                : "Hãy khám phá các sản phẩm tuyệt vời và bắt đầu mua sắm ngay hôm nay!"}
+            </div>
+            ${isFiltered
+              ? `<button class="btn-shop-now" onclick="switchTab('all')">📋 Xem tất cả đơn hàng</button>`
+              : `<a class="btn-shop-now" href="index.html">🛍️ Mua sắm ngay</a>`}
+          </div>`;
+      }
+
+      function showErrorState(msg) {
+        const content = document.getElementById("mainContent");
+        content.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">⚠️</span>
+            <div class="empty-title">Có lỗi xảy ra</div>
+            <div class="empty-desc">${escHtml(msg || "Không thể tải danh sách đơn hàng. Vui lòng thử lại.")}</div>
+            <button class="btn-shop-now" onclick="fetchOrders(true)">🔄 Thử lại</button>
+          </div>`;
+      }
+
+      // =========================================================================
+      // SKELETON
+      // =========================================================================
+      function showSkeleton() {
+        const content = document.getElementById("mainContent");
+        content.innerHTML = `
+          <div class="skeleton-wrap">
+            ${[1,2,3].map(() => `
+              <div class="skeleton-card">
+                <div class="skeleton-head">
+                  <div class="sk sk-h16 sk-w140"></div>
+                  <div class="sk sk-h12 sk-w80" style="margin-left:auto;"></div>
+                </div>
+                <div class="skeleton-body">
+                  <div class="sk sk-h12 sk-wfull" style="margin-bottom:8px;"></div>
+                  <div class="sk sk-h12 sk-w60p" style="margin-bottom:16px;"></div>
+                  <div class="sk sk-h16 sk-w100"></div>
+                </div>
+              </div>`).join("")}
+          </div>`;
+      }
+
+      function hideSkeleton() {
+        const sk = document.getElementById("skeletonLoader");
+        if (sk) sk.remove();
+      }
+
+      // =========================================================================
+      // INSERT HELPERS
+      // =========================================================================
+      function insertBeforeContent(el, id) {
+        // Avoid duplicates
+        const existing = document.getElementById(id);
+        if (existing) return;
+        const wrapper = document.getElementById("mainContent");
+        wrapper.parentNode.insertBefore(el, wrapper);
+      }
+
+      // =========================================================================
+      // UTILITY FUNCTIONS
+      // =========================================================================
+      function formatDateTime(raw) {
+        if (!raw) return "—";
+        try {
+          const d = new Date(raw.includes("T") ? raw : raw.replace(" ", "T"));
+          if (isNaN(d.getTime())) return raw;
+          return d.toLocaleString("vi-VN", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          });
+        } catch {
+          return raw;
+        }
+      }
+
+      function escHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function showToast(msg, type = "") {
+        const box = document.getElementById("toastBox");
+        const msgEl = document.getElementById("toastMsg");
+        if (!box || !msgEl) return;
+        box.className = "toast-box" + (type ? " " + type : "");
+        msgEl.textContent = msg;
+        box.style.display = "flex";
+        if (window._toastTimer) clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(() => { box.style.display = "none"; }, 4000);
+      }
+
+      // =========================================================================
+      // KEYBOARD SHORTCUTS
+      // =========================================================================
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (document.getElementById("cancelModal").classList.contains("active")) {
+            closeCancelModal();
+          } else if (document.getElementById("detailModal").classList.contains("active")) {
+            closeDetailModal();
+          }
+        }
+      });
+
+      // Close modal on backdrop click
+      document.getElementById("detailModal").addEventListener("click", function(e) {
+        if (e.target === this) closeDetailModal();
+      });
+      document.getElementById("cancelModal").addEventListener("click", function(e) {
+        if (e.target === this) closeCancelModal();
+      });
+    </script>
+  </body>
+</html>
