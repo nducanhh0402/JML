@@ -365,12 +365,26 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
                 pi["subtotal_str"]
             ))
 
-        # 9. Ghi nhận thanh toán vào bảng `payments` (TF172C2)
+        # 9. Ghi nhận thanh toán vào bảng `payments` (TF172C2) & VNPay Sandbox (TF1753A)
+        vnpay_url = None
         try:
             cursor.execute("SHOW TABLES LIKE 'payments';")
             if cursor.fetchone():
                 txn_code = f"TXN{random.randint(1000000, 9999999)}"
                 p_status = "completed" if payment_method.lower() in ("bank_qr", "ewallet", "card") else "pending"
+                if payment_method.lower() in ("vnpay", "vnpay_sandbox"):
+                    p_status = "pending"
+                    try:
+                        from backend.src.utils.vnpay import build_payment_url
+                        vnpay_url, vnp_params = build_payment_url(
+                            order_key=order_key,
+                            amount=numeric_total,
+                            order_desc=f"Thanh toan don hang {order_key}"
+                        )
+                        txn_code = vnp_params.get("vnp_TxnRef", txn_code)
+                    except Exception:
+                        pass
+
                 cursor.execute("""
                     INSERT INTO payments (order_key, user_id, payment_method, payment_status, amount, transaction_code)
                     VALUES (?, ?, ?, ?, ?, ?);
@@ -456,7 +470,7 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
         # 13. COMMIT TOÀN BỘ TRANSACTION
         conn.commit()
 
-        return {
+        response_data = {
             "success": True,
             "message": "Đặt hàng từ giỏ thành công và đã cập nhật tồn kho trong Transaction!",
             "order_key": order_key,
@@ -466,6 +480,10 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
             "cart_cleared": should_clear,
             "items_count": len(processed_items)
         }
+        if vnpay_url:
+            response_data["payment_url"] = vnpay_url
+
+        return response_data
 
     except HTTPException:
         conn.rollback()

@@ -1077,6 +1077,21 @@
                 </div>
               </label>
 
+              <!-- VNPAY SANDBOX: TF1753A -->
+              <label class="radio-card" onclick="selectPayment('VNPAY', this)">
+                <div class="radio-left">
+                  <input type="radio" name="paymentMethod" value="VNPAY" />
+                  <div class="radio-icon">💳</div>
+                  <div>
+                    <div class="radio-title">
+                      <span>Cổng Thanh Toán VNPAY (Sandbox)</span>
+                      <span class="radio-tag" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">QR / Thẻ ATM</span>
+                    </div>
+                    <div class="radio-sub">Thanh toán trực tuyến môi trường thử nghiệm VNPAY Sandbox</div>
+                  </div>
+                </div>
+              </label>
+
               <label class="radio-card" onclick="selectPayment('BANK_QR', this)">
                 <div class="radio-left">
                   <input type="radio" name="paymentMethod" value="BANK_QR" />
@@ -1490,6 +1505,7 @@
           if (codBox) codBox.style.display = "none";
           if (btnText) {
             const names = {
+              VNPAY: "Cổng VNPAY Sandbox",
               BANK_QR: "Thanh Toán VietQR",
               EWALLET: "Thanh Toán Ví Điện Tử",
               CARD: "Thanh Toán Bằng Thẻ"
@@ -1776,6 +1792,14 @@
 
           localStorage.removeItem("JML_CART_ITEMS");
 
+          if (data.payment_url) {
+            showToast("✅ Đặt hàng thành công! Đang chuyển hướng sang VNPAY Sandbox...");
+            setTimeout(() => {
+              window.location.href = data.payment_url;
+            }, 1200);
+            return;
+          }
+
           if (document.getElementById("saveAddressCheck")?.checked) {
             saveNewAddressPreset({
               fullName,
@@ -1868,6 +1892,7 @@
       function showSuccessModal(order) {
         const paymentNames = {
           COD: "Thanh toán khi nhận hàng (COD)",
+          VNPAY: "Cổng thanh toán VNPAY (Sandbox)",
           BANK_QR: "Chuyển khoản ngân hàng (VietQR)",
           EWALLET: "Ví điện tử (MoMo / ZaloPay)",
           CARD: "Thẻ tín dụng / Ghi nợ quốc tế"
