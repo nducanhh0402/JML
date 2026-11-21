@@ -290,12 +290,27 @@ def remove_cart_item(item_or_product_id: int, user_id: Optional[int] = Query(def
                 (cart_id, item_or_product_id),
             )
             if cursor.rowcount == 0:
+                # Kiểm tra xem có phải người dùng truyền nhầm cart_item_id của người khác (Anti-IDOR)
+                cursor.execute(
+                    """
+                    SELECT ci.id, ci.cart_id, c.user_id
+                    FROM cart_items ci
+                    JOIN carts c ON c.id = ci.cart_id
+                    WHERE ci.id = ?;
+                    """,
+                    (item_or_product_id,),
+                )
+                item = cursor.fetchone()
+                if item and item["user_id"] != user_id:
+                    raise HTTPException(
+                        status_code=403, detail="Bạn không có quyền thao tác giỏ hàng của người khác!"
+                    )
                 raise HTTPException(status_code=404, detail="Sản phẩm không có trong giỏ hàng.")
         else:
-            # Tìm cart_id và user_id trước khi xóa để serialize lại giỏ
+            # Xóa theo cart_item_id
             cursor.execute(
                 """
-                SELECT ci.id, c.user_id
+                SELECT ci.id, ci.cart_id, c.user_id
                 FROM cart_items ci
                 JOIN carts c ON c.id = ci.cart_id
                 WHERE ci.id = ?;
@@ -305,6 +320,10 @@ def remove_cart_item(item_or_product_id: int, user_id: Optional[int] = Query(def
             item = cursor.fetchone()
             if not item:
                 raise HTTPException(status_code=404, detail="Mục giỏ hàng không tồn tại.")
+            if user_id is not None and item["user_id"] != user_id:
+                raise HTTPException(
+                    status_code=403, detail="Bạn không có quyền thao tác giỏ hàng của người khác!"
+                )
             deleted_user_id = item["user_id"]
             cursor.execute("DELETE FROM cart_items WHERE id = ?;", (item_or_product_id,))
 
@@ -323,15 +342,26 @@ def remove_cart_item(item_or_product_id: int, user_id: Optional[int] = Query(def
 
 
 @router.delete("/{cart_id}/clear")
-def clear_cart(cart_id: int):
-    """TF17055: Xóa toàn bộ sản phẩm trong giỏ hàng."""
+def clear_cart(cart_id: int, user_id: Optional[int] = Query(default=None, gt=0)):
+    """TF17055 / TF170CB: Xóa toàn bộ sản phẩm trong giỏ hàng. Chặn thao tác giỏ người khác (Anti-IDOR)."""
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
+        cursor.execute("SELECT id, user_id FROM carts WHERE id = ?;", (cart_id,))
+        cart = cursor.fetchone()
+        if not cart:
+            raise HTTPException(status_code=404, detail="Không tìm thấy giỏ hàng.")
+        if user_id is not None and cart["user_id"] != user_id:
+            raise HTTPException(
+                status_code=403, detail="Bạn không có quyền thao tác giỏ hàng của người khác!"
+            )
         cursor.execute("DELETE FROM cart_items WHERE cart_id = ?;", (cart_id,))
         cursor.execute("UPDATE carts SET status = 'completed' WHERE id = ?;", (cart_id,))
         conn.commit()
         return {"success": True, "message": "Giỏ hàng đã được làm trống thành công!"}
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
 
