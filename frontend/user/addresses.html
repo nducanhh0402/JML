@@ -1,0 +1,1457 @@
+<!-- =============================================================== -->
+<!-- Nguyễn Công Trường - Task TF17133: [FE] Trang quản lý địa chỉ nhận hàng -->
+<!-- Sprint 3 · 24/11–30/11 · JML Store Marketplace -->
+<!-- =============================================================== -->
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sổ Địa Chỉ Nhận Hàng | JML Store</title>
+    <link rel="icon" type="image/svg+xml" href="jml-store-icon.svg" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Auth & Shared Helpers -->
+    <script src="../shared/js/auth.js"></script>
+    <style>
+      /* ==========================================================================
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ JML STORE DESIGN SYSTEM)
+         ========================================================================== */
+      :root {
+        --primary: #ea580c;
+        --primary-hover: #c2410c;
+        --primary-light: #ffedd5;
+        --secondary: #111827;
+        --secondary-light: #4b5563;
+        --accent: #f97316;
+        --success: #10b981;
+        --success-light: #d1fae5;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --danger: #ef4444;
+        --danger-light: #fee2e2;
+        --info: #3b82f6;
+        --info-light: #dbeafe;
+        --background: #f8f9fa;
+        --surface: #ffffff;
+        --surface-dim: #f3f4f6;
+        --border: #e5e7eb;
+        --border-focus: #fdba74;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.16);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: var(--background);
+        color: var(--text-main);
+        line-height: 1.5;
+        min-height: 100vh;
+      }
+
+      /* ==========================================================================
+         2. TOPBAR & HEADER
+         ========================================================================== */
+      .topbar {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: var(--secondary);
+        font-weight: 800;
+        font-size: 18px;
+      }
+      .brand-badge {
+        background: var(--primary);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .top-nav {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 13.5px;
+      }
+      .top-nav a {
+        text-decoration: none;
+        color: var(--secondary-light);
+        font-weight: 600;
+        transition: var(--transition);
+      }
+      .top-nav a:hover, .top-nav a.active {
+        color: var(--primary);
+      }
+
+      /* ==========================================================================
+         3. CONTAINER & LAYOUT
+         ========================================================================== */
+      .container {
+        max-width: 1080px;
+        margin: 28px auto;
+        padding: 0 20px;
+      }
+
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+      }
+      .breadcrumb a {
+        text-decoration: none;
+        color: var(--text-muted);
+        transition: var(--transition);
+      }
+      .breadcrumb a:hover {
+        color: var(--primary);
+      }
+      .breadcrumb-sep { color: var(--border); }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .page-desc {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      .count-badge {
+        background: var(--primary-light);
+        color: var(--primary);
+        font-size: 13px;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 9999px;
+      }
+
+      /* Buttons */
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        padding: 11px 20px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+        transition: var(--transition);
+      }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+      }
+
+      /* Status Pill */
+      .api-status-bar {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: var(--surface-dim);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        margin-bottom: 18px;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #94a3b8;
+      }
+      .status-dot.online {
+        background: var(--success);
+        box-shadow: 0 0 0 3px var(--success-light);
+      }
+
+      /* ==========================================================================
+         4. DANH SÁCH ĐỊA CHỈ (ADDRESS CARDS LIST)
+         ========================================================================== */
+      .address-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .address-card {
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px 24px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        transition: var(--transition);
+        position: relative;
+      }
+      .address-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: var(--shadow-md);
+      }
+      .address-card.is-default {
+        border-color: var(--primary);
+        background: #fffdfb;
+      }
+      .address-card.is-default::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        bottom: -1px;
+        left: -1px;
+        width: 5px;
+        background: var(--primary);
+        border-top-left-radius: var(--radius-md);
+        border-bottom-left-radius: var(--radius-md);
+      }
+
+      .address-info {
+        flex: 1;
+      }
+      .address-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+      .recipient-name {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--secondary);
+      }
+      .divider {
+        color: var(--border);
+        font-weight: 300;
+      }
+      .recipient-phone {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      /* Badges */
+      .badge-tag {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: var(--surface-dim);
+        color: var(--secondary-light);
+        border: 1px solid var(--border);
+      }
+      .badge-default {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 6px;
+        background: var(--primary);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .address-detail {
+        font-size: 14px;
+        color: var(--secondary-light);
+        margin-bottom: 4px;
+        line-height: 1.5;
+      }
+      .address-location {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      /* Actions */
+      .address-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        min-width: 140px;
+      }
+      .action-btns-row {
+        display: flex;
+        gap: 8px;
+      }
+      .btn-action {
+        background: none;
+        border: none;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: var(--transition);
+      }
+      .btn-edit {
+        color: var(--primary);
+        background: var(--primary-light);
+      }
+      .btn-edit:hover {
+        background: #fed7aa;
+      }
+      .btn-delete {
+        color: var(--danger);
+        background: var(--danger-light);
+      }
+      .btn-delete:hover {
+        background: #fecaca;
+      }
+      .btn-set-default {
+        background: #fff;
+        border: 1px solid var(--border);
+        color: var(--secondary);
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-set-default:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--surface-dim);
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 64px 20px;
+        background: var(--surface);
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-lg);
+      }
+      .empty-icon {
+        font-size: 52px;
+        margin-bottom: 12px;
+      }
+      .empty-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: 6px;
+      }
+      .empty-desc {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Loading State */
+      .loading-state {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--text-muted);
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* ==========================================================================
+         5. MODAL FORM THÊM / SỬA ĐỊA CHỈ (POPUP MODAL)
+         ========================================================================== */
+      .modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .modal-backdrop.show {
+        display: flex;
+      }
+      .modal-dialog {
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 540px;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes modalScaleUp {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      .modal-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .modal-title {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--secondary);
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: var(--transition);
+      }
+      .modal-close:hover {
+        color: var(--secondary);
+      }
+      .modal-body {
+        padding: 24px;
+      }
+
+      /* Form elements */
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--secondary);
+        margin-bottom: 6px;
+      }
+      .form-label span {
+        color: var(--danger);
+      }
+      .form-input, .form-select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-family: inherit;
+        background: #fff;
+        color: var(--text-main);
+        transition: var(--transition);
+      }
+      .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+      .form-input.is-invalid, .form-select.is-invalid {
+        border-color: var(--danger);
+        background: #fff5f5;
+      }
+      .form-error {
+        color: var(--danger);
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+        display: none;
+      }
+      .form-error.show {
+        display: block;
+      }
+
+      /* Radio Tags */
+      .tag-options {
+        display: flex;
+        gap: 12px;
+      }
+      .tag-option {
+        flex: 1;
+        cursor: pointer;
+      }
+      .tag-option input {
+        display: none;
+      }
+      .tag-pill {
+        display: block;
+        text-align: center;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--secondary-light);
+        transition: var(--transition);
+      }
+      .tag-option input:checked + .tag-pill {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      /* Checkbox */
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--secondary);
+        cursor: pointer;
+        user-select: none;
+        margin-top: 10px;
+      }
+      .checkbox-label input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+        cursor: pointer;
+      }
+
+      .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        background: var(--surface-dim);
+        border-bottom-left-radius: var(--radius-md);
+        border-bottom-right-radius: var(--radius-md);
+      }
+      .btn-cancel {
+        background: #fff;
+        border: 1px solid var(--border);
+        padding: 9px 18px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-cancel:hover {
+        background: var(--surface-dim);
+      }
+      .btn-save {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        padding: 9px 22px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-save:hover {
+        background: var(--primary-hover);
+      }
+
+      /* ==========================================================================
+         6. MODAL XÁC NHẬN XÓA (CONFIRM MODAL)
+         ========================================================================== */
+      .confirm-box {
+        background: #fff;
+        border-radius: var(--radius-md);
+        padding: 28px 24px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        animation: modalScaleUp 0.2s ease-out;
+      }
+      .confirm-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+      }
+      .confirm-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: 8px;
+      }
+      .confirm-desc {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        margin-bottom: 22px;
+        line-height: 1.45;
+      }
+      .confirm-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .btn-danger-confirm {
+        flex: 1;
+        background: var(--danger);
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-danger-confirm:hover {
+        background: #dc2626;
+      }
+
+      /* ==========================================================================
+         7. TOAST NOTIFICATION
+         ========================================================================== */
+      .toast-box {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--secondary);
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 13.5px;
+        font-weight: 600;
+        box-shadow: var(--shadow-lg);
+        display: none;
+        align-items: center;
+        gap: 10px;
+        z-index: 10000;
+        animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes toastIn {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      /* Responsive */
+      @media (max-width: 640px) {
+        .address-card {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .address-actions {
+          align-items: flex-start;
+          flex-direction: row;
+          justify-content: space-between;
+          width: 100%;
+          border-top: 1px solid var(--surface-dim);
+          padding-top: 12px;
+        }
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Topbar -->
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-badge">JML</span>
+        <span>STORE</span>
+      </a>
+      <nav class="top-nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="profile.html">Hồ sơ</a>
+        <a href="orders.html">Đơn hàng</a>
+        <a href="addresses.html" class="active">Địa chỉ</a>
+        <a href="../buyer/cart.html">🛒 Giỏ hàng</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="index.html">Trang chủ</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="profile.html">Tài khoản</a>
+        <span class="breadcrumb-sep">/</span>
+        <span style="color: var(--secondary); font-weight: 700;">Địa chỉ nhận hàng</span>
+      </div>
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">
+            📍 Sổ Địa Chỉ Nhận Hàng
+            <span class="count-badge" id="addressCountBadge">0 địa chỉ</span>
+          </h1>
+          <p class="page-desc">Quản lý danh sách địa chỉ giao hàng để thanh toán nhanh chóng hơn khi mua sắm.</p>
+        </div>
+        <button class="btn-primary" onclick="openCreateAddressModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Thêm Địa Chỉ Mới
+        </button>
+      </div>
+
+      <!-- API Status Indicator -->
+      <div class="api-status-bar">
+        <span class="status-dot" id="apiStatusDot"></span>
+        <span id="apiStatusText">Đang kiểm tra kết nối API...</span>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <span>Đang tải danh sách địa chỉ nhận hàng...</span>
+      </div>
+
+      <!-- Address Cards Container -->
+      <div class="address-list" id="addressListContainer" style="display: none;"></div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-icon">📫</div>
+        <h3 class="empty-title">Bạn chưa có địa chỉ nhận hàng nào</h3>
+        <p class="empty-desc">Lưu sẵn địa chỉ giao hàng giúp bạn hoàn tất đơn hàng nhanh chóng mà không cần nhập lại nhiều lần.</p>
+        <button class="btn-primary" onclick="openCreateAddressModal()">
+          ＋ Thêm Địa Chỉ Đầu Tiên
+        </button>
+      </div>
+    </main>
+
+    <!-- ======================================================================
+         MODAL FORM: THÊM / SỬA ĐỊA CHỈ
+         ====================================================================== -->
+    <div class="modal-backdrop" id="addressModal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalFormTitle">Thêm Địa Chỉ Nhận Hàng Mới</h3>
+          <button class="modal-close" onclick="closeAddressModal()">&times;</button>
+        </div>
+        <form id="addressForm" onsubmit="handleAddressSubmit(event)" novalidate>
+          <div class="modal-body">
+            <input type="hidden" id="editAddressId" value="" />
+
+            <!-- Row 1: Tên & SĐT -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="recipientName">Họ và tên người nhận <span>*</span></label>
+                <input
+                  type="text"
+                  id="recipientName"
+                  class="form-input"
+                  placeholder="Ví dụ: Nguyễn Văn A"
+                  maxlength="150"
+                  required
+                />
+                <div class="form-error" id="error_recipientName">Vui lòng nhập họ và tên người nhận.</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="recipientPhone">Số điện thoại <span>*</span></label>
+                <input
+                  type="tel"
+                  id="recipientPhone"
+                  class="form-input"
+                  placeholder="Ví dụ: 0912345678"
+                  maxlength="15"
+                  required
+                />
+                <div class="form-error" id="error_recipientPhone">Số điện thoại phải có ít nhất 9 số.</div>
+              </div>
+            </div>
+
+            <!-- Row 2: Tỉnh / Thành & Quận / Huyện -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="provinceCity">Tỉnh / Thành phố <span>*</span></label>
+                <input
+                  type="text"
+                  id="provinceCity"
+                  class="form-input"
+                  placeholder="Ví dụ: Hà Nội hoặc TP.HCM"
+                  required
+                />
+                <div class="form-error" id="error_provinceCity">Vui lòng nhập Tỉnh / Thành phố.</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="district">Quận / Huyện <span>*</span></label>
+                <input
+                  type="text"
+                  id="district"
+                  class="form-input"
+                  placeholder="Ví dụ: Cầu Giấy"
+                  required
+                />
+                <div class="form-error" id="error_district">Vui lòng nhập Quận / Huyện.</div>
+              </div>
+            </div>
+
+            <!-- Row 3: Phường / Xã & Nhãn -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="ward">Phường / Xã</label>
+                <input
+                  type="text"
+                  id="ward"
+                  class="form-input"
+                  placeholder="Ví dụ: Dịch Vọng Hậu"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Loại địa chỉ</label>
+                <div class="tag-options">
+                  <label class="tag-option">
+                    <input type="radio" name="addressTag" value="Nhà riêng" checked />
+                    <span class="tag-pill">🏠 Nhà riêng</span>
+                  </label>
+                  <label class="tag-option">
+                    <input type="radio" name="addressTag" value="Văn phòng" />
+                    <span class="tag-pill">🏢 Văn phòng</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 4: Địa chỉ cụ thể -->
+            <div class="form-group">
+              <label class="form-label" for="streetAddress">Địa chỉ chi tiết (Số nhà, tên đường, ngõ ngách) <span>*</span></label>
+              <input
+                type="text"
+                id="streetAddress"
+                class="form-input"
+                placeholder="Ví dụ: Số 10 Ngõ 123 Đường Cầu Giấy"
+                maxlength="255"
+                required
+              />
+              <div class="form-error" id="error_streetAddress">Vui lòng nhập số nhà, tên đường chi tiết.</div>
+            </div>
+
+            <!-- Row 5: Đặt làm mặc định -->
+            <label class="checkbox-label" for="isDefaultCheck">
+              <input type="checkbox" id="isDefaultCheck" />
+              <span>Đặt làm địa chỉ nhận hàng mặc định</span>
+            </label>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeAddressModal()">Hủy bỏ</button>
+            <button type="submit" class="btn-save" id="btnSubmitForm">Lưu Địa Chỉ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL: XÁC NHẬN XÓA ĐỊA CHỈ
+         ====================================================================== -->
+    <div class="modal-backdrop" id="deleteConfirmModal">
+      <div class="confirm-box">
+        <div class="confirm-icon">🗑️</div>
+        <h4 class="confirm-title">Xóa địa chỉ nhận hàng?</h4>
+        <p class="confirm-desc" id="deleteConfirmDesc">
+          Bạn có chắc chắn muốn xóa địa chỉ này? Hành động này không thể hoàn tác.
+        </p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" style="flex:1;" onclick="closeDeleteConfirmModal()">Không, giữ lại</button>
+          <button class="btn-danger-confirm" id="btnConfirmDelete" onclick="executeDeleteAddress()">Đồng ý xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-box" id="toastBox">
+      <span id="toastMsg">Thao tác thành công!</span>
+    </div>
+
+    <!-- ======================================================================
+         JAVASCRIPT LOGIC
+         ====================================================================== -->
+    <script>
+      const API_BASE_URL = "http://127.0.0.1:8000";
+      const LOCAL_STORAGE_KEY = "JML_SAVED_ADDRESSES";
+
+      let addresses = [];
+      let isApiOnline = false;
+      let currentUser = null;
+      let pendingDeleteId = null;
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 1. KHỞI TẠO
+      // ──────────────────────────────────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Lấy thông tin user đăng nhập
+        currentUser =
+          (typeof Auth !== "undefined" ? Auth.getUser() : null) ||
+          JSON.parse(localStorage.getItem("JML_CUSTOMER_USER") || "null") ||
+          JSON.parse(localStorage.getItem("JML_AUTH_USER") || "null");
+
+        // Kiểm tra kết nối backend API
+        await checkBackendConnection();
+
+        // Tải danh sách địa chỉ
+        await loadAddresses();
+      });
+
+      async function checkBackendConnection() {
+        const dot = document.getElementById("apiStatusDot");
+        const txt = document.getElementById("apiStatusText");
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/user/addresses?user_id=1`, {
+            method: "GET",
+            signal: AbortSignal.timeout(2000),
+          });
+          isApiOnline = res.ok || res.status === 401 || res.status === 404;
+        } catch (e) {
+          isApiOnline = false;
+        }
+
+        if (isApiOnline) {
+          dot.className = "status-dot online";
+          txt.textContent = "Đã kết nối API backend (FastAPI)";
+        } else {
+          dot.className = "status-dot";
+          txt.textContent = "Chế độ lưu trữ cục bộ (Offline LocalStorage)";
+        }
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 2. TẢI DANH SÁCH ĐỊA CHỈ
+      // ──────────────────────────────────────────────────────────────────────
+      async function loadAddresses() {
+        setLoading(true);
+
+        const uid = currentUser && currentUser.id ? currentUser.id : 1;
+        const token = typeof Auth !== "undefined" && Auth.getToken ? Auth.getToken() : null;
+
+        if (isApiOnline) {
+          try {
+            const headers = { "Content-Type": "application/json" };
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const res = await fetch(`${API_BASE_URL}/api/user/addresses?user_id=${uid}`, {
+              headers: headers,
+            });
+
+            if (res.ok) {
+              const data = await res.json();
+              addresses = data.addresses || [];
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(addresses));
+              renderAddressList();
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.warn("Không thể tải API địa chỉ, chuyển sang localStorage:", err);
+          }
+        }
+
+        // Fallback đọc từ LocalStorage
+        const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (cached) {
+          try {
+            addresses = JSON.parse(cached);
+          } catch (e) {
+            addresses = [];
+          }
+        } else {
+          // Tạo 1 địa chỉ mẫu ban đầu nếu máy khách chưa có gì
+          addresses = [
+            {
+              id: 1,
+              user_id: uid,
+              recipient_name: currentUser ? (currentUser.full_name || currentUser.name || "Khách Hàng JML") : "Nguyễn Công Trường",
+              phone: currentUser ? (currentUser.phone || "0987654321") : "0987654321",
+              province_city: "Hà Nội",
+              district: "Cầu Giấy",
+              ward: "Dịch Vọng Hậu",
+              street_address: "Số 123 Đường Cầu Giấy",
+              full_address: "Số 123 Đường Cầu Giấy, Dịch Vọng Hậu, Cầu Giấy, Hà Nội",
+              is_default: true,
+              tag: "Nhà riêng",
+            },
+          ];
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(addresses));
+        }
+
+        renderAddressList();
+        setLoading(false);
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 3. HIỂN THỊ DANH SÁCH ĐỊA CHỈ (RENDER)
+      // ──────────────────────────────────────────────────────────────────────
+      function renderAddressList() {
+        const container = document.getElementById("addressListContainer");
+        const emptyState = document.getElementById("emptyState");
+        const countBadge = document.getElementById("addressCountBadge");
+
+        countBadge.textContent = `${addresses.length} địa chỉ`;
+
+        if (addresses.length === 0) {
+          container.style.display = "none";
+          emptyState.style.display = "block";
+          return;
+        }
+
+        emptyState.style.display = "none";
+        container.style.display = "grid";
+
+        // Sắp xếp: Địa chỉ mặc định lên đầu
+        addresses.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
+
+        container.innerHTML = addresses
+          .map((item) => {
+            const isDef = Boolean(item.is_default);
+            return `
+            <div class="address-card ${isDef ? "is-default" : ""}" id="address-card-${item.id}">
+              <div class="address-info">
+                <div class="address-head">
+                  <span class="recipient-name">${escapeHtml(item.recipient_name)}</span>
+                  <span class="divider">|</span>
+                  <span class="recipient-phone">${escapeHtml(item.phone)}</span>
+                  <span class="badge-tag">${escapeHtml(item.tag || "Nhà riêng")}</span>
+                  ${isDef ? `<span class="badge-default">⭐ Mặc định</span>` : ""}
+                </div>
+                <div class="address-detail">
+                  📍 <strong>${escapeHtml(item.street_address)}</strong>
+                </div>
+                <div class="address-location">
+                  ${escapeHtml(item.full_address || `${item.street_address}, ${item.ward || ""}, ${item.district || ""}, ${item.province_city || ""}`)}
+                </div>
+              </div>
+
+              <div class="address-actions">
+                <div class="action-btns-row">
+                  <button class="btn-action btn-edit" onclick="openEditAddressModal(${item.id})">
+                    ✏️ Sửa
+                  </button>
+                  <button class="btn-action btn-delete" onclick="openDeleteConfirmModal(${item.id})">
+                    🗑️ Xóa
+                  </button>
+                </div>
+                ${
+                  !isDef
+                    ? `<button class="btn-set-default" onclick="handleSetDefaultAddress(${item.id})">
+                         Thiết lập mặc định
+                       </button>`
+                    : ""
+                }
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 4. MỞ MODAL THÊM / SỬA ĐỊA CHỈ
+      // ──────────────────────────────────────────────────────────────────────
+      function openCreateAddressModal() {
+        document.getElementById("modalFormTitle").textContent = "Thêm Địa Chỉ Nhận Hàng Mới";
+        document.getElementById("editAddressId").value = "";
+        document.getElementById("btnSubmitForm").textContent = "Lưu Địa Chỉ";
+
+        // Reset inputs
+        document.getElementById("recipientName").value = currentUser ? (currentUser.full_name || "") : "";
+        document.getElementById("recipientPhone").value = currentUser ? (currentUser.phone || "") : "";
+        document.getElementById("provinceCity").value = "";
+        document.getElementById("district").value = "";
+        document.getElementById("ward").value = "";
+        document.getElementById("streetAddress").value = "";
+
+        // Nếu chưa có địa chỉ nào thì tự động tích mặc định và khóa
+        const isDefaultCheck = document.getElementById("isDefaultCheck");
+        if (addresses.length === 0) {
+          isDefaultCheck.checked = true;
+          isDefaultCheck.disabled = true;
+        } else {
+          isDefaultCheck.checked = false;
+          isDefaultCheck.disabled = false;
+        }
+
+        clearFormErrors();
+        document.getElementById("addressModal").classList.add("show");
+      }
+
+      function openEditAddressModal(id) {
+        const item = addresses.find((a) => a.id === id);
+        if (!item) return;
+
+        document.getElementById("modalFormTitle").textContent = "Chỉnh Sửa Địa Chỉ Nhận Hàng";
+        document.getElementById("editAddressId").value = item.id;
+        document.getElementById("btnSubmitForm").textContent = "Cập Nhật";
+
+        document.getElementById("recipientName").value = item.recipient_name || "";
+        document.getElementById("recipientPhone").value = item.phone || "";
+        document.getElementById("provinceCity").value = item.province_city || "";
+        document.getElementById("district").value = item.district || "";
+        document.getElementById("ward").value = item.ward || "";
+        document.getElementById("streetAddress").value = item.street_address || "";
+
+        // Tag radio
+        const tagRadios = document.getElementsByName("addressTag");
+        for (const r of tagRadios) {
+          r.checked = r.value === item.tag;
+        }
+
+        // Checkbox mặc định
+        const isDefaultCheck = document.getElementById("isDefaultCheck");
+        isDefaultCheck.checked = Boolean(item.is_default);
+        isDefaultCheck.disabled = Boolean(item.is_default); // Nếu đã là mặc định thì không cho bỏ tích trực tiếp
+
+        clearFormErrors();
+        document.getElementById("addressModal").classList.add("show");
+      }
+
+      function closeAddressModal() {
+        document.getElementById("addressModal").classList.remove("show");
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 5. VALIDATE & SUBMIT FORM (THÊM / CẬP NHẬT)
+      // ──────────────────────────────────────────────────────────────────────
+      async function handleAddressSubmit(e) {
+        e.preventDefault();
+        clearFormErrors();
+
+        const editId = document.getElementById("editAddressId").value;
+        const name = document.getElementById("recipientName").value.trim();
+        const phone = document.getElementById("recipientPhone").value.trim();
+        const city = document.getElementById("provinceCity").value.trim();
+        const district = document.getElementById("district").value.trim();
+        const ward = document.getElementById("ward").value.trim();
+        const street = document.getElementById("streetAddress").value.trim();
+        const isDefault = document.getElementById("isDefaultCheck").checked;
+
+        let tag = "Nhà riêng";
+        const tagRadios = document.getElementsByName("addressTag");
+        for (const r of tagRadios) {
+          if (r.checked) tag = r.value;
+        }
+
+        // Validate Client-side
+        let hasError = false;
+        if (!name) {
+          showFieldError("recipientName", "Vui lòng nhập họ và tên người nhận!");
+          hasError = true;
+        }
+
+        const phoneDigits = phone.replace(/\D/g, "");
+        if (!phone || phoneDigits.length < 9) {
+          showFieldError("recipientPhone", "Số điện thoại không hợp lệ (tối thiểu 9 số)!");
+          hasError = true;
+        }
+
+        if (!city) {
+          showFieldError("provinceCity", "Vui lòng nhập Tỉnh / Thành phố!");
+          hasError = true;
+        }
+
+        if (!district) {
+          showFieldError("district", "Vui lòng nhập Quận / Huyện!");
+          hasError = true;
+        }
+
+        if (!street) {
+          showFieldError("streetAddress", "Vui lòng nhập số nhà, tên đường chi tiết!");
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        const uid = currentUser && currentUser.id ? currentUser.id : 1;
+        const fullAddr = [street, ward, district, city].filter(Boolean).join(", ");
+
+        const payload = {
+          user_id: uid,
+          recipient_name: name,
+          phone: phone,
+          province_city: city,
+          district: district,
+          ward: ward,
+          street_address: street,
+          full_address: fullAddr,
+          is_default: isDefault,
+          tag: tag,
+        };
+
+        const token = typeof Auth !== "undefined" && Auth.getToken ? Auth.getToken() : null;
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        // TH1: Cập nhật địa chỉ (PUT)
+        if (editId) {
+          const addrId = parseInt(editId);
+          if (isApiOnline) {
+            try {
+              const res = await fetch(`${API_BASE_URL}/api/user/addresses/${addrId}`, {
+                method: "PUT",
+                headers: headers,
+                body: JSON.stringify(payload),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                showToast("✓ " + (data.message || "Cập nhật địa chỉ thành công!"));
+                closeAddressModal();
+                await loadAddresses();
+                return;
+              }
+            } catch (err) {
+              console.warn("Lỗi gọi PUT API địa chỉ:", err);
+            }
+          }
+
+          // Fallback LocalStorage
+          const idx = addresses.findIndex((a) => a.id === addrId);
+          if (idx !== -1) {
+            if (isDefault) {
+              addresses.forEach((a) => (a.is_default = false));
+            }
+            addresses[idx] = { ...addresses[idx], ...payload, id: addrId, is_default: isDefault };
+            saveAndRefresh("Cập nhật địa chỉ thành công!");
+          }
+        }
+        // TH2: Thêm mới địa chỉ (POST)
+        else {
+          if (isApiOnline) {
+            try {
+              const res = await fetch(`${API_BASE_URL}/api/user/addresses`, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(payload),
+              });
+              if (res.ok || res.status === 201) {
+                const data = await res.json();
+                showToast("✓ " + (data.message || "Thêm địa chỉ mới thành công!"));
+                closeAddressModal();
+                await loadAddresses();
+                return;
+              }
+            } catch (err) {
+              console.warn("Lỗi gọi POST API địa chỉ:", err);
+            }
+          }
+
+          // Fallback LocalStorage
+          if (isDefault || addresses.length === 0) {
+            addresses.forEach((a) => (a.is_default = false));
+          }
+          const newId = addresses.length > 0 ? Math.max(...addresses.map((a) => a.id)) + 1 : 1;
+          addresses.push({
+            ...payload,
+            id: newId,
+            is_default: isDefault || addresses.length === 0,
+          });
+          saveAndRefresh("Thêm địa chỉ mới thành công!");
+        }
+
+        closeAddressModal();
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 6. THIẾT LẬP ĐỊA CHỈ MẶC ĐỊNH
+      // ──────────────────────────────────────────────────────────────────────
+      async function handleSetDefaultAddress(id) {
+        const uid = currentUser && currentUser.id ? currentUser.id : 1;
+        const token = typeof Auth !== "undefined" && Auth.getToken ? Auth.getToken() : null;
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        if (isApiOnline) {
+          try {
+            const res = await fetch(`${API_BASE_URL}/api/user/addresses/${id}/default`, {
+              method: "PATCH",
+              headers: headers,
+              body: JSON.stringify({ user_id: uid }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              showToast("⭐ " + (data.message || "Đã đặt làm địa chỉ mặc định!"));
+              await loadAddresses();
+              return;
+            }
+          } catch (e) {
+            console.warn("Lỗi gọi PATCH default API:", e);
+          }
+        }
+
+        // Fallback LocalStorage
+        addresses.forEach((a) => {
+          a.is_default = a.id === id;
+        });
+        saveAndRefresh("Đã thiết lập làm địa chỉ mặc định!");
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 7. XÓA ĐỊA CHỈ
+      // ──────────────────────────────────────────────────────────────────────
+      function openDeleteConfirmModal(id) {
+        pendingDeleteId = id;
+        const item = addresses.find((a) => a.id === id);
+        const desc = document.getElementById("deleteConfirmDesc");
+        if (item) {
+          desc.innerHTML = `Bạn có chắc muốn xóa địa chỉ của <strong>"${escapeHtml(item.recipient_name)}"</strong> (${escapeHtml(item.street_address)}) không?`;
+        }
+        document.getElementById("deleteConfirmModal").classList.add("show");
+      }
+
+      function closeDeleteConfirmModal() {
+        pendingDeleteId = null;
+        document.getElementById("deleteConfirmModal").classList.remove("show");
+      }
+
+      async function executeDeleteAddress() {
+        if (!pendingDeleteId) return;
+        const idToDelete = pendingDeleteId;
+        const uid = currentUser && currentUser.id ? currentUser.id : 1;
+        const token = typeof Auth !== "undefined" && Auth.getToken ? Auth.getToken() : null;
+
+        if (isApiOnline) {
+          try {
+            const headers = {};
+            if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const res = await fetch(`${API_BASE_URL}/api/user/addresses/${idToDelete}?user_id=${uid}`, {
+              method: "DELETE",
+              headers: headers,
+            });
+            if (res.ok) {
+              closeDeleteConfirmModal();
+              showToast("✓ Đã xóa địa chỉ thành công!");
+              await loadAddresses();
+              return;
+            }
+          } catch (e) {
+            console.warn("Lỗi gọi DELETE API:", e);
+          }
+        }
+
+        // Fallback LocalStorage
+        const target = addresses.find((a) => a.id === idToDelete);
+        const wasDefault = target ? target.is_default : false;
+        addresses = addresses.filter((a) => a.id !== idToDelete);
+
+        // Nếu xóa địa chỉ mặc định và còn địa chỉ khác -> chuyển địa chỉ đầu tiên thành mặc định
+        if (wasDefault && addresses.length > 0) {
+          addresses[0].is_default = true;
+        }
+
+        closeDeleteConfirmModal();
+        saveAndRefresh("Đã xóa địa chỉ thành công!");
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // 8. TIỆN ÍCH HỖ TRỢ
+      // ──────────────────────────────────────────────────────────────────────
+      function saveAndRefresh(toastMsg) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(addresses));
+        renderAddressList();
+        if (toastMsg) showToast(toastMsg);
+      }
+
+      function setLoading(isLoading) {
+        document.getElementById("loadingState").style.display = isLoading ? "flex" : "none";
+        if (isLoading) {
+          document.getElementById("addressListContainer").style.display = "none";
+          document.getElementById("emptyState").style.display = "none";
+        }
+      }
+
+      function showFieldError(fieldId, msg) {
+        const input = document.getElementById(fieldId);
+        const err = document.getElementById("error_" + fieldId);
+        if (input) input.classList.add("is-invalid");
+        if (err) {
+          err.textContent = msg;
+          err.classList.add("show");
+        }
+      }
+
+      function clearFormErrors() {
+        document.querySelectorAll(".form-input, .form-select").forEach((el) => {
+          el.classList.remove("is-invalid");
+        });
+        document.querySelectorAll(".form-error").forEach((el) => {
+          el.classList.remove("show");
+          el.textContent = "";
+        });
+      }
+
+      function showToast(msg) {
+        const box = document.getElementById("toastBox");
+        const msgEl = document.getElementById("toastMsg");
+        msgEl.textContent = msg;
+        box.style.display = "flex";
+        clearTimeout(box._timer);
+        box._timer = setTimeout(() => {
+          box.style.display = "none";
+        }, 3200);
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+    </script>
+  </body>
+</html>
