@@ -1633,7 +1633,7 @@ function openProductDetail(productId) {
                   <div class="shipping-row">
                     <span>📍 Địa chỉ nhận hàng:</span>
                     <strong>Tòa nhà Discovery Complex, Cầu Giấy, Hà Nội</strong>
-                    <a href="#" onclick="showToast('Vị trí', 'Cập nhật địa chỉ nhận hàng'); return false;" style="color: var(--primary); font-weight: 600; margin-left: auto;">Thay đổi</a>
+                    <a href="../user/addresses.html" style="color: var(--primary); font-weight: 600; margin-left: auto;">Thay đổi</a>
                   </div>
                   <div class="shipping-row">
                     <span>🚚 Vận chuyển:</span>
