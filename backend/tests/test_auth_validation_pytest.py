@@ -227,6 +227,11 @@ class TestLoginApi:
         res = client.post("/api/auth/login", json={"username": account["phone"], "password": account["password"]})
         assert res.status_code == 200, res.text
 
+    def test_login_by_email_case_insensitive(self, client, account):
+        res = client.post("/api/auth/login", json={"username": account["email"].upper(), "password": account["password"]})
+        assert res.status_code == 200, res.text
+        assert res.json()["user"]["username"] == account["username"]
+
     def test_login_token_works_on_protected_endpoint(self, client, account):
         token = client.post(
             "/api/auth/login", json={"username": account["username"], "password": account["password"]}

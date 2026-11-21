@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" class="h-full bg-[#F6F7F9]">
+<html lang="vi" class="h-full bg-[#f4f5ee]" data-theme-role="admin">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,36 +17,36 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#F0F7FF',
-                            100: '#E0EDFF',
-                            200: '#CCE0FF',
-                            500: '#0D6EFD',
-                            600: '#0B5ED7',
-                            700: '#1C2EB0',
+                            50: '#edf3e7',
+                            100: '#dce8d2',
+                            200: '#c2d6b2',
+                            500: '#39522a',
+                            600: '#2c4120',
+                            700: '#203117',
                         },
                         neutral: {
-                            50: '#F6F7F9',
-                            100: '#EDF0F2',
-                            200: '#DCE0E5',
-                            300: '#CBD3DB',
-                            500: '#929EAA',
-                            600: '#6F7C8E',
-                            700: '#525E6F',
-                            800: '#323C49',
-                            900: '#14181F',
+                            50: '#f4f5ee',
+                            100: '#eceee3',
+                            200: '#dce0d2',
+                            300: '#c7cebc',
+                            500: '#6d7967',
+                            600: '#55614f',
+                            700: '#3d4938',
+                            800: '#293325',
+                            900: '#1a261a',
                         },
                         success: {
-                            50: '#E8F8EE',
-                            500: '#00B517',
+                            50: '#eaf3e5',
+                            500: '#39522a',
                         },
                         warning: {
-                            50: '#FFF0DE',
-                            500: '#FF9017',
+                            50: '#fbf4dc',
+                            500: '#d49b1a',
                         },
                         danger: {
-                            50: '#FFE5E5',
-                            500: '#FA3434',
-                            600: '#D92D20',
+                            50: '#fceceb',
+                            500: '#c92a22',
+                            600: '#a61e18',
                         }
                     },
                     fontFamily: {
@@ -59,8 +59,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
-</head>
-<body class="h-full flex overflow-hidden text-neutral-900 text-sm antialiased">
+    <script src="../shared/js/koi-banner-ambient.js" defer></script>
+  </head>
+<body data-theme-role="admin" class="h-full flex overflow-hidden text-neutral-900 text-sm antialiased">
 
     <!-- SIDEBAR: QUẢN TRỊ SÀN TRUNG GIAN -->
     <aside class="w-[280px] bg-white border-r border-neutral-200 flex flex-col flex-shrink-0 z-20 select-none">

@@ -190,7 +190,7 @@ const Auth = {
             container.innerHTML = `
                 <span>Hotline: <strong style="color: #fff;">1900 8888</strong></span>
                 <span style="opacity: 0.3;">|</span>
-                <a href="${authPath}" style="color: #fb923c; font-weight: 700; text-decoration: none;">Đăng Nhập / Đăng Ký</a>
+                <a href="${authPath}" style="color: #e8c254; font-weight: 700; text-decoration: none;">Đăng Nhập / Đăng Ký</a>
             `;
             this.updateAccountButtonAction('guest', authPath);
             return;
@@ -202,30 +202,30 @@ const Auth = {
         const displayName = user.full_name || user.username || 'Thành viên';
 
         if (role === 'admin') {
-            roleBadge = `<span style="background: #ef4444; color: #fff; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-left: 4px;">👑 Admin</span>`;
+            roleBadge = `<span style="background: #c92a22; color: #fff; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-left: 4px;">👑 Admin</span>`;
             roleLinks = `
-                <a href="${adminPath}" style="color: #fbbf24; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Vào Bảng Điều Khiển Quản Trị Hệ Thống">
+                <a href="${adminPath}" style="color: #e8c254; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Vào Bảng Điều Khiển Quản Trị Hệ Thống">
                     <span>👑 Trang Quản Trị</span>
                 </a>
                 <span style="opacity: 0.3;">|</span>
-                <a href="${sellerPath}" style="text-decoration: none; color: #cbd5e1;">Kênh Shop</a>
+                <a href="${sellerPath}" style="text-decoration: none; color: #cfd8c4;">Kênh Shop</a>
             `;
         } else if (role === 'seller') {
             const shopName = user.shop_name || 'Kênh Shop';
-            roleBadge = `<span style="background: #f97316; color: #fff; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-left: 4px;">🏪 Seller</span>`;
+            roleBadge = `<span style="background: #d49b1a; color: #fff; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-left: 4px;">🏪 Seller</span>`;
             roleLinks = `
-                <a href="${sellerPath}" style="color: #fb923c; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Vào Kênh Quản Lý Cửa Hàng">
+                <a href="${sellerPath}" style="color: #e8c254; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Vào Kênh Quản Lý Cửa Hàng">
                     <span>🏪 Kênh Người Bán</span>
                 </a>
             `;
         } else {
             // Customer / Client
             const rank = user.rank || 'Đồng';
-            roleBadge = `<span style="background: #3b82f6; color: #fff; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 700; margin-left: 4px;">${rank}</span>`;
+            roleBadge = `<span style="background: #39522a; color: #fff; padding: 2px 7px; border-radius: 9999px; font-size: 10px; font-weight: 700; margin-left: 4px;">${rank}</span>`;
             roleLinks = `
-                <a href="${userPath}#my-orders" onclick="if(window.openOrdersModal) openOrdersModal();" style="text-decoration: none; color: #cbd5e1;">Đơn Mua</a>
+                <a href="${userPath}#my-orders" onclick="if(window.openOrdersModal) openOrdersModal();" style="text-decoration: none; color: #cfd8c4;">Đơn Mua</a>
                 <span style="opacity: 0.3;">|</span>
-                <a href="${sellerPath}" style="text-decoration: none; color: #cbd5e1;" title="Đăng ký mở gian hàng trên JML Store">Mở Shop</a>
+                <a href="${sellerPath}" style="text-decoration: none; color: #cfd8c4;" title="Đăng ký mở gian hàng trên JML Store">Mở Shop</a>
             `;
         }
 
@@ -289,31 +289,31 @@ const Auth = {
         `;
 
         let roleLabel = 'Khách Mua Hàng (Buyer)';
-        let roleBadgeColor = '#3b82f6';
+        let roleBadgeColor = '#39522a';
         let specialLinks = '';
 
         if (role === 'admin') {
             roleLabel = 'Quản Trị Viên (Super Admin)';
-            roleBadgeColor = '#ef4444';
+            roleBadgeColor = '#c92a22';
             specialLinks = `
-                <a href="${adminPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #b45309; background: #fef3c7; text-decoration: none; font-weight: 700; font-size: 12px; margin-bottom: 6px;">
+                <a href="${adminPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #2b401f; background: #edf3e7; text-decoration: none; font-weight: 700; font-size: 12px; margin-bottom: 6px;">
                     👑 Vào Bảng Điều Khiển Admin
                 </a>
-                <a href="${sellerPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #475569; text-decoration: none; font-size: 12px;">
+                <a href="${sellerPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #3d4938; text-decoration: none; font-size: 12px;">
                     🏪 Kênh Người Bán (Shop)
                 </a>
             `;
         } else if (role === 'seller') {
             roleLabel = 'Chủ Cửa Hàng (Seller)';
-            roleBadgeColor = '#f97316';
+            roleBadgeColor = '#d49b1a';
             specialLinks = `
-                <a href="${sellerPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #c2410c; background: #ffedd5; text-decoration: none; font-weight: 700; font-size: 12px; margin-bottom: 6px;">
+                <a href="${sellerPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #a61e18; background: #fdf0ee; text-decoration: none; font-weight: 700; font-size: 12px; margin-bottom: 6px;">
                     🏪 Vào Kênh Người Bán (Dashboard)
                 </a>
             `;
         } else {
             specialLinks = `
-                <a href="#orders" onclick="if(window.openOrdersModal) openOrdersModal();" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #334155; text-decoration: none; font-size: 12px;">
+                <a href="#orders" onclick="if(window.openOrdersModal) openOrdersModal();" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #3d4938; text-decoration: none; font-size: 12px;">
                     📦 Đơn Hàng Của Tôi
                 </a>
                 <a href="${sellerPath}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #334155; text-decoration: none; font-size: 12px;">

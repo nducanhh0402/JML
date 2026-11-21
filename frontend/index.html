@@ -11,16 +11,19 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./shared/css/koi-lotus-theme.css" />
     <style>
       :root {
-        --primary: #ea580c;
-        --primary-hover: #c2410c;
-        --primary-soft: #fff7ed;
-        --bg: #f8fafc;
+        --primary: #c92a22;
+        --primary-hover: #a61e18;
+        --primary-soft: #fdf0ee;
+        --lotus: #39522a;
+        --lotus-soft: #edf3e7;
+        --bg: #f5f5ee;
         --surface: #ffffff;
-        --text: #0f172a;
-        --muted: #475569;
-        --border: #e2e8f0;
+        --text: #1a261a;
+        --muted: #586552;
+        --border: #dce0d2;
       }
 
       * {
@@ -31,7 +34,10 @@
 
       body {
         font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-        background: radial-gradient(circle at top right, #ffedd5 0%, var(--bg) 42%);
+        background:
+          radial-gradient(circle at top right, rgba(200, 75, 122, 0.10) 0%, transparent 38%),
+          radial-gradient(circle at top left, rgba(57, 82, 42, 0.14) 0%, transparent 45%),
+          var(--bg);
         color: var(--text);
         min-height: 100vh;
         line-height: 1.5;
@@ -61,13 +67,13 @@
       }
 
       .brand-badge {
-        background: linear-gradient(135deg, #ea580c, #f97316);
+        background: linear-gradient(135deg, #d42b24 0%, #a61e18 65%, #242919 100%);
         color: #fff;
         font-weight: 800;
         font-size: 18px;
         padding: 8px 14px;
         border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(234, 88, 12, 0.25);
+        box-shadow: 0 8px 20px rgba(201, 42, 34, 0.28);
       }
 
       .brand-title {
@@ -82,20 +88,21 @@
         gap: 8px;
         padding: 6px 14px;
         border-radius: 999px;
-        background: var(--primary-soft);
-        border: 1px solid #fed7aa;
-        color: #9a3412;
+        background: var(--lotus-soft);
+        border: 1px solid #cddbc0;
+        color: #2b401f;
         font-size: 13px;
         font-weight: 700;
       }
 
       .hero {
-        background: var(--surface);
+        background: linear-gradient(135deg, #ffffff 0%, #fafbf5 100%);
         border: 1px solid var(--border);
+        border-top: 4px solid var(--lotus);
         border-radius: 20px;
         padding: 32px;
         margin-bottom: 28px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        box-shadow: 0 12px 30px rgba(26, 38, 26, 0.06);
       }
 
       .hero h1 {
@@ -135,23 +142,23 @@
       }
 
       .btn-primary {
-        background: var(--primary);
+        background: linear-gradient(135deg, #d42b24, #a61e18);
         color: #fff;
-        box-shadow: 0 8px 18px rgba(234, 88, 12, 0.25);
+        box-shadow: 0 8px 18px rgba(201, 42, 34, 0.26);
       }
 
       .btn-primary:hover {
-        background: var(--primary-hover);
+        background: linear-gradient(135deg, #be231d, #8d1712);
       }
 
       .btn-secondary {
-        background: #f1f5f9;
-        color: var(--text);
-        border: 1px solid var(--border);
+        background: #edf3e7;
+        color: #223519;
+        border: 1px solid #cddbc0;
       }
 
       .btn-secondary:hover {
-        background: #e2e8f0;
+        background: #e1ebd7;
       }
 
       .grid {
@@ -169,7 +176,7 @@
         flex-direction: column;
         justify-content: space-between;
         gap: 16px;
-        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        box-shadow: 0 4px 14px rgba(26, 38, 26, 0.05);
       }
 
       .card-icon {
@@ -179,7 +186,7 @@
         display: grid;
         place-items: center;
         font-size: 22px;
-        background: var(--primary-soft);
+        background: var(--lotus-soft);
         margin-bottom: 12px;
       }
 
@@ -211,18 +218,18 @@
         text-decoration: none;
         color: var(--primary);
         background: var(--primary-soft);
-        border: 1px solid #fed7aa;
+        border: 1px solid #efc4be;
       }
 
       .card-link:hover {
-        background: #ffedd5;
+        background: #fae0dc;
       }
 
       .note {
         margin-top: 28px;
         padding: 16px 20px;
         border-radius: 14px;
-        background: #f1f5f9;
+        background: #eceee3;
         border: 1px solid var(--border);
         font-size: 13px;
         color: var(--muted);
@@ -232,6 +239,7 @@
         color: var(--text);
       }
     </style>
+      <script src="./shared/js/koi-banner-ambient.js" defer></script>
   </head>
   <body>
     <main class="container">

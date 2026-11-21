@@ -1,0 +1,314 @@
+/* ==============================================================================
+   JML STORE — KOI & LOTUS POND MASTER THEME
+   Chủ đề đồng bộ toàn dự án từ trang Đăng nhập 3D Cá Koi & Hồ Hoa Sen:
+   - Đỏ son Cá Koi (Koi Crimson):      #c92a22 / #a61e18
+   - Vàng kim Hoàng gia (24K Koi):     #d49b1a / #e5be53
+   - Xanh lá sen phủ sáp (Lotus Leaf): #39522a / #223519
+   - Hồng cánh sen (Lotus Rose):       #c84b7a
+   - Đáy hồ rêu bùn trầm (Pond Olive): #4e4b25 / #242b19
+   - Nền trắng sứ & kem rêu nhạt:      #ffffff / #f5f5ee
+   ============================================================================== */
+
+:root {
+  /* Core Koi & Lotus Palette */
+  --koi-red: #c92a22;
+  --koi-red-hover: #a61e18;
+  --koi-red-soft: #fdf0ee;
+  --koi-red-border: #efc4be;
+
+  --koi-gold: #d49b1a;
+  --koi-gold-light: #fbf4dc;
+  --koi-gold-bright: #e8c254;
+
+  --lotus-green: #39522a;
+  --lotus-green-hover: #2b401f;
+  --lotus-green-dark: #213018;
+  --lotus-green-soft: #edf3e7;
+  --lotus-green-border: #cddbc0;
+
+  --lotus-pink: #c84b7a;
+  --lotus-pink-soft: #faeef3;
+
+  --pond-olive: #4e4b25;
+  --pond-deep: #222a19;
+  --pond-ink: #1a261a;
+  --pond-muted: #586552;
+
+  /* Unified semantic tokens (override storefront & shared pages) */
+  --primary: #c92a22;
+  --primary-hover: #a61e18;
+  --primary-light: #fdf0ee;
+  --primary-soft: #fdf0ee;
+  --secondary: #222a19;
+  --secondary-light: #47543e;
+  --accent: #d49b1a;
+  --orange: #c92a22;
+  --orange-light: #fdf0ee;
+
+  --success: #39522a;
+  --success-light: #eaf3e5;
+  --warning: #c88a12;
+  --warning-light: #fbf4dc;
+  --danger: #c92a22;
+  --danger-light: #fceceb;
+  --info: #3a6868;
+  --info-light: #e6f2f1;
+
+  --bg: #f5f5ee;
+  --background: #f5f5ee;
+  --surface: #ffffff;
+  --surface-dim: #eceee3;
+  --border: #dce0d2;
+  --border-focus: #c92a22;
+  --text: #1a261a;
+  --text-main: #1a261a;
+  --muted: #586552;
+  --text-muted: #586552;
+
+  --neutral-0: #ffffff;
+  --neutral-50: #f5f5ee;
+  --neutral-100: #eceee3;
+  --neutral-200: #dce0d2;
+  --neutral-300: #c7cebc;
+  --neutral-500: #6d7967;
+  --neutral-600: #55614f;
+  --neutral-700: #3d4938;
+  --neutral-800: #293325;
+  --neutral-900: #1a261a;
+}
+
+/* Base warm porcelain-sage backdrop across pages */
+html, body {
+  background-color: var(--background);
+  color: var(--text-main);
+}
+
+/* Scrollbar đồng bộ sắc rêu lá sen */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #eceee3;
+}
+::-webkit-scrollbar-thumb {
+  background: #b7c2a8;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8d9c7a;
+}
+
+/* ==============================================================================
+   STOREFRONT (BUYER / USER / CART / CHECKOUT / ORDERS) COHESIVE STYLING
+   ============================================================================== */
+.top-bar,
+.topbar {
+  background: linear-gradient(90deg, #1d2516 0%, #2c351e 50%, #212a18 100%) !important;
+  color: #cfd8c4 !important;
+  border-bottom: 1px solid rgba(232, 194, 84, 0.24) !important;
+}
+.top-bar a[style*="fb923c"],
+.top-bar a[style*="f97316"] {
+  color: var(--koi-gold-bright) !important;
+}
+.top-bar a:hover,
+.topbar a:hover {
+  color: #ffffff !important;
+}
+
+.header-main {
+  background: rgba(255, 255, 253, 0.96) !important;
+  border-bottom: 1px solid var(--border) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Nút, huy hiệu & logo thương hiệu JML Koi-Lotus */
+.logo-badge,
+.brand-badge,
+.brand-icon {
+  background: linear-gradient(135deg, #d42b24 0%, #a61e18 65%, #242919 100%) !important;
+  box-shadow: 0 6px 16px rgba(201, 42, 34, 0.26) !important;
+}
+
+.btn-primary,
+.search-btn,
+.btn-checkout,
+.btn-submit,
+.btn-place-order {
+  background: linear-gradient(135deg, #d42b24, #b01f19) !important;
+  border-color: #b01f19 !important;
+  color: #ffffff !important;
+}
+.btn-primary:hover,
+.search-btn:hover,
+.btn-checkout:hover,
+.btn-submit:hover,
+.btn-place-order:hover {
+  background: linear-gradient(135deg, #be231d, #921813) !important;
+}
+
+/* Banner & Hero đậm chất Hồ Sen & Cá Koi Hoàng Gia */
+.hero-banner,
+.flash-sale-header,
+.promo-banner {
+  border-color: var(--border) !important;
+}
+
+.category-pill.active,
+.filter-chip.active,
+.tab-btn.active {
+  background-color: var(--koi-red) !important;
+  color: #ffffff !important;
+  border-color: var(--koi-red) !important;
+}
+
+.card,
+.product-card,
+.order-card,
+.checkout-card,
+.summary-card,
+.cart-item-card,
+.filter-sidebar {
+  border-color: var(--border);
+}
+
+.product-card:hover {
+  border-color: #c8d5ba !important;
+  box-shadow: 0 12px 26px rgba(34, 42, 25, 0.09) !important;
+}
+
+/* Focus ring thống nhất */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--lotus-green) !important;
+  box-shadow: 0 0 0 3px rgba(57, 82, 42, 0.14) !important;
+}
+
+/* ==============================================================================
+   SELLER CENTER & ADMIN PORTAL (TAILWIND PAGES) HARMONIZATION
+   ============================================================================== */
+body[data-theme-role="seller"],
+body[data-theme-role="admin"],
+html[data-theme-role="admin"] {
+  background-color: #f4f5ee !important;
+  color: #1a261a !important;
+}
+
+/* Remap legacy Tailwind blue/orange/slate surfaces on Admin & Seller */
+body[data-theme-role="seller"] .bg-slate-50,
+body[data-theme-role="admin"] .bg-\[\#F6F7F9\],
+body[data-theme-role="admin"] .bg-neutral-50,
+body[data-theme-role="admin"] .bg-gray-100 {
+  background-color: #f4f5ee !important;
+}
+
+body[data-theme-role="seller"] aside,
+body[data-theme-role="admin"] aside {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9f3 100%) !important;
+  border-right-color: #dce0d2 !important;
+}
+
+body[data-theme-role="seller"] header,
+body[data-theme-role="admin"] header {
+  background: rgba(255, 255, 253, 0.95) !important;
+  border-bottom-color: #dce0d2 !important;
+}
+
+/* Seller: Đỏ son Cá Koi & Vàng Kim 24K thay cam gắt cũ */
+body[data-theme-role="seller"] .nav-item.active {
+  background: linear-gradient(90deg, #fdf0ee 0%, #fbf4dc 100%) !important;
+  color: #b4221b !important;
+  border-left: 3px solid #c92a22;
+}
+body[data-theme-role="seller"] .text-orange-600,
+body[data-theme-role="seller"] .text-orange-500 {
+  color: #c92a22 !important;
+}
+body[data-theme-role="seller"] .bg-orange-600,
+body[data-theme-role="seller"] .bg-orange-500 {
+  background-color: #c92a22 !important;
+}
+body[data-theme-role="seller"] .hover\:bg-orange-700:hover,
+body[data-theme-role="seller"] .hover\:bg-orange-600:hover {
+  background-color: #a61e18 !important;
+}
+body[data-theme-role="seller"] .bg-orange-50,
+body[data-theme-role="seller"] .bg-orange-100 {
+  background-color: #fdf0ee !important;
+}
+body[data-theme-role="seller"] .border-orange-200,
+body[data-theme-role="seller"] .border-orange-300,
+body[data-theme-role="seller"] .border-orange-500 {
+  border-color: #e6b8b0 !important;
+}
+
+/* Admin: Xanh lá sen phủ sáp (#39522a) làm chủ đạo quản trị + điểm nhấn Đỏ Cá Koi & Vàng Kim */
+body[data-theme-role="admin"] .nav-item.active {
+  background: linear-gradient(90deg, #edf3e7 0%, #f5f7ef 100%) !important;
+  color: #2c431f !important;
+  border-left: 3px solid #39522a;
+}
+body[data-theme-role="admin"] .nav-item.active svg {
+  color: #39522a !important;
+}
+body[data-theme-role="admin"] .text-blue-600,
+body[data-theme-role="admin"] .text-blue-500,
+body[data-theme-role="seller"] .text-blue-600,
+body[data-theme-role="seller"] .text-blue-500 {
+  color: #39522a !important;
+}
+body[data-theme-role="admin"] .bg-blue-600,
+body[data-theme-role="admin"] .bg-blue-500,
+body[data-theme-role="seller"] .bg-blue-600,
+body[data-theme-role="seller"] .bg-blue-500 {
+  background-color: #39522a !important;
+}
+body[data-theme-role="admin"] .hover\:bg-blue-700:hover,
+body[data-theme-role="seller"] .hover\:bg-blue-700:hover {
+  background-color: #2b401f !important;
+}
+body[data-theme-role="admin"] .bg-blue-50,
+body[data-theme-role="admin"] .bg-blue-100,
+body[data-theme-role="seller"] .bg-blue-50,
+body[data-theme-role="seller"] .bg-blue-100 {
+  background-color: #edf3e7 !important;
+}
+body[data-theme-role="admin"] .text-\[\#ff4d8d\] {
+  color: #c92a22 !important;
+}
+
+/* Đồng bộ màu các banner gradient trên Admin & Seller theo chủ đề Cá Koi & Hồ Sen */
+body[data-theme-role="admin"] [class*="from-blue-700"],
+body[data-theme-role="admin"] [class*="bg-gradient-to-r"] {
+  background: linear-gradient(135deg, #1f3318 0%, #39522a 58%, #4e4b25 100%) !important;
+}
+body[data-theme-role="seller"] [class*="from-amber-500"],
+body[data-theme-role="seller"] [class*="from-orange-500"] {
+  background: linear-gradient(135deg, #213018 0%, #9e1e18 52%, #c92a22 82%, #c78f16 100%) !important;
+}
+
+/* Đảm bảo chữ và nút trên mọi banner (Hero Slider, Side Banner...) LUÔN nằm TRÊN đàn cá Koi, không bao giờ bị cá che */
+.koi-banner-canvas {
+  pointer-events: none !important;
+}
+.main-slider .slide .koi-banner-canvas {
+  z-index: 2 !important;
+}
+.main-slider .slide .slide-content {
+  position: relative !important;
+  z-index: 4 !important;
+}
+.main-slider .slider-nav,
+.main-slider .slider-arrows {
+  z-index: 6 !important;
+}
+.side-banner > *:not(.koi-banner-canvas),
+.flash-sale-header > *:not(.koi-banner-canvas),
+.hero > *:not(.koi-banner-canvas) {
+  position: relative;
+  z-index: 3;
+}
+
+

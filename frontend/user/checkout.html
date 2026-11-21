@@ -15,29 +15,30 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css" />
     <style>
       /* ==========================================================================
-         1. RESET & CSS VARIABLES (ĐỒNG BỘ 100% VỚI INDEX.HTML)
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ CHỦ ĐỀ CÁ KOI & HỒ HOA SEN)
          ========================================================================== */
       :root {
-        --primary: #ea580c;
-        --primary-hover: #c2410c;
-        --primary-light: #ffedd5;
-        --secondary: #111827;
-        --secondary-light: #4b5563;
-        --accent: #f97316;
-        --success: #10b981;
-        --success-light: #d1fae5;
-        --background: #f8f9fa;
+        --primary: #c92a22;
+        --primary-hover: #a61e18;
+        --primary-light: #fdf0ee;
+        --secondary: #222a19;
+        --secondary-light: #47543e;
+        --accent: #d49b1a;
+        --success: #39522a;
+        --success-light: #eaf3e5;
+        --background: #f5f5ee;
         --surface: #ffffff;
-        --surface-dim: #f3f4f6;
-        --border: #e5e7eb;
-        --border-focus: #fdba74;
-        --text-main: #1f2937;
-        --text-muted: #6b7280;
-        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
-        --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.16);
+        --surface-dim: #eceee3;
+        --border: #dce0d2;
+        --border-focus: #c92a22;
+        --text-main: #1a261a;
+        --text-muted: #586552;
+        --shadow-sm: 0 1px 3px rgba(26, 38, 26, 0.06);
+        --shadow-md: 0 4px 14px rgba(26, 38, 26, 0.08);
+        --shadow-lg: 0 16px 36px rgba(26, 38, 26, 0.15);
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 20px;
@@ -254,7 +255,7 @@
       }
       .address-preset.active {
         border-color: var(--primary);
-        background: #fff7ed;
+        background: #fdf4f1;
       }
       .preset-badge {
         font-size: 11px;
@@ -291,7 +292,7 @@
         gap: 4px;
       }
       .address-preset.btn-new-address:hover {
-        background: #fff7ed;
+        background: #fdf4f1;
         border-color: var(--primary);
       }
 
@@ -391,7 +392,7 @@
       .radio-card:hover { border-color: var(--border-focus); background: #fffaf5; }
       .radio-card.selected {
         border-color: var(--primary);
-        background: #fff7ed;
+        background: #fdf4f1;
       }
       .radio-left {
         display: flex;
@@ -634,8 +635,8 @@
       .calc-line.discount strong { color: var(--success); }
 
       .total-box {
-        background: #fff7ed;
-        border: 1px solid #ffedd5;
+        background: #fdf4f1;
+        border: 1px solid #f6e2dc;
         border-radius: var(--radius-sm);
         padding: 14px 16px;
         display: flex;
@@ -866,6 +867,7 @@
         .header-divider, .page-title-badge { display: none; }
       }
     </style>
+      <script src="../shared/js/koi-banner-ambient.js" defer></script>
   </head>
   <body>
     <!-- Top Bar -->

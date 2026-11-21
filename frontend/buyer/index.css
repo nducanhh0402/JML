@@ -1,5 +1,7 @@
+@import url("../shared/css/koi-lotus-theme.css");
+
 /* ==========================================================================
-       0. EMBEDDED GLOBAL STYLES (100% SELF-CONTAINED IN INDEX.HTML)
+       0. EMBEDDED GLOBAL STYLES — KOI & LOTUS POND THEME
        ========================================================================== */
       html {
         scroll-behavior: smooth;
@@ -14,26 +16,26 @@
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
       /* ==========================================================================
-       1. CSS RESET & GLOBAL VARIABLES
+       1. CSS RESET & GLOBAL VARIABLES (ĐỒNG BỘ CHỦ ĐỀ CÁ KOI & HỒ HOA SEN)
        ========================================================================== */
       :root {
-        --primary: #ea580c;
-        --primary-hover: #c2410c;
-        --primary-light: #ffedd5;
-        --secondary: #111827;
-        --secondary-light: #4b5563;
-        --accent: #f97316;
-        --success: #10b981;
-        --background: #f8f9fa;
+        --primary: #c92a22;
+        --primary-hover: #a61e18;
+        --primary-light: #fdf0ee;
+        --secondary: #222a19;
+        --secondary-light: #47543e;
+        --accent: #d49b1a;
+        --success: #39522a;
+        --background: #f5f5ee;
         --surface: #ffffff;
-        --surface-dim: #f3f4f6;
-        --border: #e5e7eb;
-        --border-focus: #fdba74;
-        --text-main: #1f2937;
-        --text-muted: #6b7280;
-        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
-        --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+        --surface-dim: #eceee3;
+        --border: #dce0d2;
+        --border-focus: #c92a22;
+        --text-main: #1a261a;
+        --text-muted: #586552;
+        --shadow-sm: 0 1px 3px rgba(26, 38, 26, 0.06);
+        --shadow-md: 0 4px 14px rgba(26, 38, 26, 0.08);
+        --shadow-lg: 0 12px 28px rgba(26, 38, 26, 0.12);
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 20px;
@@ -241,7 +243,7 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #ea580c, #c2410c);
+        background: linear-gradient(135deg, #c92a22, #a61e18);
         color: #ffffff;
         display: flex;
         align-items: center;
@@ -397,8 +399,8 @@
         inset: 0;
         background: linear-gradient(
           90deg,
-          rgba(15, 23, 42, 0.92) 0%,
-          rgba(15, 23, 42, 0.35) 100%
+          rgba(26, 36, 20, 0.90) 0%,
+          rgba(34, 42, 25, 0.38) 100%
         );
         z-index: 1;
       }
@@ -423,7 +425,7 @@
         text-transform: uppercase;
         margin-bottom: 14px;
         letter-spacing: 1px;
-        color: #fdba74;
+        color: #e5c878;
       }
       .slide-title {
         font-size: 34px;
@@ -433,7 +435,7 @@
       }
       .slide-desc {
         font-size: 14px;
-        color: #e2e8f0;
+        color: #edf1e6;
         margin-bottom: 22px;
         line-height: 1.5;
       }
@@ -447,12 +449,12 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 6px 18px rgba(234, 88, 12, 0.35);
+        box-shadow: 0 6px 18px rgba(201, 42, 34, 0.36);
         transition: var(--transition);
       }
       .btn-hero:hover {
         transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 10px 24px rgba(234, 88, 12, 0.45);
+        box-shadow: 0 10px 24px rgba(201, 42, 34, 0.46);
       }
       .btn-hero:active {
         transform: translateY(1px) scale(0.98);
@@ -535,10 +537,10 @@
         box-shadow: var(--shadow-md);
       }
       .side-banner-1 {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        background: linear-gradient(135deg, #1f3318 0%, #39522a 60%, #4e4b25 100%);
       }
       .side-banner-2 {
-        background: linear-gradient(135deg, #7c2d12 0%, #c2410c 100%);
+        background: linear-gradient(135deg, #213018 0%, #a61e18 72%, #c92a22 100%);
       }
       .side-banner-title {
         font-size: 18px;
@@ -553,7 +555,7 @@
       .side-banner-link {
         font-size: 13px;
         font-weight: 700;
-        color: #fdba74;
+        color: #e5c878;
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -641,8 +643,8 @@
        5. FLASH SALE SECTION
        ========================================================================== */
       .flash-sale-wrapper {
-        background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
-        border: 1.5px solid #ffedd5;
+        background: linear-gradient(180deg, #fdf4f1 0%, #ffffff 100%);
+        border: 1.5px solid #f6e2dc;
         border-radius: var(--radius-lg);
         padding: 24px;
         margin-bottom: 48px;
@@ -732,7 +734,7 @@
       .product-card:hover {
         transform: translateY(-6px);
         box-shadow: var(--shadow-lg);
-        border-color: #fdba74;
+        border-color: #e5c878;
       }
 
       .product-img-wrapper {
@@ -1272,7 +1274,7 @@
 
       /* Price Box */
       .detail-price-box {
-        background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+        background: linear-gradient(135deg, #fdf4f1 0%, #f6e2dc 100%);
         border: 1.5px solid #fed7aa;
         border-radius: var(--radius-md);
         padding: 20px 24px;
@@ -1291,7 +1293,7 @@
         letter-spacing: 0.5px;
       }
       .deal-pill {
-        background: #ea580c;
+        background: #c92a22;
         color: #ffffff;
         font-size: 10px;
         font-weight: 800;
@@ -1325,7 +1327,7 @@
       .price-voucher-notice {
         margin-top: 12px;
         padding-top: 10px;
-        border-top: 1px dashed #fdba74;
+        border-top: 1px dashed #e5c878;
         font-size: 12px;
         color: #9a3412;
         font-weight: 600;
@@ -1697,7 +1699,7 @@
         gap: 10px;
       }
       .footer-links a:hover {
-        color: #fdba74;
+        color: #e5c878;
       }
       .footer-bottom {
         border-top: 1px solid #1e293b;
@@ -1866,7 +1868,7 @@
         margin-top: 6px;
         padding: 9px 18px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #ea580c, #f97316);
+        background: linear-gradient(135deg, #c92a22, #d49b1a);
         color: #ffffff;
         font-size: 13px;
         font-weight: 700;
@@ -1882,7 +1884,7 @@
         width: 32px;
         height: 32px;
         border: 3px solid rgba(255, 255, 255, 0.25);
-        border-top-color: #ea580c;
+        border-top-color: #c92a22;
         border-radius: 50%;
         animation: jmlSpin 0.8s linear infinite;
       }

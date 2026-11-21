@@ -12,14 +12,15 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Auth & RBAC Controller (TF16DCF) -->
     <script src="../shared/js/auth.js"></script>
+    <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css">
 <script>
 tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        primary: { 50: '#EEF5FF', 100: '#D9E8FF', 500: '#0D6EFD', 600: '#0B5ED7' },
-                        seller: { 50: '#FFF7ED', 100: '#FFEDD5', 500: '#F97316', 600: '#EA580C' }
+                        primary: { 50: '#edf3e7', 100: '#dce8d2', 500: '#39522a', 600: '#2c4120' },
+                        seller: { 50: '#fdf0ee', 100: '#fae0dc', 500: '#d42b24', 600: '#a61e18' }
                     }
                 }
             }
@@ -28,13 +29,14 @@ tailwind.config = {
 </script>
     <style>
         .nav-item.active {
-            background-color: #FFF7ED;
-            color: #EA580C;
+            background: linear-gradient(90deg, #fdf0ee 0%, #fbf4dc 100%);
+            color: #b4221b;
             font-weight: 700;
         }
     </style>
-</head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased flex h-screen overflow-hidden">
+    <script src="../shared/js/koi-banner-ambient.js" defer></script>
+  </head>
+<body data-theme-role="seller" class="bg-slate-50 text-slate-900 font-sans antialiased flex h-screen overflow-hidden">
 
     <!-- =====================================================================
          SIDEBAR NAVIGATION (JML SELLER CENTER - KÊNH CHỦ SHOP)

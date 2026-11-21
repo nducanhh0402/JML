@@ -41,18 +41,21 @@ def auth_login(payload: LoginRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Tìm user theo username hoặc phone (KHÔNG so sánh password ở SQL)
+    # Tìm user theo username, phone hoặc email (KHÔNG so sánh password ở SQL)
+    identifier = payload.username.strip()
     cursor.execute("""
-        SELECT * FROM users 
-        WHERE username = ? OR phone = ?;
-    """, (payload.username.strip(), payload.username.strip()))
+        SELECT * FROM users
+        WHERE username = ?
+           OR phone = ?
+           OR (email IS NOT NULL AND email != '' AND LOWER(email) = LOWER(?));
+    """, (identifier, identifier, identifier))
     user_row = cursor.fetchone()
 
     if not user_row:
         conn.close()
         raise HTTPException(
             status_code=401,
-            detail="Tài khoản, số điện thoại hoặc mật khẩu không chính xác!"
+            detail="Tài khoản, email, số điện thoại hoặc mật khẩu không chính xác!"
         )
 
     # Kiểm tra mật khẩu đã băm bằng bcrypt
@@ -71,7 +74,7 @@ def auth_login(payload: LoginRequest):
         conn.close()
         raise HTTPException(
             status_code=401,
-            detail="Tài khoản, số điện thoại hoặc mật khẩu không chính xác!"
+            detail="Tài khoản, email, số điện thoại hoặc mật khẩu không chính xác!"
         )
 
     # Lấy hạng thành viên nếu là khách hàng
@@ -208,6 +211,19 @@ def auth_register(payload: RegisterRequest):
         "username": payload.username,
         "access_token": access_token,
         "token_type": "bearer",
+        "user": {
+            "id": new_user_id,
+            "username": payload.username.strip(),
+            "role": payload.role,
+            "full_name": payload.full_name.strip(),
+            "phone": payload.phone.strip(),
+            "email": payload.email.strip(),
+            "address": "",
+            "shop_key": "",
+            "shop_name": "",
+            "cust_key": cust_key,
+            "rank": "Đồng",
+        },
     }
 
 

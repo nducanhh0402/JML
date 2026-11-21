@@ -1284,11 +1284,11 @@ function initRevenueChart() {
                 {
                     label: 'Tổng GMV Toàn Sàn (₫)',
                     data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    borderColor: '#0D6EFD',
-                    backgroundColor: 'rgba(13, 110, 253, 0.08)',
+                    borderColor: '#39522a',
+                    backgroundColor: 'rgba(57, 82, 42, 0.10)',
                     borderWidth: 2.5,
                     pointBackgroundColor: '#FFFFFF',
-                    pointBorderColor: '#0D6EFD',
+                    pointBorderColor: '#39522a',
                     pointBorderWidth: 2,
                     pointRadius: 3.5,
                     fill: true,
@@ -1297,11 +1297,11 @@ function initRevenueChart() {
                 {
                     label: 'Phí Hoa Hồng Sàn Thu (7%)',
                     data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    borderColor: '#00B517',
+                    borderColor: '#d49b1a',
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     borderDash: [5, 5],
-                    pointBackgroundColor: '#00B517',
+                    pointBackgroundColor: '#d49b1a',
                     pointRadius: 3,
                     fill: false,
                     tension: 0.35
@@ -1320,12 +1320,12 @@ function initRevenueChart() {
                 }
             },
             scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#6F7C8E' } },
+                x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#586552' } },
                 y: {
-                    grid: { color: '#EDF0F2' },
+                    grid: { color: '#eceee3' },
                     ticks: {
                         font: { size: 11 },
-                        color: '#6F7C8E',
+                        color: '#586552',
                         callback: function(val) {
                             if (val === 0) return '0 ₫';
                             if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M ₫';
@@ -1352,7 +1352,7 @@ function initCategoryChart() {
             labels: ['JML Mall (Chính hãng)', 'Shop Yêu Thích+ (Uy tín)', 'Shop Tiêu Chuẩn'],
             datasets: [{
                 data: [0, 0, 0],
-                backgroundColor: ['#FA3434', '#FF9017', '#0D6EFD'],
+                backgroundColor: ['#c92a22', '#d49b1a', '#39522a'],
                 borderWidth: 0,
                 hoverOffset: 4
             }]

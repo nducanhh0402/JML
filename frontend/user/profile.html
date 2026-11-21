@@ -10,18 +10,19 @@
   <script src="../shared/js/auth.js"></script>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif; background: var(--neutral-50); color: var(--neutral-900); }
-    .topbar { background: #fff; border-bottom: 1px solid var(--neutral-200); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .topbar a { text-decoration: none; color: var(--primary); font-weight: 700; font-size: 14px; }
-    .brand { font-size: 18px; font-weight: 800; color: var(--neutral-900) !important; }
+    body { margin: 0; font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif; background: radial-gradient(circle at top right, rgba(200,75,122,0.08), transparent 36%), radial-gradient(circle at top left, rgba(57,82,42,0.12), transparent 44%), var(--neutral-50); color: var(--neutral-900); min-height: 100vh; }
+    .topbar { background: linear-gradient(90deg, #1d2516 0%, #2c351e 50%, #212a18 100%); border-bottom: 1px solid rgba(232,194,84,0.25); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar a { text-decoration: none; color: #e8c254; font-weight: 700; font-size: 14px; }
+    .topbar a:hover { color: #ffffff; }
+    .brand { font-size: 18px; font-weight: 800; color: #ffffff !important; }
     .container { max-width: 960px; margin: 28px auto; padding: 0 16px; display: grid; gap: 20px; grid-template-columns: 1fr; }
     @media (min-width: 840px) { .container { grid-template-columns: 300px 1fr; align-items: start; } }
-    .card { background: #fff; border: 1px solid var(--neutral-200); border-radius: 14px; padding: 22px; }
+    .card { background: #fff; border: 1px solid var(--neutral-200); border-radius: 16px; padding: 22px; box-shadow: 0 8px 22px rgba(26,38,26,0.05); }
     .card h2 { margin: 0 0 4px; font-size: 17px; }
     .card .sub { margin: 0 0 18px; color: var(--neutral-500); font-size: 13px; }
-    .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 28px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #d42b24 0%, #a61e18 65%, #39522a 100%); color: #fff; font-size: 28px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 6px 16px rgba(201,42,34,0.24); }
     .info-name { font-size: 18px; font-weight: 800; margin: 0; word-break: break-word; }
-    .badge { display: inline-block; margin: 6px 0 14px; padding: 2px 10px; border-radius: 9999px; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 700; }
+    .badge { display: inline-block; margin: 6px 0 14px; padding: 3px 11px; border-radius: 9999px; background: var(--lotus-green-soft, #edf3e7); color: var(--lotus-green, #39522a); border: 1px solid #cddbc0; font-size: 11px; font-weight: 700; }
     .info-row { display: flex; flex-direction: column; padding: 9px 0; border-top: 1px solid var(--neutral-100); font-size: 13px; }
     .info-row span:first-child { color: var(--neutral-500); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
     .info-row span:last-child { font-weight: 600; word-break: break-word; }
@@ -51,7 +52,8 @@
     .strength-label { font-size: 11px; color: var(--neutral-500); margin-top: 3px; }
     .loading { text-align: center; color: var(--neutral-500); padding: 40px 0; grid-column: 1 / -1; }
   </style>
-</head>
+    <script src="../shared/js/koi-banner-ambient.js" defer></script>
+  </head>
 <body>
   <div class="topbar">
     <a class="brand" href="index.html">🛍️ JML Store</a>

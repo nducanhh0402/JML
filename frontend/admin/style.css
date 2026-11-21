@@ -1,36 +1,36 @@
 /* ==========================================================================
-   Brandname Marketplace Admin Portal - Custom Styles
-   Based on Figma UI Kit: Ecommerce Templates (Community)
+   JML Store Marketplace Admin Portal — Koi & Lotus Pond Theme
    ========================================================================== */
+@import url("../shared/css/koi-lotus-theme.css");
 
 :root {
-    --primary-50: #F0F7FF;
-    --primary-100: #E0EDFF;
-    --primary-200: #CCE0FF;
-    --primary-500: #0D6EFD;
-    --primary-600: #162DF3;
-    --primary-700: #1C2EB0;
+    --primary-50: #edf3e7;
+    --primary-100: #dce8d2;
+    --primary-200: #c2d6b2;
+    --primary-500: #39522a;
+    --primary-600: #2c4120;
+    --primary-700: #203117;
 
     --neutral-0: #FFFFFF;
-    --neutral-50: #F6F7F9;
-    --neutral-100: #EDF0F2;
-    --neutral-200: #DCE0E5;
-    --neutral-300: #CBD3DB;
-    --neutral-400: #B6C1CA;
-    --neutral-500: #929EAA;
-    --neutral-600: #6F7C8E;
-    --neutral-700: #525E6F;
-    --neutral-800: #323C49;
-    --neutral-900: #14181F;
+    --neutral-50: #f4f5ee;
+    --neutral-100: #eceee3;
+    --neutral-200: #dce0d2;
+    --neutral-300: #c7cebc;
+    --neutral-400: #a4b098;
+    --neutral-500: #6d7967;
+    --neutral-600: #55614f;
+    --neutral-700: #3d4938;
+    --neutral-800: #293325;
+    --neutral-900: #1a261a;
 
-    --success-50: #E8F8EE;
-    --success-500: #00B517;
+    --success-50: #eaf3e5;
+    --success-500: #39522a;
 
-    --warning-50: #FFF0DE;
-    --warning-500: #FF9017;
+    --warning-50: #fbf4dc;
+    --warning-500: #d49b1a;
 
-    --danger-50: #FFE5E5;
-    --danger-500: #FA3434;
+    --danger-50: #fceceb;
+    --danger-500: #c92a22;
 }
 
 body {
