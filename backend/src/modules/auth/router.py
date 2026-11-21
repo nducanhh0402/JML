@@ -1,5 +1,6 @@
 import random
 import bcrypt
+import pymysql
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
@@ -7,6 +8,8 @@ from backend.schemas import LoginRequest, RegisterRequest
 from backend.src.middlewares.auth_middleware import create_access_token, get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
+
+DEFAULT_AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80"
 
 
 # ==============================================================================
@@ -156,28 +159,39 @@ def auth_register(payload: RegisterRequest):
     date_only = datetime.now().strftime("%d/%m/%Y")
     cust_key = f"CUST-{random.randint(100, 999)}"
 
-    cursor.execute("""
-        INSERT INTO users (username, password, role, full_name, phone, email, address, cust_key, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, '', ?, ?);
-    """, (
-        payload.username.strip(),
-        hashed_pwd,
-        payload.role,
-        payload.full_name.strip(),
-        payload.phone.strip(),
-        payload.email.strip(),
-        cust_key,
-        now_str,
-    ))
-    new_user_id = cursor.lastrowid
+    try:
+        # Email rỗng được lưu là NULL để không vi phạm ràng buộc UNIQUE (uq_users_email)
+        cursor.execute("""
+            INSERT INTO users (username, password, role, full_name, phone, email, address, cust_key, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, '', ?, ?);
+        """, (
+            payload.username.strip(),
+            hashed_pwd,
+            payload.role,
+            payload.full_name.strip(),
+            payload.phone.strip(),
+            payload.email.strip() or None,
+            cust_key,
+            now_str,
+        ))
+        new_user_id = cursor.lastrowid
 
-    cursor.execute("""
-        INSERT INTO customers (cust_key, id_display, name, phone, email, avatar, `rank`, rank_badge, joined, orders_count, total_spent, status, status_badge, address, is_banned)
-        VALUES (?, ?, ?, ?, ?, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80', 'Đồng', 'bg-neutral-100 text-neutral-600 border-neutral-200', ?, 0, '0 ₫', 'Hoạt động', 'bg-emerald-50 text-emerald-600', '', 0);
-    """, (cust_key, f"#{cust_key}", payload.full_name.strip(), payload.phone.strip(), payload.email.strip(), date_only))
+        cursor.execute("""
+            INSERT INTO customers (cust_key, id_display, name, phone, email, avatar, `rank`, rank_badge, joined, orders_count, total_spent, status, status_badge, address, is_banned)
+            VALUES (?, ?, ?, ?, ?, ?, 'Đồng', 'bg-neutral-100 text-neutral-600 border-neutral-200', ?, 0, '0 ₫', 'Hoạt động', 'bg-emerald-50 text-emerald-600', '', 0);
+        """, (cust_key, f"#{cust_key}", payload.full_name.strip(), payload.phone.strip(), payload.email.strip(), DEFAULT_AVATAR, date_only))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+    except pymysql.err.IntegrityError:
+        # Hai request đăng ký đồng thời có thể lọt qua bước kiểm tra ở trên:
+        # ràng buộc UNIQUE của database là chốt chặn cuối cùng.
+        conn.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Tên đăng nhập, số điện thoại hoặc email đã tồn tại trên hệ thống!"
+        )
+    finally:
+        conn.close()
 
     # Tạo JWT Token cho người dùng mới đăng ký
     access_token = create_access_token({

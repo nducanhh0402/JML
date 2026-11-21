@@ -81,6 +81,68 @@ class TestFrontendRBACAndGuards(unittest.TestCase):
         self.assertIn("checkUrlAuthParams", html)
         self.assertIn("shared/js/auth.js", html)
 
+    def test_06_admin_order_management_controls_exist(self):
+        """Trang admin có bộ điều khiển đổi trạng thái, lịch sử và nút gọi API."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("modalOrderStatusSelect", html)
+        self.assertIn("modalOrderStatusHistory", html)
+        self.assertIn("changeOrderStatusFromModal", js)
+        self.assertIn("/status", js)
+        self.assertIn("/history", js)
+
+    def test_07_admin_order_list_filters_exist(self):
+        """Trang admin có tìm mã/khách, khoảng ngày và bộ đếm kết quả."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("fullOrderSearchFilter", html)
+        self.assertIn("fullOrderDateFrom", html)
+        self.assertIn("fullOrderDateTo", html)
+        self.assertIn("fullOrderResultCount", html)
+        self.assertIn("function filterFullOrders", js)
+        self.assertIn("data-date", js)
+
+    def test_07_admin_order_ui_desktop_modal_and_actions_exist(self):
+        """Desktop: modal chi tiết đơn có đổi trạng thái, lịch sử và nút escrow."""
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("orderDetailModal", html)
+        self.assertIn("modalOrderStatusSelect", html)
+        self.assertIn("modalOrderStatusHistory", html)
+        self.assertIn("changeOrderStatusFromModal", js)
+        self.assertIn("releaseEscrow", js)
+        self.assertIn("freezeEscrow", js)
+
+    def test_08_admin_order_ui_mobile_responsive_exists(self):
+        """Mobile: trang admin có responsive, modal và bảng cuộn ngang."""
+        mobile_css = os.path.join(os.path.dirname(self.admin_html_path), "mobile-responsive.css")
+        with open(mobile_css, "r", encoding="utf-8") as f:
+            css = f.read()
+        with open(self.admin_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        self.assertIn("@media (max-width: 768px)", css)
+        self.assertIn("table", css)
+        self.assertIn("orderDetailModal", html)
+
+    def test_09_admin_order_ui_status_history_links_exist(self):
+        """Giao diện liên kết endpoint trạng thái và lịch sử."""
+        with open(self.admin_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        self.assertIn("/status", js)
+        self.assertIn("/history", js)
+        self.assertIn("changeOrderStatusFromModal", js)
+
 
 if __name__ == "__main__":
     unittest.main()

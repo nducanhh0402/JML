@@ -136,6 +136,23 @@ class TestAuthRBACMiddleware(unittest.TestCase):
         self.assertEqual(res_orders.status_code, 200)
         self.assertIn("orders", res_orders.json())
 
+    def test_08d_admin_order_status_rejects_invalid_status(self):
+        """Admin không thể chuyển đơn sang trạng thái không được hỗ trợ."""
+        response = self.client.put(
+            "/api/admin/orders/MP-9999/status",
+            json={"status": "invalid_state", "note": "Test validation"},
+            headers={"Authorization": f"Bearer {self.admin_token}"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_08e_seller_order_status_rejects_invalid_status(self):
+        """Seller không thể cập nhật trạng thái ngoài danh sách cho phép."""
+        response = self.client.put(
+            "/api/seller/orders/MP-9999/status",
+            json={"status": "invalid_state", "note": "Test validation"}
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_09_cors_options_preflight_bypasses_auth(self):
         """CORS OPTIONS preflight request tới /api/admin/* không bị chặn bởi Auth."""
         response = self.client.options(
@@ -182,6 +199,44 @@ class TestAuthRBACMiddleware(unittest.TestCase):
         )
         self.assertEqual(res_auth.status_code, 200)
         self.assertEqual(res_auth.json()["user"]["username"], "admin")
+
+    def test_08f_admin_orders_filter_search_pagination(self):
+        """Admin gọi API đơn với trạng thái, ngày, tìm mã đơn và phân trang."""
+        response = self.client.get(
+            "/api/admin/orders",
+            params={"status": "preparing", "date_from": "2026-11-01", "date_to": "2026-11-30", "search": "MP", "page": 1, "limit": 10},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("orders", data)
+        self.assertEqual(data["pagination"]["page"], 1)
+        self.assertEqual(data["pagination"]["limit"], 10)
+
+    def test_08g_admin_orders_reject_invalid_date_range(self):
+        """date_from lớn hơn date_to phải trả HTTP 400."""
+        response = self.client.get(
+            "/api/admin/orders",
+            params={"date_from": "2026-11-30", "date_to": "2026-11-01"},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_08h_admin_order_schemas_validate_status_and_reason(self):
+        """Schema admin chặn trạng thái sai và lý do khóa rỗng."""
+        status_res = self.client.put(
+            "/api/admin/orders/MP-9999/status",
+            json={"status": "invalid_state", "note": "Test"},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(status_res.status_code, 422)
+
+        freeze_res = self.client.put(
+            "/api/admin/orders/MP-9999/freeze",
+            json={"reason": ""},
+            headers={"Authorization": f"Bearer {self.admin_token}"},
+        )
+        self.assertEqual(freeze_res.status_code, 422)
 
 
 if __name__ == "__main__":

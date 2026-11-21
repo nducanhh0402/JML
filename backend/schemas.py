@@ -1,5 +1,7 @@
-from pydantic import BaseModel
-from typing import List, Optional
+import re
+
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Literal, Optional
 
 
 class ProductCreate(BaseModel):
@@ -69,7 +71,7 @@ class CreateOrderFromCartRequest(BaseModel):
 
 
 class FreezeOrderRequest(BaseModel):
-    reason: str = "Khách khiếu nại sản phẩm lỗi"
+    reason: str = Field(default="Khách khiếu nại sản phẩm lỗi", min_length=1, max_length=255)
 
 
 class CancelOrderRequest(BaseModel):
@@ -84,10 +86,37 @@ class CustomerCreate(BaseModel):
     rank: str = "Đồng"
 
 
+ALLOWED_REGISTER_ROLES = ("customer", "seller", "admin")
+_EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+
+
+def _require_text(value: str, label: str, min_len: int = 1, max_len: int = 255) -> str:
+    """Cắt khoảng trắng đầu/cuối, bắt buộc không rỗng và nằm trong giới hạn độ dài."""
+    value = (value or "").strip()
+    if len(value) < min_len:
+        raise ValueError(
+            f"{label} không được để trống!" if min_len <= 1 else f"{label} phải có ít nhất {min_len} ký tự!"
+        )
+    if len(value) > max_len:
+        raise ValueError(f"{label} không được vượt quá {max_len} ký tự!")
+    return value
+
+
 class LoginRequest(BaseModel):
     username: str
     password: str
     role: Optional[str] = None
+
+    @field_validator("username")
+    @classmethod
+    def _check_username(cls, v):
+        return _require_text(v, "Tên đăng nhập", max_len=100)
+
+    @field_validator("password")
+    @classmethod
+    def _check_password(cls, v):
+        # Không áp độ dài tối thiểu khi đăng nhập (tài khoản cũ có thể có mật khẩu ngắn)
+        return _require_text(v, "Mật khẩu", max_len=128)
 
 
 class RegisterRequest(BaseModel):
@@ -101,12 +130,55 @@ class RegisterRequest(BaseModel):
     shop_name: str = ""
     shop_badge: str = "TIÊU CHUẨN"
 
+    @field_validator("username")
+    @classmethod
+    def _check_username(cls, v):
+        v = _require_text(v, "Tên đăng nhập", min_len=3, max_len=100)
+        if re.search(r"\s", v):
+            raise ValueError("Tên đăng nhập không được chứa khoảng trắng!")
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def _check_password(cls, v):
+        return _require_text(v, "Mật khẩu", min_len=6, max_len=128)
+
+    @field_validator("role")
+    @classmethod
+    def _check_role(cls, v):
+        v = (v or "").strip().lower()
+        if v not in ALLOWED_REGISTER_ROLES:
+            raise ValueError("Vai trò không hợp lệ! Chỉ chấp nhận: " + ", ".join(ALLOWED_REGISTER_ROLES))
+        return v
+
+    @field_validator("full_name")
+    @classmethod
+    def _check_full_name(cls, v):
+        return _require_text(v, "Họ và tên", max_len=255)
+
+    @field_validator("phone")
+    @classmethod
+    def _check_phone(cls, v):
+        return _require_text(v, "Số điện thoại", min_len=8, max_len=20)
+
+    @field_validator("email")
+    @classmethod
+    def _check_email(cls, v):
+        v = (v or "").strip()
+        if not v:
+            return ""  # email là tùy chọn
+        if len(v) > 191 or not _EMAIL_RE.match(v):
+            raise ValueError("Email không hợp lệ!")
+        return v.lower()
+    shop_badge: str = "TIÊU CHUẨN"
+
 
 class ShopUpdateRequest(BaseModel):
     shop_key: str
     name: str
     badge: str = "TIÊU CHUẨN"
     address: str = ""
+
 
 
 class VNPayCreateUrlRequest(BaseModel):
@@ -124,6 +196,49 @@ class VNPayPaymentResponse(BaseModel):
     order_key: str
     amount: int
     payment_url: str
+
+
+=======
+class OrderStatusUpdate(BaseModel):
+    status: Literal["preparing", "shipping", "delivered", "released", "dispute", "cancelled"]
+    note: str = Field(default="", max_length=255)
+
+
+class AdminOrderItemResponse(BaseModel):
+    name: str
+    variant: str = ""
+    price: str = ""
+    qty: str = ""
+    subtotal: str = ""
+
+
+class AdminOrderStatusHistoryResponse(BaseModel):
+    id: int
+    old_status: Optional[str] = None
+    new_status: str
+    changed_by: Optional[int] = None
+    note: str = ""
+    created_at: str
+
+
+class AdminOrderResponse(BaseModel):
+    id: str
+    key: str
+    escrowBadge: str
+    escrowClass: str
+    time: str
+    shopName: str
+    shopAddress: str
+    buyerName: str
+    buyerPhone: str = ""
+    buyerAddress: str
+    total: str
+    numericTotal: int = 0
+    fee: str
+    net: str
+    status: str
+    createdAt: str = ""
+    items: List[AdminOrderItemResponse] = []
 
 
 
