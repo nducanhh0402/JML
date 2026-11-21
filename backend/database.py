@@ -363,6 +363,35 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
+    # 10. Bảng USER_ADDRESSES (Sổ địa chỉ nhận hàng của người dùng) - TF170FF
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_addresses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        recipient_name VARCHAR(150) NOT NULL,
+        phone VARCHAR(50) NOT NULL,
+        province_city VARCHAR(100) DEFAULT '',
+        district VARCHAR(100) DEFAULT '',
+        ward VARCHAR(100) DEFAULT '',
+        street_address VARCHAR(255) NOT NULL,
+        full_address TEXT NOT NULL,
+        is_default TINYINT(1) DEFAULT 0,
+        tag VARCHAR(50) DEFAULT 'Nhà riêng',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
+    try:
+        cursor.execute("CREATE INDEX idx_user_addresses_user ON user_addresses (user_id);")
+    except Exception:
+        pass
+    try:
+        cursor.execute("CREATE INDEX idx_user_addresses_user_default ON user_addresses (user_id, is_default);")
+    except Exception:
+        pass
+
     # TF175F0: Index tối ưu lọc trạng thái, khoảng ngày và lịch sử đơn
     for index_sql in (
         "CREATE INDEX idx_order_status_created ON orders (status, created_at)",
