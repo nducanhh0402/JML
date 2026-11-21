@@ -69,30 +69,35 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Left: Brand & Back -->
-                <div class="flex items-center gap-4">
-                    <a href="index.html" class="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors text-sm font-medium">
+                <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+                    <a href="index.html" class="flex items-center gap-1.5 text-neutral-600 hover:text-neutral-900 px-2 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors text-xs sm:text-sm font-medium shrink-0" title="Về trang Tổng quan Admin">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        <span>Bàn Điều Khiển</span>
+                        <span class="hidden sm:inline">Bàn Điều Khiển</span>
                     </a>
-                    <div class="h-5 w-px bg-neutral-200"></div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-primary-500 text-white flex items-center justify-center font-bold text-sm">
+                    <div class="h-5 w-px bg-neutral-200 shrink-0"></div>
+                    <a href="categories_brands.html" class="flex items-center gap-1.5 text-neutral-600 hover:text-primary-600 px-2 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors text-xs sm:text-sm font-medium shrink-0" title="Chuyển sang Quản lý Danh mục & Thương hiệu">
+                        <i data-lucide="folder-tree" class="w-4 h-4"></i>
+                        <span class="hidden md:inline">Danh Mục & Thương Hiệu</span>
+                    </a>
+                    <div class="h-5 w-px bg-neutral-200 shrink-0 hidden md:block"></div>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <div class="w-8 h-8 rounded-lg bg-primary-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
                             <i data-lucide="package" class="w-4 h-4"></i>
                         </div>
-                        <div>
-                            <h1 class="text-base font-bold text-neutral-900 leading-tight">Quản Lý Sản Phẩm</h1>
-                            <p class="text-[11px] text-neutral-500">Danh mục kho hàng, tìm kiếm & phân trang (TF171CF)</p>
+                        <div class="min-w-0">
+                            <h1 class="text-sm sm:text-base font-bold text-neutral-900 leading-tight truncate">Quản Lý Sản Phẩm</h1>
+                            <p class="text-[10px] sm:text-[11px] text-neutral-500 hidden sm:block truncate">Tìm kiếm, lọc danh mục & phân trang (TF17205)</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right: Actions & User -->
-                <div class="flex items-center gap-3">
-                    <button onclick="openAddModal()" class="inline-flex items-center gap-2 px-3.5 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold text-xs transition-colors shadow-sm">
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold text-xs transition-colors shadow-sm whitespace-nowrap">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                        <span>Thêm Sản Phẩm Mới</span>
+                        <span>Thêm <span class="hidden sm:inline">Sản Phẩm</span></span>
                     </button>
-                    <a href="../buyer/products.html" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200 rounded-lg text-xs font-semibold transition-colors">
+                    <a href="../buyer/products.html" target="_blank" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200 rounded-lg text-xs font-semibold transition-colors">
                         <i data-lucide="external-link" class="w-3.5 h-3.5 text-primary-500"></i>
                         <span>Xem Sàn</span>
                     </a>
@@ -579,6 +584,13 @@
             nextBtn.disabled = (currentPage >= totalPages);
 
             let html = '';
+            
+            // Mobile compact badge
+            html += `<span class="sm:hidden px-2 py-1 text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 rounded-lg whitespace-nowrap">Trang ${currentPage}/${totalPages}</span>`;
+
+            // Desktop number buttons container
+            html += `<div class="hidden sm:flex items-center gap-1">`;
+            
             // Generate max 5 page buttons around currentPage
             let startPage = Math.max(1, currentPage - 2);
             let endPage = Math.min(totalPages, startPage + 4);
@@ -607,6 +619,8 @@
                 }
                 html += `<button onclick="goToPage(${totalPages})" class="w-7 h-7 rounded-lg text-xs font-semibold border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700">${totalPages}</button>`;
             }
+
+            html += `</div>`;
 
             container.innerHTML = html;
         }
