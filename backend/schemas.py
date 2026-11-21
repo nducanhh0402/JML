@@ -109,4 +109,22 @@ class ShopUpdateRequest(BaseModel):
     address: str = ""
 
 
+class VNPayCreateUrlRequest(BaseModel):
+    order_key: str
+    amount: Optional[int] = None
+    order_desc: Optional[str] = None
+    bank_code: Optional[str] = None
+    return_url: Optional[str] = None
+
+
+class VNPayPaymentResponse(BaseModel):
+    status: str = "success"
+    code: str = "00"
+    message: str = "Tạo URL thanh toán VNPay thành công"
+    order_key: str
+    amount: int
+    payment_url: str
+
+
+
 
