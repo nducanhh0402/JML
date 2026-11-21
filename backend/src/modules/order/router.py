@@ -1030,73 +1030,110 @@ def cancel_user_order(
     phone: Optional[str] = Query(None)
 ):
     """
-    Khách hàng yêu cầu hủy đơn hàng:
-    - Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hoặc Admin mới được hủy).
-    - Chỉ cho phép hủy khi đơn ở trạng thái 'preparing' hoặc 'escrow'.
-    - Hoàn trả lại số lượng tồn kho và giảm số lượng đã bán.
-    - Ghi nhận lịch sử trạng thái vào order_status_history.
+    TF17444 – Khách hủy đơn khi còn Chờ xác nhận (preparing):
+    1. Xác thực danh tính người dùng qua JWT / Header / Query.
+    2. Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hoặc Admin).
+    3. Chỉ cho phép hủy khi đơn ở trạng thái 'preparing' (Chờ xác nhận).
+    4. Hoàn trả số lượng tồn kho (total_stock + stock) và giảm sold về sản phẩm.
+    5. Cập nhật trạng thái đơn sang 'cancelled'.
+    6. Ghi lịch sử trạng thái vào order_status_history.
     """
     clean_key = order_key.replace("#", "").strip()
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+
+        # 1. Tìm đơn hàng
         cursor.execute("SELECT * FROM orders WHERE order_key = ? OR id_display = ?;", (clean_key, f"#{clean_key}"))
         order = cursor.fetchone()
 
         if not order:
             raise HTTPException(status_code=404, detail=f"Không tìm thấy đơn hàng #{clean_key}!")
 
+        # 2. Xác thực danh tính
         auth_info = resolve_requester(request, user_id=user_id, phone=phone, conn=conn)
         if not auth_info["is_authenticated"]:
             raise HTTPException(status_code=401, detail="Yêu cầu xác thực tài khoản để thao tác trên đơn hàng!")
 
+        # 3. Kiểm tra quyền sở hữu
         check_order_ownership(dict(order), auth_info, conn=conn)
 
+        # 4. Kiểm tra trạng thái – chỉ cho hủy khi còn 'preparing' (Chờ xác nhận)
         curr_status = str(order["status"]).lower()
-        if curr_status not in ["preparing", "escrow"]:
+        if curr_status != "preparing":
             raise HTTPException(
                 status_code=400,
-                detail=f"Không thể hủy đơn hàng ở trạng thái '{curr_status}'. Chỉ cho phép hủy đơn đang chuẩn bị hoặc chờ xử lý!"
+                detail=(
+                    f"Không thể hủy đơn hàng ở trạng thái '{curr_status}'. "
+                    "Chỉ được phép hủy khi đơn đang ở trạng thái Chờ xác nhận (preparing)!"
+                )
             )
 
         cancel_reason = (payload.reason if payload and payload.reason else "Khách hàng hủy đơn").strip()
 
-        # Hoàn trả lại tồn kho sản phẩm
+        # 5. Hoàn trả tồn kho – cộng lại total_stock, stock và giảm sold
         cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (order["order_key"],))
         items = cursor.fetchall()
-        for it in items:
-            try:
-                qty_val = int(it.get("qty", 1))
-            except (ValueError, TypeError):
-                qty_val = 1
-            try:
+
+        conn.autocommit(False)
+        conn.begin()
+        try:
+            for it in items:
+                try:
+                    qty_val = int(it.get("qty", 1))
+                except (ValueError, TypeError):
+                    qty_val = 1
+
+                # Hoàn total_stock và giảm sold
                 cursor.execute("""
-                    UPDATE products 
-                    SET sold = GREATEST(0, sold - ?), total_stock = total_stock + ? 
+                    UPDATE products
+                    SET sold        = GREATEST(0, sold - ?),
+                        total_stock = total_stock + ?
                     WHERE title = ? OR title LIKE ?;
                 """, (qty_val, qty_val, it["name"], f"%{it['name']}%"))
-            except Exception:
-                pass
 
-        # Cập nhật trạng thái đơn
-        cursor.execute("""
-            UPDATE orders 
-            SET status = 'cancelled',
-                escrow_badge = '✕ Đã hủy đơn hàng',
-                escrow_class = 'bg-rose-50 text-rose-600 border-rose-200'
-            WHERE order_key = ?;
-        """, (order["order_key"],))
+                # Hoàn cột stock (nếu tồn tại trong schema)
+                try:
+                    cursor.execute("""
+                        UPDATE products
+                        SET stock = stock + ?
+                        WHERE title = ? OR title LIKE ?;
+                    """, (qty_val, it["name"], f"%{it['name']}%"))
+                except Exception:
+                    pass
 
-        # Ghi log lịch sử trạng thái
-        try:
+            # 6. Cập nhật trạng thái đơn sang 'cancelled'
+            cursor.execute("""
+                UPDATE orders
+                SET status        = 'cancelled',
+                    escrow_badge  = '✕ Đã hủy đơn hàng',
+                    escrow_class  = 'bg-rose-50 text-rose-600 border-rose-200'
+                WHERE order_key = ?;
+            """, (order["order_key"],))
+
+            # 7. Ghi lịch sử trạng thái vào order_status_history
             cursor.execute("""
                 INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
                 VALUES (?, ?, 'cancelled', ?, ?);
-            """, (order["order_key"], curr_status, auth_info.get("user_id"), f"Hủy đơn: {cancel_reason}"))
-        except Exception:
-            pass
+            """, (
+                order["order_key"],
+                curr_status,
+                auth_info.get("user_id"),
+                f"Khách hủy đơn: {cancel_reason}"
+            ))
 
-        conn.commit()
+            conn.commit()
+
+        except HTTPException:
+            conn.rollback()
+            raise
+        except Exception as exc:
+            conn.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Lỗi khi hủy đơn hàng: {str(exc)}"
+            )
+
         return {
             "success": True,
             "message": f"Hủy đơn hàng #{order['order_key']} thành công!",
