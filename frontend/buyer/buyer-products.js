@@ -1100,7 +1100,7 @@
       }
 
       function goToDetail(id) {
-        window.location.href = `index.html?productId=${id}`;
+        window.location.href = `product-detail.html?id=${id}`;
       }
 
       function goToCart() {
