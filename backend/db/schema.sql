@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `banners` (
     `title` VARCHAR(255) NOT NULL DEFAULT '',
     `image_url` TEXT NOT NULL,
     `link_url` VARCHAR(500) DEFAULT '',
-    `description` TEXT DEFAULT '',
+    `description` TEXT,
     `sort_order` INT DEFAULT 0,
     `is_active` TINYINT(1) DEFAULT 1,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
