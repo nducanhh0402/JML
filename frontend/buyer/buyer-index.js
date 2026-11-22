@@ -1442,11 +1442,12 @@ function openProductDetail(productId) {
   const detailContainer = document.getElementById("view-product-detail");
   const homeContainer = document.getElementById("view-home");
 
-  // Gợi ý 4 sản phẩm cùng phân khúc
-  const relatedList = RECOMMEND_PRODUCTS.filter(
-    (p) => p.id !== product.id,
-  ).slice(0, 4);
-  const relatedCardsHtml = relatedList
+  // Gợi ý 4 sản phẩm cùng danh mục
+  const sameCategoryPool = [...RECOMMEND_PRODUCTS, ...FLASH_PRODUCTS, ...(typeof LATEST_PRODUCTS !== "undefined" ? LATEST_PRODUCTS : [])]
+    .filter((p) => p.id !== product.id && p.category === product.category);
+  const uniqueSameCategory = Array.from(new Map(sameCategoryPool.map((p) => [p.id, p])).values()).slice(0, 4);
+  const relatedCardsHtml = uniqueSameCategory.length
+    ? uniqueSameCategory
     .map((rel) => {
       const relImg = rel.images ? rel.images[0] : rel.image;
       return `
@@ -1456,7 +1457,7 @@ function openProductDetail(productId) {
                 <h3 class="product-title" title="${rel.title}">${rel.title}</h3>
                 <div class="product-meta">
                   <span class="rating-stars">★ ${rel.rating}</span>
-                  <span>• Đã bán ${rel.soldCount}</span>
+                  <span>• Đã bán ${rel.soldCount ?? rel.sold ?? 0}</span>
                 </div>
                 <div class="price-row">
                   <span class="current-price">${formatCurrency(rel.price)}</span>
@@ -1471,7 +1472,8 @@ function openProductDetail(productId) {
             </div>
           `;
     })
-    .join("");
+    .join("")
+    : `<div class="section-state-box is-empty" style="min-height: 150px;"><div class="state-icon">🛍️</div><div class="state-title">Chưa có thêm sản phẩm cùng danh mục</div></div>`;
 
   detailContainer.innerHTML = `
           <div class="product-detail-wrapper">
@@ -1699,33 +1701,28 @@ function openProductDetail(productId) {
                 </table>
               </div>
 
-              <!-- Tab 3: Đánh giá -->
+              <!-- Tab 3: Đánh giá (TF17554: Danh sách đánh giá + Form gửi đánh giá) -->
               <div id="tab-reviews" class="detail-tab-pane">
-                <div style="display: flex; align-items: center; gap: 20px; background: var(--surface-dim); padding: 18px; border-radius: 12px; margin-bottom: 20px;">
-                  <div style="font-size: 38px; font-weight: 800; color: var(--secondary); line-height: 1;">4.9<span style="font-size: 18px; color: var(--text-muted); font-weight: 500;">/5</span></div>
-                  <div>
-                    <div style="color: #f59e0b; font-size: 16px; margin-bottom: 4px;">★★★★★</div>
-                    <div style="font-size: 12px; color: var(--text-muted);">Dựa trên 184 lượt đánh giá từ người mua đã xác thực</div>
-                  </div>
-                </div>
+                <div id="spaReviewsSummary" style="margin-bottom: 18px;"></div>
 
-                <div class="review-card">
-                  <div class="review-header">
-                    <span class="reviewer-name">Nguyễn Văn Hoàng <span class="verified-badge">✓ Đã mua hàng tại JML Store</span></span>
-                    <span class="review-date">3 ngày trước</span>
+                <form class="review-form-card" onsubmit="submitSpaProductReview(event, ${product.id})">
+                  <div class="review-form-title">✍️ Gửi Đánh Giá Sản Phẩm</div>
+                  <div class="star-picker-row" id="spaStarPicker">
+                    <span style="font-size: 13px; font-weight: 700; margin-right: 4px;">Số sao:</span>
+                    ${[1, 2, 3, 4, 5].map((s) => `<button type="button" class="star-picker-btn active" data-star="${s}" onclick="selectSpaReviewStar(${s})">★</button>`).join("")}
                   </div>
-                  <div class="review-stars">★★★★★</div>
-                  <p>Hàng chính hãng đóng gói rất kỹ lưỡng. Giao hàng chỉ mất 2 tiếng ở Hà Nội, đúng chuẩn mô tả và màu sắc trên ảnh. Rất hài lòng!</p>
-                </div>
+                  <div class="review-form-grid">
+                    <input type="text" id="spaReviewName" class="review-input" placeholder="Tên của bạn..." />
+                    <textarea id="spaReviewComment" class="review-textarea" placeholder="Nhập nhận xét của bạn (1-5 sao)..." required></textarea>
+                    <div class="review-form-alert" id="spaReviewAlert"></div>
+                    <div class="review-form-actions">
+                      <span style="font-size: 12px; color: var(--text-muted);">Mỗi người dùng gửi 1 đánh giá cho mỗi sản phẩm</span>
+                      <button type="submit" class="review-submit-btn">Gửi Đánh Giá</button>
+                    </div>
+                  </div>
+                </form>
 
-                <div class="review-card">
-                  <div class="review-header">
-                    <span class="reviewer-name">Trần Thùy Linh <span class="verified-badge">✓ Đã mua hàng tại JML Store</span></span>
-                    <span class="review-date">1 tuần trước</span>
-                  </div>
-                  <div class="review-stars">★★★★★</div>
-                  <p>Sản phẩm cao cấp, chất lượng hoàn thiện tuyệt vời. Nhân viên hỗ trợ tư vấn rất nhiệt tình và kích hoạt bảo hành điện tử nhanh chóng.</p>
-                </div>
+                <div id="spaReviewsList">Đang tải danh sách đánh giá...</div>
               </div>
 
               <!-- Tab 4: Chính sách -->
@@ -1751,14 +1748,17 @@ function openProductDetail(productId) {
             <div class="related-products-section">
               <div class="section-title-wrap">
                 <div>
-                  <h2 class="section-title">Sản Phẩm Cùng Bộ Sưu Tập</h2>
-                  <p class="section-subtitle">Gợi ý sản phẩm tương tự có thể bạn cũng quan tâm</p>
+                  <h2 class="section-title">Sản Phẩm Cùng Danh Mục</h2>
+                  <p class="section-subtitle">Gợi ý sản phẩm thuộc ngành hàng ${getCategoryName(product.category)}</p>
                 </div>
               </div>
               <div class="recommend-grid">${relatedCardsHtml}</div>
             </div>
           </div>
         `;
+
+  // Gọi API tải đánh giá cho SPA detail view
+  loadSpaProductReviews(product.id);
 
   // Chuyển SPA view
   const cartContainer = document.getElementById("view-cart");
@@ -1917,6 +1917,94 @@ function switchDetailTab(tabId, btn) {
   btn.classList.add("active");
   const target = document.getElementById(tabId);
   if (target) target.classList.add("active");
+}
+
+let spaSelectedReviewStar = 5;
+function selectSpaReviewStar(star) {
+  spaSelectedReviewStar = Math.max(1, Math.min(5, Number(star) || 5));
+  document.querySelectorAll("#spaStarPicker .star-picker-btn").forEach((b) => {
+    b.classList.toggle("active", Number(b.dataset.star) <= spaSelectedReviewStar);
+  });
+}
+
+async function loadSpaProductReviews(productId) {
+  const sumEl = document.getElementById("spaReviewsSummary");
+  const listEl = document.getElementById("spaReviewsList");
+  if (!listEl) return;
+
+  const authU = JSON.parse(localStorage.getItem("JML_CUSTOMER_USER") || localStorage.getItem("JML_AUTH_USER") || "null");
+  const nameInp = document.getElementById("spaReviewName");
+  if (nameInp && authU && (authU.full_name || authU.username) && !nameInp.value) {
+    nameInp.value = authU.full_name || authU.username;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/reviews/${productId}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const avg = Number(data.average_rating ?? data.rating ?? 0).toFixed(1);
+    const total = Number(data.total_reviews ?? (data.reviews || []).length);
+    if (sumEl) {
+      sumEl.innerHTML = `<div style="display:flex;align-items:center;gap:16px;background:var(--surface-dim);padding:16px;border-radius:12px;"><div style="font-size:34px;font-weight:800;">${avg}/5</div><div><div style="color:#f59e0b;">★★★★★</div><div style="font-size:12px;color:var(--text-muted);">${total} lượt đánh giá</div></div></div>`;
+    }
+    const reviews = data.reviews || [];
+    listEl.innerHTML = reviews.length
+      ? reviews.map((r) => `<div class="review-card"><div class="review-header"><span class="reviewer-name">${escapeHomepageHtml(r.user_name)}</span><span class="review-date">${escapeHomepageHtml(r.date || "")}</span></div><div class="review-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div><p>${escapeHomepageHtml(r.comment)}</p></div>`).join("")
+      : `<div class="section-state-box is-empty" style="min-height:120px;"><div class="state-title">Chưa có đánh giá nào</div></div>`;
+  } catch (e) {
+    if (sumEl) sumEl.innerHTML = "";
+    listEl.innerHTML = `<div class="section-state-box is-empty" style="min-height:120px;"><div class="state-title">Chưa kết nối được API đánh giá</div></div>`;
+  }
+}
+
+async function submitSpaProductReview(e, productId) {
+  e.preventDefault();
+  const alertEl = document.getElementById("spaReviewAlert");
+  const nameVal = (document.getElementById("spaReviewName")?.value || "").trim();
+  const commentVal = (document.getElementById("spaReviewComment")?.value || "").trim();
+  const authU = JSON.parse(localStorage.getItem("JML_CUSTOMER_USER") || localStorage.getItem("JML_AUTH_USER") || "null");
+
+  if (!commentVal || (!nameVal && !(authU && authU.id))) {
+    if (alertEl) {
+      alertEl.className = "review-form-alert is-error";
+      alertEl.textContent = "Vui lòng nhập tên và nội dung nhận xét.";
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        product_id: Number(productId),
+        user_id: authU && authU.id ? Number(authU.id) : null,
+        user_name: nameVal || authU?.full_name || authU?.username,
+        rating: spaSelectedReviewStar,
+        comment: commentVal,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (alertEl) {
+        alertEl.className = "review-form-alert is-error";
+        alertEl.textContent = data.detail || `Lỗi HTTP ${res.status}`;
+      }
+      return;
+    }
+    if (alertEl) {
+      alertEl.className = "review-form-alert is-success";
+      alertEl.textContent = data.message || "Đã gửi đánh giá thành công!";
+    }
+    const cEl = document.getElementById("spaReviewComment");
+    if (cEl) cEl.value = "";
+    loadSpaProductReviews(productId);
+  } catch (err) {
+    if (alertEl) {
+      alertEl.className = "review-form-alert is-error";
+      alertEl.textContent = "Không thể kết nối máy chủ API.";
+    }
+  }
 }
 
 // Xử lý URL hash để đồng bộ SPA (nút Back/Forward của trình duyệt)

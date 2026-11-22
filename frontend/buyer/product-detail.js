@@ -64,7 +64,59 @@ const FALLBACK_CATALOG = [
     exclusive: "Hot Deal",
     shopName: "Luxury Watch Vietnam",
   },
+  {
+    id: 103,
+    category: "audio",
+    brand: "Harman Kardon",
+    title: "Loa Bluetooth Harman Kardon Aura Studio 4 Hi-End",
+    description:
+      "Thiết kế vòm trong suốt kèm hiệu ứng ánh sáng Ambient Light 360 độ, âm bass uy lực 130W chuẩn phòng thu.",
+    price: 5890000,
+    originalPrice: 7500000,
+    discount: "-22%",
+    rating: 4.8,
+    sold: 92,
+    stock: 8,
+    totalStock: 100,
+    images: [
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80",
+    ],
+    angles: ["Vòm Acrylic", "Đèn Ambient LED"],
+    exclusive: "Flash",
+    shopName: "SoundMax Audio",
+  },
+  {
+    id: 104,
+    category: "audio",
+    brand: "Apple",
+    title: "Tai Nghe AirPods Max Không Gian Chống Ồn Chủ Động",
+    description:
+      "Driver động thiết kế riêng bởi Apple, âm thanh không gian Spatial Audio và khung thép không gỉ cao cấp.",
+    price: 12490000,
+    originalPrice: 13990000,
+    discount: "-11%",
+    rating: 4.8,
+    sold: 189,
+    stock: 22,
+    totalStock: 100,
+    images: [
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+    ],
+    angles: ["Chụp tai vòm lưới", "Khung thép không gỉ"],
+    exclusive: "Chính Hãng",
+    shopName: "AB Technology Ltd",
+  },
 ];
+
+const STAR_LABELS = {
+  1: "1/5 - Rất tệ",
+  2: "2/5 - Không hài lòng",
+  3: "3/5 - Bình thường",
+  4: "4/5 - Hài lòng",
+  5: "5/5 - Tuyệt vời",
+};
 
 let detailState = {
   product: null,
@@ -75,6 +127,9 @@ let detailState = {
   availableStock: 0,
   selectedColor: "Đen Titan",
   selectedVersion: "Bản Tiêu Chuẩn (Fullbox)",
+  reviewStar: 5,
+  reviewFilterStar: null,
+  reviewPage: 1,
 };
 
 function escapeHtml(str) {
@@ -229,46 +284,12 @@ function renderProductDetail(product, isOfflineDemo = false) {
   const colors = ["Đen Titan", "Bạc Ánh Kim", "Xanh Navy"];
   detailState.selectedColor = colors[0];
   detailState.selectedVersion = "Bản Tiêu Chuẩn (Fullbox)";
+  detailState.reviewStar = 5;
+  detailState.reviewFilterStar = null;
+  detailState.reviewPage = 1;
 
-  const relatedHtml = product.relatedProducts.length
-    ? `
-      <section class="related-products-section" style="margin-top: 36px;">
-        <div class="section-title-wrap">
-          <div>
-            <h2 class="section-title">Sản Phẩm Liên Quan</h2>
-            <p class="section-subtitle">Cùng ngành hàng ${escapeHtml(product.categoryName)}</p>
-          </div>
-          <a href="products.html?category=${encodeURIComponent(product.category)}" class="view-all-link">Xem thêm →</a>
-        </div>
-        <div class="recommend-grid">
-          ${product.relatedProducts
-            .map((rel) => {
-              const relImg = Array.isArray(rel.images) && rel.images[0] ? rel.images[0] : rel.image || FALLBACK_IMG;
-              return `
-                <div class="product-card" onclick="window.location.href='product-detail.html?id=${rel.id}'">
-                  <div class="product-img-wrapper">
-                    ${rel.discount ? `<span class="discount-tag">${escapeHtml(rel.discount)}</span>` : ""}
-                    <img src="${escapeHtml(relImg)}" alt="${escapeHtml(rel.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />
-                  </div>
-                  <div class="product-body">
-                    <h3 class="product-title" title="${escapeHtml(rel.title)}">${escapeHtml(rel.title)}</h3>
-                    <div class="product-meta">
-                      <span class="rating-stars">★ ${escapeHtml(rel.rating ?? 5.0)}</span>
-                      <span>• Đã bán ${Number(rel.sold ?? rel.soldCount ?? 0)}</span>
-                    </div>
-                    <div class="price-row">
-                      <span class="current-price">${formatCurrency(rel.price)}</span>
-                      ${rel.originalPrice > rel.price ? `<span class="original-price">${formatCurrency(rel.originalPrice)}</span>` : ""}
-                    </div>
-                  </div>
-                </div>
-              `;
-            })
-            .join("")}
-        </div>
-      </section>
-    `
-    : "";
+  const authUser = getAuthenticatedUser();
+  const defaultReviewerName = authUser ? authUser.full_name || authUser.username || "" : "";
 
   const root = document.getElementById("productDetailRoot");
   root.innerHTML = `
@@ -375,8 +396,10 @@ function renderProductDetail(product, isOfflineDemo = false) {
           <div class="detail-meta-row">
             <div class="meta-rating">
               <span class="stars">★★★★★</span>
-              <strong>${escapeHtml(product.rating)}</strong>
+              <strong id="detailRatingValue">${escapeHtml(product.rating)}</strong>
             </div>
+            <span>•</span>
+            <span class="meta-reviews" id="detailReviewCountHeader">Đang tải đánh giá...</span>
             <span>•</span>
             <span class="meta-sold">Đã bán ${product.sold}</span>
             <span>•</span>
@@ -485,6 +508,7 @@ function renderProductDetail(product, isOfflineDemo = false) {
         <div class="detail-tab-nav">
           <button type="button" class="detail-tab-btn active" onclick="switchDetailTab(this, 'tabDesc')">Mô Tả Sản Phẩm</button>
           <button type="button" class="detail-tab-btn" onclick="switchDetailTab(this, 'tabSpecs')">Thông Số Kỹ Thuật</button>
+          <button type="button" class="detail-tab-btn" onclick="scrollToReviewsSection()">Đánh Giá Khách Hàng (<span id="reviewsTabCount">0</span>)</button>
         </div>
 
         <div class="detail-tab-pane active" id="tabDesc">
@@ -503,9 +527,98 @@ function renderProductDetail(product, isOfflineDemo = false) {
         </div>
       </section>
 
-      ${relatedHtml}
+      <!-- Khu Vực Đánh Giá & Form Gửi Đánh Giá (TF17554) -->
+      <section class="detail-tabs-section" id="reviewsSection">
+        <div class="section-title-wrap" style="margin-bottom: 18px;">
+          <div>
+            <h2 class="section-title">Đánh Giá &amp; Nhận Xét Khách Hàng</h2>
+            <p class="section-subtitle">Mỗi người dùng được gửi 1 đánh giá (1–5 sao) cho sản phẩm này</p>
+          </div>
+        </div>
+
+        <!-- Tổng quan điểm trung bình & phân bố 1-5 sao -->
+        <div id="reviewsSummaryContainer">
+          <div class="skeleton-block" style="width: 100%; height: 130px; margin-bottom: 20px;"></div>
+        </div>
+
+        <!-- Form gửi đánh giá -->
+        <form class="review-form-card" id="reviewSubmitForm" onsubmit="submitProductReview(event)">
+          <div class="review-form-title">✍️ Gửi Đánh Giá Của Bạn</div>
+          <div class="star-picker-row" id="reviewStarPicker">
+            <span style="font-size: 13px; font-weight: 700; color: var(--secondary); margin-right: 4px;">Chọn số sao:</span>
+            ${[1, 2, 3, 4, 5]
+              .map(
+                (s) =>
+                  `<button type="button" class="star-picker-btn active" data-star="${s}" onclick="selectReviewStar(${s})" title="${s} sao">★</button>`
+              )
+              .join("")}
+            <span id="selectedStarLabel" style="font-size: 13px; font-weight: 700; color: #b45309; margin-left: 6px;">${STAR_LABELS[5]}</span>
+          </div>
+
+          <div class="review-form-grid">
+            <div>
+              <input
+                type="text"
+                id="reviewUserNameInput"
+                class="review-input"
+                placeholder="Tên của bạn (bắt buộc nếu chưa đăng nhập)..."
+                value="${escapeHtml(defaultReviewerName)}"
+                ${authUser && defaultReviewerName ? "readonly" : ""}
+                maxlength="120"
+              />
+            </div>
+            <div>
+              <textarea
+                id="reviewCommentInput"
+                class="review-textarea"
+                placeholder="Chia sẻ cảm nhận thực tế về chất lượng, đóng gói và trải nghiệm sản phẩm..."
+                maxlength="2000"
+                required
+              ></textarea>
+            </div>
+            <div class="review-form-alert" id="reviewFormAlert"></div>
+            <div class="review-form-actions">
+              <span style="font-size: 12px; color: var(--text-muted);">
+                ${authUser ? `Đang đăng nhập với tài khoản: <strong>${escapeHtml(defaultReviewerName)}</strong>` : "Mẹo: Đăng nhập để đồng bộ đánh giá theo tài khoản"}
+              </span>
+              <button type="submit" class="review-submit-btn" id="reviewSubmitBtn">Gửi Đánh Giá</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Bộ lọc theo sao -->
+        <div class="review-filter-row" id="reviewFilterRow">
+          <button type="button" class="review-filter-btn active" onclick="filterReviewsByStar(null, this)">Tất Cả</button>
+          <button type="button" class="review-filter-btn" onclick="filterReviewsByStar(5, this)">5 ★</button>
+          <button type="button" class="review-filter-btn" onclick="filterReviewsByStar(4, this)">4 ★</button>
+          <button type="button" class="review-filter-btn" onclick="filterReviewsByStar(3, this)">3 ★</button>
+          <button type="button" class="review-filter-btn" onclick="filterReviewsByStar(2, this)">2 ★</button>
+          <button type="button" class="review-filter-btn" onclick="filterReviewsByStar(1, this)">1 ★</button>
+        </div>
+
+        <!-- Danh sách đánh giá -->
+        <div id="reviewsListContainer">
+          <div class="skeleton-block" style="width: 100%; height: 90px; margin-bottom: 10px;"></div>
+          <div class="skeleton-block" style="width: 100%; height: 90px;"></div>
+        </div>
+      </section>
+
+      <!-- Gợi Ý Sản Phẩm Cùng Danh Mục (TF17554) -->
+      <section class="related-products-section" id="relatedProductsSection" style="margin-top: 36px;">
+        <div class="section-title-wrap">
+          <div>
+            <h2 class="section-title">Sản Phẩm Cùng Danh Mục</h2>
+            <p class="section-subtitle">Gợi ý các sản phẩm khác thuộc ngành hàng ${escapeHtml(product.categoryName)}</p>
+          </div>
+          <a href="products.html?category=${encodeURIComponent(product.category)}" class="view-all-link">Xem thêm cùng danh mục →</a>
+        </div>
+        <div class="recommend-grid" id="relatedProductsGrid"></div>
+      </section>
     </div>
   `;
+
+  loadProductReviews(product.id);
+  loadRelatedCategoryProducts(product);
 }
 
 function selectDetailImage(index) {
@@ -771,3 +884,402 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   loadProductDetailPage();
 });
+
+// ============================================================================
+// TF17554: DANH SÁCH ĐÁNH GIÁ, FORM GỬI ĐÁNH GIÁ & SẢN PHẨM CÙNG DANH MỤC
+// ============================================================================
+function getAuthenticatedUser() {
+  try {
+    if (typeof Auth !== "undefined" && typeof Auth.getUser === "function") {
+      const u = Auth.getUser();
+      if (u) return u;
+    }
+    return (
+      JSON.parse(localStorage.getItem("JML_CUSTOMER_USER") || "null") ||
+      JSON.parse(localStorage.getItem("JML_AUTH_USER") || "null")
+    );
+  } catch (e) {
+    return null;
+  }
+}
+
+function scrollToReviewsSection() {
+  const sec = document.getElementById("reviewsSection");
+  if (sec) sec.scrollIntoView({ behavior: "smooth" });
+}
+
+function selectReviewStar(star) {
+  const safeStar = Math.max(1, Math.min(5, Number(star) || 5));
+  detailState.reviewStar = safeStar;
+  document.querySelectorAll("#reviewStarPicker .star-picker-btn").forEach((btn) => {
+    const btnStar = Number(btn.dataset.star);
+    btn.classList.toggle("active", btnStar <= safeStar);
+  });
+  const label = document.getElementById("selectedStarLabel");
+  if (label) label.textContent = STAR_LABELS[safeStar] || `${safeStar}/5 sao`;
+}
+
+function filterReviewsByStar(star, btn) {
+  detailState.reviewFilterStar = star;
+  detailState.reviewPage = 1;
+  document.querySelectorAll("#reviewFilterRow .review-filter-btn").forEach((b) => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  if (detailState.product) {
+    loadProductReviews(detailState.product.id, star, 1);
+  }
+}
+
+function renderStarsString(ratingVal) {
+  const count = Math.max(0, Math.min(5, Math.round(Number(ratingVal) || 0)));
+  return "★".repeat(count) + "☆".repeat(5 - count);
+}
+
+function getOfflineReviewsKey(productId) {
+  return `JML_OFFLINE_REVIEWS_${productId}`;
+}
+
+function readOfflineReviews(productId) {
+  try {
+    return JSON.parse(localStorage.getItem(getOfflineReviewsKey(productId)) || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+
+function computeOfflineReviewStats(reviews) {
+  const total = reviews.length;
+  const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  let sum = 0;
+  reviews.forEach((r) => {
+    const s = Math.max(1, Math.min(5, Number(r.rating) || 5));
+    breakdown[s] += 1;
+    sum += s;
+  });
+  return {
+    total_reviews: total,
+    average_rating: total > 0 ? Number((sum / total).toFixed(1)) : 0,
+    rating_breakdown: breakdown,
+  };
+}
+
+function renderReviewsSummary(avgRating, totalReviews, breakdown) {
+  const container = document.getElementById("reviewsSummaryContainer");
+  const headerRating = document.getElementById("detailRatingValue");
+  const headerCount = document.getElementById("detailReviewCountHeader");
+  const tabCount = document.getElementById("reviewsTabCount");
+
+  const displayAvg = totalReviews > 0 ? Number(avgRating || 0).toFixed(1) : "0.0";
+  if (headerRating) headerRating.textContent = totalReviews > 0 ? displayAvg : detailState.product?.rating || "5.0";
+  if (headerCount) headerCount.textContent = `${totalReviews} Đánh giá`;
+  if (tabCount) tabCount.textContent = totalReviews;
+
+  if (!container) return;
+  const safeTotal = Math.max(1, Number(totalReviews) || 0);
+  const barsHtml = [5, 4, 3, 2, 1]
+    .map((star) => {
+      const cnt = Number((breakdown && (breakdown[String(star)] ?? breakdown[star])) || 0);
+      const pct = totalReviews > 0 ? Math.round((cnt / safeTotal) * 100) : 0;
+      return `
+        <div class="rating-bar-row">
+          <span class="rating-bar-label">${star} ★</span>
+          <div class="rating-bar-track"><div class="rating-bar-fill" style="width: ${pct}%;"></div></div>
+          <span class="rating-bar-count">${cnt}</span>
+        </div>`;
+    })
+    .join("");
+
+  container.innerHTML = `
+    <div class="reviews-summary-box">
+      <div class="reviews-score-col">
+        <div class="reviews-avg-number">${displayAvg}<span style="font-size:18px;color:var(--text-muted);font-weight:500;">/5</span></div>
+        <div class="reviews-avg-stars">${totalReviews > 0 ? renderStarsString(avgRating) : "☆☆☆☆☆"}</div>
+        <div style="font-size: 12.5px; color: var(--text-muted);">${totalReviews} lượt đánh giá</div>
+      </div>
+      <div class="reviews-bars-col">${barsHtml}</div>
+    </div>
+  `;
+}
+
+function renderReviewsList(reviews, isOfflineMode = false) {
+  const container = document.getElementById("reviewsListContainer");
+  if (!container) return;
+
+  const offlineBanner = isOfflineMode
+    ? `<div style="font-size:12px;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:8px 12px;border-radius:8px;margin-bottom:12px;">
+         ℹ️ Backend chưa kết nối — đang hiển thị đánh giá lưu cục bộ (localStorage).
+       </div>`
+    : "";
+
+  if (!Array.isArray(reviews) || reviews.length === 0) {
+    const emptyMsg = detailState.reviewFilterStar
+      ? `Chưa có đánh giá ${detailState.reviewFilterStar} sao nào cho sản phẩm này.`
+      : "Sản phẩm chưa có đánh giá nào. Hãy là người đầu tiên nhận xét!";
+    container.innerHTML = `
+      ${offlineBanner}
+      <div class="section-state-box is-empty" style="min-height: 150px; padding: 24px;">
+        <div class="state-icon">💬</div>
+        <div class="state-title">Chưa có đánh giá</div>
+        <div class="state-desc">${escapeHtml(emptyMsg)}</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML =
+    offlineBanner +
+    reviews
+      .map(
+        (rev) => `
+      <div class="review-card">
+        <div class="review-header">
+          <span class="reviewer-name">
+            ${escapeHtml(rev.user_name || "Khách hàng")}
+            <span class="verified-badge">✓ Khách hàng JML Store</span>
+          </span>
+          <span class="review-date">${escapeHtml(rev.date || rev.created_at || "")}</span>
+        </div>
+        <div class="review-stars">${renderStarsString(rev.rating)} <span style="color:var(--text-muted);font-size:12px;">(${Number(rev.rating)}/5)</span></div>
+        <p style="margin-top: 4px; color: var(--text-main);">${escapeHtml(rev.comment)}</p>
+      </div>
+    `
+      )
+      .join("");
+}
+
+async function loadProductReviews(productId, starFilter = detailState.reviewFilterStar, page = 1) {
+  const listEl = document.getElementById("reviewsListContainer");
+  if (listEl) {
+    listEl.innerHTML = `
+      <div class="skeleton-block" style="width: 100%; height: 84px; margin-bottom: 10px;"></div>
+      <div class="skeleton-block" style="width: 100%; height: 84px;"></div>`;
+  }
+
+  const query = new URLSearchParams({ page: String(page), page_size: "10" });
+  if (starFilter !== null && starFilter !== undefined) {
+    query.set("rating", String(starFilter));
+  }
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 7000);
+    const res = await fetch(`${API_BASE_URL}/api/reviews/${productId}?${query.toString()}`, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    renderReviewsSummary(data.average_rating ?? data.rating ?? 0, data.total_reviews ?? 0, data.rating_breakdown || {});
+    renderReviewsList(data.reviews || [], false);
+  } catch (err) {
+    const allLocal = readOfflineReviews(productId);
+    const stats = computeOfflineReviewStats(allLocal);
+    const filtered = starFilter ? allLocal.filter((r) => Number(r.rating) === Number(starFilter)) : allLocal;
+    renderReviewsSummary(stats.average_rating, stats.total_reviews, stats.rating_breakdown);
+    renderReviewsList(filtered, true);
+  }
+}
+
+function setReviewFormAlert(message, type) {
+  const alertEl = document.getElementById("reviewFormAlert");
+  if (!alertEl) return;
+  alertEl.className = "review-form-alert";
+  if (!message) {
+    alertEl.textContent = "";
+    return;
+  }
+  alertEl.classList.add(type === "success" ? "is-success" : "is-error");
+  alertEl.textContent = message;
+}
+
+async function submitProductReview(e) {
+  e.preventDefault();
+  const product = detailState.product;
+  if (!product) return;
+
+  const user = getAuthenticatedUser();
+  const nameInput = document.getElementById("reviewUserNameInput");
+  const commentInput = document.getElementById("reviewCommentInput");
+  const submitBtn = document.getElementById("reviewSubmitBtn");
+
+  const userName = (nameInput?.value || "").trim() || (user ? user.full_name || user.username : "");
+  const comment = (commentInput?.value || "").trim();
+  const rating = detailState.reviewStar;
+
+  if (!userName && !(user && user.id)) {
+    setReviewFormAlert("Vui lòng nhập tên của bạn trước khi gửi đánh giá.", "error");
+    return;
+  }
+  if (!comment) {
+    setReviewFormAlert("Vui lòng nhập nội dung nhận xét cho sản phẩm.", "error");
+    return;
+  }
+
+  setReviewFormAlert("", "");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Đang gửi...";
+  }
+
+  const headers = { "Content-Type": "application/json", Accept: "application/json" };
+  const token = localStorage.getItem("JML_ACCESS_TOKEN");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const payload = {
+    product_id: Number(product.id),
+    rating: Number(rating),
+    comment,
+    user_name: userName,
+  };
+  if (user && user.id) payload.user_id = Number(user.id);
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/reviews`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 409) {
+      const msg = data.detail || "Bạn đã đánh giá sản phẩm này rồi! Mỗi người chỉ được gửi 1 đánh giá cho mỗi sản phẩm.";
+      setReviewFormAlert(msg, "error");
+      showToast("Đã đánh giá trước đó", msg, true);
+      return;
+    }
+
+    if (!res.ok) {
+      const msg = data.detail || `Không thể gửi đánh giá (HTTP ${res.status})`;
+      setReviewFormAlert(msg, "error");
+      showToast("Lỗi gửi đánh giá", msg, true);
+      return;
+    }
+
+    if (commentInput) commentInput.value = "";
+    selectReviewStar(5);
+    setReviewFormAlert(data.message || "Cảm ơn bạn đã gửi đánh giá cho sản phẩm!", "success");
+    showToast("Đã gửi đánh giá!", "Đánh giá của bạn đã được ghi nhận.");
+    await loadProductReviews(product.id, detailState.reviewFilterStar, 1);
+  } catch (err) {
+    // Offline fallback: lưu localStorage & kiểm tra trùng
+    const localList = readOfflineReviews(product.id);
+    const isDuplicate = localList.some((r) =>
+      user && user.id
+        ? Number(r.user_id) === Number(user.id)
+        : String(r.user_name || "").trim().toLowerCase() === userName.toLowerCase()
+    );
+    if (isDuplicate) {
+      const msg = "Bạn đã đánh giá sản phẩm này rồi! Mỗi người chỉ được gửi 1 đánh giá cho mỗi sản phẩm.";
+      setReviewFormAlert(msg, "error");
+      showToast("Đã đánh giá trước đó", msg, true);
+      return;
+    }
+
+    localList.unshift({
+      id: Date.now(),
+      product_id: product.id,
+      user_id: user ? user.id : null,
+      user_name: userName,
+      rating,
+      comment,
+      date: new Date().toLocaleDateString("vi-VN"),
+    });
+    localStorage.setItem(getOfflineReviewsKey(product.id), JSON.stringify(localList));
+    if (commentInput) commentInput.value = "";
+    selectReviewStar(5);
+    setReviewFormAlert("Đã lưu đánh giá ở chế độ offline (localStorage).", "success");
+    showToast("Đã gửi đánh giá!", "Lưu thành công (offline).");
+    await loadProductReviews(product.id, detailState.reviewFilterStar, 1);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Gửi Đánh Giá";
+    }
+  }
+}
+
+function renderRelatedProductsGrid(items) {
+  const grid = document.getElementById("relatedProductsGrid");
+  if (!grid) return;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    grid.innerHTML = `
+      <div class="section-state-box is-empty" style="min-height: 160px; padding: 24px;">
+        <div class="state-icon">🛍️</div>
+        <div class="state-title">Chưa có thêm sản phẩm cùng danh mục</div>
+        <div class="state-desc">Bạn có thể xem toàn bộ sản phẩm khác trong cửa hàng.</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = items
+    .slice(0, 4)
+    .map((rel) => {
+      const relImg = Array.isArray(rel.images) && rel.images[0] ? rel.images[0] : rel.image || FALLBACK_IMG;
+      return `
+        <div class="product-card" onclick="window.location.href='product-detail.html?id=${rel.id}'">
+          <div class="product-img-wrapper">
+            ${rel.discount ? `<span class="discount-tag">${escapeHtml(rel.discount)}</span>` : ""}
+            <img src="${escapeHtml(relImg)}" alt="${escapeHtml(rel.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />
+          </div>
+          <div class="product-body">
+            <h3 class="product-title" title="${escapeHtml(rel.title)}">${escapeHtml(rel.title)}</h3>
+            <div class="product-meta">
+              <span class="rating-stars">★ ${escapeHtml(Number(rel.rating ?? 5.0).toFixed(1))}</span>
+              <span>• Đã bán ${Number(rel.sold ?? rel.soldCount ?? 0)}</span>
+            </div>
+            <div class="price-row">
+              <span class="current-price">${formatCurrency(rel.price)}</span>
+              ${rel.originalPrice > rel.price ? `<span class="original-price">${formatCurrency(rel.originalPrice)}</span>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+async function loadRelatedCategoryProducts(product) {
+  const grid = document.getElementById("relatedProductsGrid");
+  if (!grid) return;
+
+  if (Array.isArray(product.relatedProducts) && product.relatedProducts.length > 0) {
+    renderRelatedProductsGrid(product.relatedProducts);
+    return;
+  }
+
+  grid.innerHTML = Array.from({ length: 4 })
+    .map(
+      () => `
+      <div class="skeleton-card">
+        <div class="skeleton-block" style="width: 100%; height: 180px;"></div>
+        <div class="skeleton-block" style="width: 85%; height: 15px;"></div>
+        <div class="skeleton-block" style="width: 55%; height: 14px;"></div>
+      </div>`
+    )
+    .join("");
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/products?category=${encodeURIComponent(product.category)}`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const list =
+      Array.isArray(data.items) && data.items.length > 0
+        ? data.items
+        : [...(data.recommend_products || []), ...(data.flash_products || [])];
+    const sameCat = list.filter((item) => Number(item.id) !== Number(product.id));
+    renderRelatedProductsGrid(sameCat);
+  } catch (err) {
+    const fallbackSameCat = FALLBACK_CATALOG.filter(
+      (item) => item.category === product.category && Number(item.id) !== Number(product.id)
+    );
+    renderRelatedProductsGrid(fallbackSameCat);
+  }
+}
