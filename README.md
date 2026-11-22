@@ -8,11 +8,12 @@
 
 ## 📑 Bảng Mục Lục
 1. [Giới Thiệu Dự Án](#1-giới-thiệu-dự-án)
-2. [Sơ Đồ Use Case Tổng Quan](#2-sơ-đồ-use-case-tổng-quan)
-3. [Cấu Trúc Thư Mục Dự Án](#3-cấu-trúc-thư-mục-dự-án)
-4. [Các Phân Hệ Giao Diện & Tài Khoản Mẫu](#4-các-phân-hệ-giao-diện--tài-khoản-mẫu)
-5. [Hướng Dẫn Cài Đặt & Khởi Chạy](#5-hướng-dẫn-cài-đặt--khởi-chạy)
-6. [Kiểm Thử & Tài Liệu API (Swagger)](#6-kiểm-thử--tài-liệu-api-swagger)
+2. [Bản Demo Trực Tuyến (Vercel Live Demo)](#2-bản-demo-trực-tuyến-vercel-live-demo)
+3. [Sơ Đồ Use Case Tổng Quan](#3-sơ-đồ-use-case-tổng-quan)
+4. [Cấu Trúc Thư Mục Dự Án](#4-cấu-trúc-thư-mục-dự-án)
+5. [Các Phân Hệ Giao Diện & Tài Khoản Mẫu](#5-các-phân-hệ-giao-diện--tài-khoản-mẫu)
+6. [Hướng Dẫn Cài Đặt & Khởi Chạy](#6-hướng-dẫn-cài-đặt--khởi-chạy)
+7. [Kiểm Thử & Tài Liệu API (Swagger)](#7-kiểm-thử--tài-liệu-api-swagger)
 
 ---
 
@@ -26,7 +27,35 @@
 
 ---
 
-## 2. Sơ Đồ Use Case Tổng Quan
+## 2. Bản Demo Trực Tuyến (Vercel Live Demo)
+
+Giao diện tĩnh (`frontend/`) được cấu hình sẵn bằng [`vercel.json`](./vercel.json) (`outputDirectory: "frontend"`, rewrite `/frontend/:path* -> /:path*`) để triển khai trực tiếp lên **Vercel**, tương thích hiển thị cả **Máy tính (Desktop)** và **Điện thoại (Mobile)**.
+
+- **Triển khai nhanh lên Vercel:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnducanhh0402%2FJML)
+- **Đường dẫn Demo chính (sau khi Import repo trên Vercel):** `https://<ten-du-an>.vercel.app/`
+
+### Danh sách các trang chính kiểm tra trên Desktop & Mobile
+
+| Phân hệ / Trang chính | Đường dẫn trên Vercel | Kiểm tra Desktop (1440px) | Kiểm tra Mobile (375px) |
+| :--- | :--- | :---: | :---: |
+| **Cổng Demo tổng hợp (Landing)** | `/` | ✅ | ✅ |
+| **Trang chủ Người mua (Buyer)** | `/buyer/index.html` | ✅ | ✅ |
+| **Danh sách & Bộ lọc sản phẩm** | `/buyer/products.html` | ✅ | ✅ |
+| **Chi tiết sản phẩm & Đánh giá** | `/buyer/product-detail.html?id=101` | ✅ | ✅ |
+| **Giỏ hàng & Mã giảm giá** | `/buyer/cart.html` | ✅ | ✅ |
+| **Đặt hàng (Checkout)** | `/user/checkout.html` | ✅ | ✅ |
+| **Lịch sử & Trạng thái đơn hàng** | `/user/orders.html` | ✅ | ✅ |
+| **Hồ sơ cá nhân & Đổi mật khẩu** | `/user/profile.html` | ✅ | ✅ |
+| **Sổ địa chỉ nhận hàng** | `/user/addresses.html` | ✅ | ✅ |
+| **Đăng nhập / Đăng ký 3D** | `/auth/index.html` | ✅ | ✅ |
+| **Kênh Người bán (Seller Center)** | `/seller/index.html` | ✅ | ✅ |
+| **Quản trị Sàn (Admin Portal)** | `/admin/index.html` | ✅ | ✅ |
+| **Quản lý Danh mục & Thương hiệu** | `/admin/categories_brands.html` | ✅ | ✅ |
+| **Quản lý Sản phẩm Admin** | `/admin/products.html` | ✅ | ✅ |
+
+---
+
+## 3. Sơ Đồ Use Case Tổng Quan
 
 ```mermaid
 flowchart LR
@@ -84,7 +113,7 @@ flowchart LR
 
 ---
 
-## 3. Cấu Trúc Thư Mục Dự Án
+## 4. Cấu Trúc Thư Mục Dự Án
 
 ```text
 JML/
@@ -141,7 +170,7 @@ JML/
 
 ---
 
-## 4. Các Phân Hệ Giao Diện & Tài Khoản Mẫu
+## 5. Các Phân Hệ Giao Diện & Tài Khoản Mẫu
 
 | Phân hệ | Đường dẫn mở trên Live Server (`:5500`) | Tài khoản mẫu (`seed.sql`) | Chức năng chính |
 | :--- | :--- | :--- | :--- |
@@ -151,7 +180,7 @@ JML/
 
 ---
 
-## 5. Hướng Dẫn Cài Đặt & Khởi Chạy
+## 6. Hướng Dẫn Cài Đặt & Khởi Chạy
 
 ### Cách 1: Chạy trực tiếp trên máy (Local Machine)
 
@@ -196,7 +225,7 @@ docker-compose up -d --build
 
 ---
 
-## 6. Kiểm Thử & Tài Liệu API (Swagger)
+## 7. Kiểm Thử & Tài Liệu API (Swagger)
 
 Sau khi chạy Backend Server ở cổng `8000`, truy cập trực tiếp các đường dẫn sau:
 
