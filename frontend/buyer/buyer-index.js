@@ -1421,6 +1421,21 @@ function openProductDetail(productId) {
     "Cận cảnh",
     "Thực tế",
   ];
+  const totalStockVal = Number(product.totalStock ?? 100);
+  const soldVal = Number(product.sold ?? product.soldCount ?? 0);
+  const availableStock =
+    product.stock !== undefined && product.stock !== null
+      ? Math.max(0, Number(product.stock))
+      : Math.max(0, totalStockVal - soldVal);
+  product.availableStock = availableStock;
+  currentDetailQty = availableStock > 0 ? 1 : 0;
+  const isOutOfStock = availableStock <= 0;
+  const stockBadgeClass = isOutOfStock ? "stock-out" : availableStock <= 10 ? "stock-low" : "stock-in";
+  const stockBadgeText = isOutOfStock
+    ? "Hết hàng"
+    : availableStock <= 10
+    ? `Sắp hết hàng (còn ${availableStock})`
+    : `Còn hàng (${availableStock} sẵn có)`;
   currentSelectedColor = extra.colors[0];
   currentSelectedVersion = "Bản Tiêu Chuẩn";
 
@@ -1606,23 +1621,24 @@ function openProductDetail(productId) {
                 </div>
 
                 <!-- Quantity Picker -->
-                <div class="quantity-section">
+                <div class="quantity-section" style="flex-wrap: wrap;">
                   <span class="qty-label">Số Lượng:</span>
                   <div class="qty-picker">
-                    <button type="button" onclick="changeDetailQty(-1)">−</button>
-                    <input type="number" id="detailQtyInput" value="1" min="1" max="10" readonly>
-                    <button type="button" onclick="changeDetailQty(1)">+</button>
+                    <button type="button" id="detailQtyDecBtn" onclick="changeDetailQty(-1)" ${isOutOfStock || currentDetailQty <= 1 ? "disabled" : ""}>−</button>
+                    <input type="number" id="detailQtyInput" value="${currentDetailQty}" min="${isOutOfStock ? 0 : 1}" max="${availableStock}" ${isOutOfStock ? "disabled" : ""} onchange="onSpaDetailQtyInput(this.value)">
+                    <button type="button" id="detailQtyIncBtn" onclick="changeDetailQty(1)" ${isOutOfStock || currentDetailQty >= availableStock ? "disabled" : ""}>+</button>
                   </div>
-                  <span class="stock-remain">Còn lại <strong>${product.totalStock || 45}</strong> sản phẩm trong kho</span>
+                  <span class="stock-badge ${stockBadgeClass}">${stockBadgeText}</span>
+                  <span class="stock-remain">${isOutOfStock ? "Sản phẩm hiện tạm hết hàng" : `Còn lại <strong>${availableStock}</strong> sản phẩm trong kho`}</span>
                 </div>
 
                 <!-- CTA Action Buttons -->
                 <div class="detail-actions-row">
-                  <button class="btn-detail-add-cart" onclick="addCurrentDetailToCart()">
+                  <button class="btn-detail-add-cart" onclick="addCurrentDetailToCart()" ${isOutOfStock ? "disabled" : ""}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                    Thêm Vào Giỏ Hàng
+                    ${isOutOfStock ? "Tạm Hết Hàng" : "Thêm Vào Giỏ Hàng"}
                   </button>
-                  <button class="btn-detail-buy-now" onclick="buyCurrentDetailNow()">
+                  <button class="btn-detail-buy-now" onclick="buyCurrentDetailNow()" ${isOutOfStock ? "disabled" : ""}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                     Mua Ngay Với Giá Ưu Đãi
                   </button>
@@ -1792,31 +1808,82 @@ function selectVariant(button, labelId, value) {
   if (labelId === "selectedVersionLabel") currentSelectedVersion = value;
 }
 
-function changeDetailQty(delta) {
+function syncSpaDetailQtyUi(maxStock) {
   const input = document.getElementById("detailQtyInput");
-  if (!input) return;
-  let val = parseInt(input.value, 10) || 1;
-  val += delta;
+  const decBtn = document.getElementById("detailQtyDecBtn");
+  const incBtn = document.getElementById("detailQtyIncBtn");
+  if (input) input.value = currentDetailQty;
+  if (decBtn) decBtn.disabled = maxStock <= 0 || currentDetailQty <= 1;
+  if (incBtn) incBtn.disabled = maxStock <= 0 || currentDetailQty >= maxStock;
+}
+
+function changeDetailQty(delta) {
+  const maxStock = Math.max(0, Number(currentDetailProduct?.availableStock ?? 45));
+  if (maxStock <= 0) return;
+  let val = (Number(currentDetailQty) || 1) + delta;
   if (val < 1) val = 1;
-  if (val > 10) val = 10;
-  input.value = val;
+  if (val > maxStock) {
+    val = maxStock;
+    showToast("Giới hạn tồn kho", `Chỉ còn tối đa ${maxStock} sản phẩm trong kho.`);
+  }
   currentDetailQty = val;
+  syncSpaDetailQtyUi(maxStock);
+}
+
+function onSpaDetailQtyInput(rawVal) {
+  const maxStock = Math.max(0, Number(currentDetailProduct?.availableStock ?? 45));
+  if (maxStock <= 0) {
+    currentDetailQty = 0;
+    syncSpaDetailQtyUi(0);
+    return;
+  }
+  let val = parseInt(rawVal, 10);
+  if (isNaN(val) || val < 1) val = 1;
+  if (val > maxStock) {
+    val = maxStock;
+    showToast("Vượt tồn kho", `Số lượng tối đa có thể đặt là ${maxStock}.`);
+  }
+  currentDetailQty = val;
+  syncSpaDetailQtyUi(maxStock);
 }
 
 function addCurrentDetailToCart() {
   if (!currentDetailProduct) return;
+  const maxStock = Math.max(0, Number(currentDetailProduct.availableStock ?? 45));
+  if (maxStock <= 0) {
+    showToast("Hết hàng", "Sản phẩm hiện tạm hết hàng trong kho.");
+    return;
+  }
+
   const mainImg = currentDetailProduct.images
     ? currentDetailProduct.images[0]
     : currentDetailProduct.image;
   const titleWithVariant = `${currentDetailProduct.title} (${currentSelectedColor || "Tiêu chuẩn"})`;
   const shopName = currentDetailProduct.shopName || "Trungshop";
+  const qtyToAdd = Math.max(1, Math.min(currentDetailQty || 1, maxStock));
 
-  for (let i = 0; i < currentDetailQty; i++) {
+  const existing = cartItems.find(
+    (it) => Number(it.id) === Number(currentDetailProduct.id) && it.title === titleWithVariant
+  );
+  const currentInCart = existing ? Number(existing.qty) || 1 : 0;
+  if (currentInCart + qtyToAdd > maxStock) {
+    showToast("Vượt tồn kho", `Tổng số lượng trong giỏ không thể vượt quá ${maxStock}.`);
+    return;
+  }
+
+  if (existing) {
+    existing.qty = currentInCart + qtyToAdd;
+    existing.stock = maxStock;
+  } else {
     cartItems.push({
+      id: currentDetailProduct.id,
+      product_id: currentDetailProduct.id,
       title: titleWithVariant,
       price: currentDetailProduct.price,
+      originalPrice: currentDetailProduct.originalPrice,
       image: mainImg,
-      qty: 1,
+      qty: qtyToAdd,
+      stock: maxStock,
       shopName: shopName,
     });
   }
@@ -1830,7 +1897,7 @@ function addCurrentDetailToCart() {
 
   showToast(
     "Đã thêm vào giỏ hàng!",
-    `${currentDetailQty}x ${titleWithVariant}`,
+    `${qtyToAdd}x ${titleWithVariant}`,
   );
 }
 

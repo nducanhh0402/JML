@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Chi Tiết Sản Phẩm - JML Store</title>
+    <link rel="icon" type="image/svg+xml" href="../admin/jml-store-icon.svg" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" />
+    <script src="../shared/js/auth.js"></script>
+  </head>
+  <body>
+    <!-- Top Utilities Bar -->
+    <div class="top-bar">
+      <div class="container top-bar-inner">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <span>📞 Hotline: <strong style="color: #fff">1900 8888</strong> (24/7)</span>
+          <span style="opacity: 0.4">|</span>
+          <span>✉️ Hỗ trợ: <strong style="color: #fff">cskh@jmlstore.vn</strong></span>
+        </div>
+        <div class="top-links">
+          <a href="index.html">Trang Chủ</a>
+          <a href="products.html" style="color: #fb923c; font-weight: 700">🛍️ Tất Cả Sản Phẩm</a>
+          <a href="cart.html">Giỏ Hàng</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sticky Header -->
+    <header class="header-main">
+      <div class="container header-container">
+        <a class="logo" href="index.html" title="Về Trang Chủ JML Store">
+          <span class="logo-badge">JML</span>
+          <span style="letter-spacing: -0.5px; font-weight: 800">STORE</span>
+        </a>
+
+        <div class="search-wrapper">
+          <form class="search-box" id="detailSearchForm">
+            <input
+              class="search-input"
+              id="detailSearchInput"
+              placeholder="Tìm kiếm sản phẩm cao cấp, thương hiệu độc quyền..."
+              type="text"
+            />
+            <button class="search-btn" type="submit">
+              <svg
+                fill="none"
+                height="15"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                viewBox="0 0 24 24"
+                width="15"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+              </svg>
+              Tìm Kiếm
+            </button>
+          </form>
+        </div>
+
+        <div class="header-actions">
+          <a
+            href="cart.html"
+            aria-label="Giỏ hàng"
+            class="cart-btn"
+            style="text-decoration: none"
+            title="Xem giỏ hàng"
+          >
+            <svg
+              fill="none"
+              height="22"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="22"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path
+                d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+              ></path>
+            </svg>
+            <div class="cart-badge" id="cartBadgeCount">0</div>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 24px; padding-bottom: 48px">
+      <div id="productDetailRoot">
+        <!-- Trạng thái Đang tải mặc định -->
+        <div class="product-detail-wrapper">
+          <div class="detail-breadcrumb-bar">
+            <div class="skeleton-block" style="width: 150px; height: 36px"></div>
+            <div class="skeleton-block" style="width: 280px; height: 20px"></div>
+          </div>
+          <div class="product-showcase-grid">
+            <div>
+              <div class="skeleton-block" style="width: 100%; aspect-ratio: 1/1"></div>
+              <div class="gallery-thumbs-row">
+                <div class="skeleton-block" style="height: 82px"></div>
+                <div class="skeleton-block" style="height: 82px"></div>
+                <div class="skeleton-block" style="height: 82px"></div>
+                <div class="skeleton-block" style="height: 82px"></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div class="skeleton-block" style="width: 45%; height: 24px"></div>
+              <div class="skeleton-block" style="width: 90%; height: 34px"></div>
+              <div class="skeleton-block" style="width: 100%; height: 110px"></div>
+              <div class="skeleton-block" style="width: 70%; height: 42px"></div>
+              <div class="skeleton-block" style="width: 100%; height: 52px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Lightbox phóng to ảnh -->
+    <div class="detail-lightbox-overlay" id="detailLightbox" onclick="closeDetailLightbox(event)">
+      <div class="detail-lightbox-box" onclick="event.stopPropagation()">
+        <button class="detail-lightbox-close" onclick="closeDetailLightbox()" aria-label="Đóng">✕</button>
+        <button class="gallery-nav-btn gallery-nav-prev" onclick="stepDetailImage(-1)" aria-label="Ảnh trước">❮</button>
+        <img id="lightboxImg" src="" alt="Phóng to sản phẩm" />
+        <button class="gallery-nav-btn gallery-nav-next" onclick="stepDetailImage(1)" aria-label="Ảnh tiếp">❯</button>
+        <div class="detail-lightbox-caption">
+          <span id="lightboxAngleText">Ảnh sản phẩm</span>
+          <span id="lightboxIndexText">1 / 1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-bottom" style="border-top: none; padding-top: 0">
+          <span>© 2026 JML Store Marketplace. Cam kết 100% hàng chính hãng.</span>
+          <div style="display: flex; gap: 16px">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Danh sách sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="product-detail.js"></script>
+  </body>
+</html>
