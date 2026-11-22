@@ -179,17 +179,14 @@ def vnpay_return_callback(request: Request):
     if not is_valid_hash:
         error_msg = "Chữ ký số không hợp lệ (Sai mã checksum bảo mật HMAC-SHA512)!"
         if "text/html" in request.headers.get("accept", ""):
-            return HTMLResponse(
-                content=render_payment_result_html(
-                    is_success=False,
-                    title="Thanh toán thất bại",
-                    message=error_msg,
-                    order_key=order_key,
-                    transaction_no=transaction_no,
-                    amount=amount,
-                    bank_code=bank_code
-                ),
-                status_code=400
+            import urllib.parse
+            from fastapi.responses import RedirectResponse
+            q_copy = dict(query_params)
+            q_copy["vnp_ResponseCode"] = "97"
+            q_copy["error_detail"] = error_msg
+            return RedirectResponse(
+                url=f"/frontend/user/payment-result.html?{urllib.parse.urlencode(q_copy)}",
+                status_code=303
             )
         return JSONResponse(
             status_code=400,
@@ -277,16 +274,11 @@ def vnpay_return_callback(request: Request):
         conn.close()
 
     if "text/html" in request.headers.get("accept", ""):
-        return HTMLResponse(
-            content=render_payment_result_html(
-                is_success=is_success,
-                title="Thanh toán thành công" if is_success else "Thanh toán thất bại",
-                message=response_desc,
-                order_key=order_key,
-                transaction_no=transaction_no,
-                amount=amount,
-                bank_code=bank_code
-            )
+        import urllib.parse
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(
+            url=f"/frontend/user/payment-result.html?{urllib.parse.urlencode(query_params)}",
+            status_code=303
         )
 
     return {

@@ -60,6 +60,10 @@ app.include_router(review_router)
 app.include_router(admin_router)
 app.include_router(homepage_router)
 
+# Mount static files cho Frontend (UI người dùng, checkout, kết quả thanh toán VNPAY)
+if os.path.exists("frontend"):
+    app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+
 @app.get("/", include_in_schema=False)
 def root():
     return {
