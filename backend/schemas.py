@@ -198,7 +198,6 @@ class VNPayPaymentResponse(BaseModel):
     payment_url: str
 
 
-=======
 class OrderStatusUpdate(BaseModel):
     status: Literal["preparing", "shipping", "delivered", "released", "dispute", "cancelled"]
     note: str = Field(default="", max_length=255)

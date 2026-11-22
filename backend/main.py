@@ -17,7 +17,7 @@ from backend.src.modules.category.router import router as category_router
 from backend.src.modules.product.router import router as product_router
 from backend.src.modules.order.router import router as order_router
 from backend.src.modules.seller.router import router as seller_router
-from backend.src.modules.voucher.router import router as voucher_router
+from backend.src.modules.voucher.router import router as voucher_router, admin_router as voucher_admin_router
 from backend.src.modules.cart.router import router as cart_router
 from backend.src.modules.payment.router import router as payment_router
 from backend.src.modules.review.router import router as review_router
@@ -55,6 +55,7 @@ app.include_router(product_router)
 app.include_router(order_router)
 app.include_router(seller_router)
 app.include_router(voucher_router)
+app.include_router(voucher_admin_router)
 app.include_router(cart_router)
 app.include_router(payment_router)
 app.include_router(review_router)
