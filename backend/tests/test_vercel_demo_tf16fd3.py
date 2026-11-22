@@ -91,6 +91,7 @@ def test_landing_page_links_and_responsive_breakpoints():
 def test_readme_documents_vercel_demo_section():
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     assert "Vercel Live Demo" in readme
+    assert "https://jml-teal.vercel.app" in readme
     assert "vercel.json" in readme
     for route in ("/buyer/index.html", "/buyer/products.html", "/user/checkout.html", "/auth/index.html", "/admin/index.html"):
         assert route in readme, f"README chưa ghi đường dẫn demo {route}"

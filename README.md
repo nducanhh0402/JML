@@ -31,27 +31,27 @@
 
 Giao diện tĩnh (`frontend/`) được cấu hình sẵn bằng [`vercel.json`](./vercel.json) (`outputDirectory: "frontend"`, rewrite `/frontend/:path* -> /:path*`) để triển khai trực tiếp lên **Vercel**, tương thích hiển thị cả **Máy tính (Desktop)** và **Điện thoại (Mobile)**.
 
+- **Link Demo trực tuyến (Vercel Production):** [https://jml-teal.vercel.app](https://jml-teal.vercel.app)
 - **Triển khai nhanh lên Vercel:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnducanhh0402%2FJML)
-- **Đường dẫn Demo chính (sau khi Import repo trên Vercel):** `https://<ten-du-an>.vercel.app/`
 
 ### Danh sách các trang chính kiểm tra trên Desktop & Mobile
 
-| Phân hệ / Trang chính | Đường dẫn trên Vercel | Kiểm tra Desktop (1440px) | Kiểm tra Mobile (375px) |
+| Phân hệ / Trang chính | Đường dẫn Demo trực tuyến trên Vercel | Kiểm tra Desktop (1440px) | Kiểm tra Mobile (375px) |
 | :--- | :--- | :---: | :---: |
-| **Cổng Demo tổng hợp (Landing)** | `/` | ✅ | ✅ |
-| **Trang chủ Người mua (Buyer)** | `/buyer/index.html` | ✅ | ✅ |
-| **Danh sách & Bộ lọc sản phẩm** | `/buyer/products.html` | ✅ | ✅ |
-| **Chi tiết sản phẩm & Đánh giá** | `/buyer/product-detail.html?id=101` | ✅ | ✅ |
-| **Giỏ hàng & Mã giảm giá** | `/buyer/cart.html` | ✅ | ✅ |
-| **Đặt hàng (Checkout)** | `/user/checkout.html` | ✅ | ✅ |
-| **Lịch sử & Trạng thái đơn hàng** | `/user/orders.html` | ✅ | ✅ |
-| **Hồ sơ cá nhân & Đổi mật khẩu** | `/user/profile.html` | ✅ | ✅ |
-| **Sổ địa chỉ nhận hàng** | `/user/addresses.html` | ✅ | ✅ |
-| **Đăng nhập / Đăng ký 3D** | `/auth/index.html` | ✅ | ✅ |
-| **Kênh Người bán (Seller Center)** | `/seller/index.html` | ✅ | ✅ |
-| **Quản trị Sàn (Admin Portal)** | `/admin/index.html` | ✅ | ✅ |
-| **Quản lý Danh mục & Thương hiệu** | `/admin/categories_brands.html` | ✅ | ✅ |
-| **Quản lý Sản phẩm Admin** | `/admin/products.html` | ✅ | ✅ |
+| **Cổng Demo tổng hợp (Landing)** | [https://jml-teal.vercel.app/](https://jml-teal.vercel.app/) | ✅ | ✅ |
+| **Trang chủ Người mua (Buyer)** | [https://jml-teal.vercel.app/buyer/index.html](https://jml-teal.vercel.app/buyer/index.html) | ✅ | ✅ |
+| **Danh sách & Bộ lọc sản phẩm** | [https://jml-teal.vercel.app/buyer/products.html](https://jml-teal.vercel.app/buyer/products.html) | ✅ | ✅ |
+| **Chi tiết sản phẩm & Đánh giá** | [https://jml-teal.vercel.app/buyer/product-detail.html?id=101](https://jml-teal.vercel.app/buyer/product-detail.html?id=101) | ✅ | ✅ |
+| **Giỏ hàng & Mã giảm giá** | [https://jml-teal.vercel.app/buyer/cart.html](https://jml-teal.vercel.app/buyer/cart.html) | ✅ | ✅ |
+| **Đặt hàng (Checkout)** | [https://jml-teal.vercel.app/user/checkout.html](https://jml-teal.vercel.app/user/checkout.html) | ✅ | ✅ |
+| **Lịch sử & Trạng thái đơn hàng** | [https://jml-teal.vercel.app/user/orders.html](https://jml-teal.vercel.app/user/orders.html) | ✅ | ✅ |
+| **Hồ sơ cá nhân & Đổi mật khẩu** | [https://jml-teal.vercel.app/user/profile.html](https://jml-teal.vercel.app/user/profile.html) | ✅ | ✅ |
+| **Sổ địa chỉ nhận hàng** | [https://jml-teal.vercel.app/user/addresses.html](https://jml-teal.vercel.app/user/addresses.html) | ✅ | ✅ |
+| **Đăng nhập / Đăng ký 3D** | [https://jml-teal.vercel.app/auth/index.html](https://jml-teal.vercel.app/auth/index.html) | ✅ | ✅ |
+| **Kênh Người bán (Seller Center)** | [https://jml-teal.vercel.app/seller/index.html](https://jml-teal.vercel.app/seller/index.html) | ✅ | ✅ |
+| **Quản trị Sàn (Admin Portal)** | [https://jml-teal.vercel.app/admin/index.html](https://jml-teal.vercel.app/admin/index.html) | ✅ | ✅ |
+| **Quản lý Danh mục & Thương hiệu** | [https://jml-teal.vercel.app/admin/categories_brands.html](https://jml-teal.vercel.app/admin/categories_brands.html) | ✅ | ✅ |
+| **Quản lý Sản phẩm Admin** | [https://jml-teal.vercel.app/admin/products.html](https://jml-teal.vercel.app/admin/products.html) | ✅ | ✅ |
 
 ---
 
