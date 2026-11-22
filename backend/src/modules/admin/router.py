@@ -1,4 +1,5 @@
 import json
+import re
 import random
 from datetime import date as date_type
 from datetime import datetime
@@ -192,9 +193,84 @@ def reject_pending_product(product_id: int):
 
     return {"message": f"Đã từ chối sản phẩm #{product_id}."}
 
+def _validate_admin_product(payload: ProductCreate, exclude_id: int | None = None):
+    """Kiểm tra hợp lệ sản phẩm: giá > 0, tồn kho không âm, tên không trùng, giới hạn loại & dung lượng ảnh (TF171B5)."""
+    # 1. Kiểm tra giá lớn hơn 0
+    if payload.price <= 0:
+        raise HTTPException(status_code=400, detail="Giá sản phẩm phải lớn hơn 0")
+
+    # 2. Kiểm tra tồn kho không âm
+    stock_val = payload.stock if payload.stock is not None else 100
+    if stock_val < 0:
+        raise HTTPException(status_code=400, detail="Tồn kho không được âm")
+
+    # 3. Kiểm tra tên không trùng
+    clean_title = (payload.title or "").strip()
+    if not clean_title:
+        raise HTTPException(status_code=400, detail="Tên sản phẩm không được để trống")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if exclude_id is not None:
+        cursor.execute(
+            "SELECT id FROM products WHERE LOWER(TRIM(title)) = LOWER(?) AND id != ?;",
+            (clean_title, exclude_id),
+        )
+    else:
+        cursor.execute(
+            "SELECT id FROM products WHERE LOWER(TRIM(title)) = LOWER(?);",
+            (clean_title,),
+        )
+    existing = cursor.fetchone()
+    conn.close()
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Tên sản phẩm '{clean_title}' đã tồn tại trên sàn")
+
+    # 4. Giới hạn loại và dung lượng ảnh
+    if payload.image:
+        img_str = payload.image.strip()
+        if img_str.startswith("data:"):
+            # Kiểm tra loại mime (chỉ chấp nhận: image/jpeg, image/jpg, image/png, image/webp, image/gif)
+            mime_match = re.match(r"^data:([^;]+);base64,", img_str)
+            if not mime_match or mime_match.group(1).lower() not in [
+                "image/jpeg",
+                "image/jpg",
+                "image/png",
+                "image/webp",
+                "image/gif",
+            ]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Loại ảnh không hợp lệ. Chỉ chấp nhận các định dạng JPG, JPEG, PNG, WEBP, GIF",
+                )
+            # Kiểm tra dung lượng (giới hạn tối đa 2MB)
+            b64_content = img_str.split(",", 1)[1] if "," in img_str else ""
+            approx_size = len(b64_content) * 3 / 4
+            if approx_size > 2 * 1024 * 1024:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Dung lượng ảnh vượt quá giới hạn tối đa 2MB",
+                )
+        elif img_str.startswith("http://") or img_str.startswith("https://"):
+            valid_exts = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+            clean_url = img_str.lower().split("?")[0]
+            if not any(clean_url.endswith(ext) for ext in valid_exts):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Đường dẫn ảnh phải có định dạng hợp lệ: .jpg, .jpeg, .png, .webp, .gif",
+                )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Ảnh sản phẩm không hợp lệ (phải là URL http/https hoặc base64 image)",
+            )
+
+
 @router.post("/products")
 def create_or_approve_product(payload: ProductCreate):
-    """Admin thêm mới sản phẩm lên sàn."""
+    """Admin thêm mới sản phẩm lên sàn (TF171B5: kiểm tra giá > 0, tồn kho >= 0, tên duy nhất, giới hạn loại & dung lượng ảnh)."""
+    _validate_admin_product(payload)
+
     orig_price = payload.original_price or int(payload.price * 1.2)
     discount_pct = max(1, round((1 - payload.price / max(orig_price, 1)) * 100))
     discount_str = f"-{discount_pct}%"
@@ -211,11 +287,11 @@ def create_or_approve_product(payload: ProductCreate):
         VALUES (?, ?, ?, ?, ?, 5.0, 0, ?, ?, ?, 'Mới Lên Kệ', ?, ?, 'approved');
     """, (
         payload.category,
-        payload.title,
+        payload.title.strip(),
         payload.price,
         orig_price,
         discount_str,
-        payload.stock or 100,
+        payload.stock if payload.stock is not None else 100,
         json.dumps(images),
         json.dumps(angles),
         clean_shop_name,
@@ -226,6 +302,52 @@ def create_or_approve_product(payload: ProductCreate):
     conn.close()
 
     return {"message": f"Đã thêm sản phẩm '{payload.title}' vào sàn thành công!", "id": new_id}
+
+
+@router.put("/products/{product_id}")
+def update_product(product_id: int, payload: ProductCreate):
+    """Admin cập nhật sản phẩm (TF171B5: kiểm tra giá > 0, tồn kho >= 0, tên duy nhất, giới hạn loại & dung lượng ảnh)."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM products WHERE id = ?;", (product_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"Sản phẩm #{product_id} không tồn tại")
+    conn.close()
+
+    _validate_admin_product(payload, exclude_id=product_id)
+
+    orig_price = payload.original_price or int(payload.price * 1.2)
+    discount_pct = max(1, round((1 - payload.price / max(orig_price, 1)) * 100))
+    discount_str = f"-{discount_pct}%"
+    images = [payload.image] * 4
+    angles = ["Chính diện", "Góc nghiêng", "Cận cảnh", "Thực tế"]
+    clean_shop_name = (payload.shop_name or "JML Official Store").strip()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE products
+        SET category = ?, title = ?, price = ?, original_price = ?, discount = ?,
+            total_stock = ?, images_json = ?, angles_json = ?, shop_name = ?, is_flash_sale = ?
+        WHERE id = ?;
+    """, (
+        payload.category,
+        payload.title.strip(),
+        payload.price,
+        orig_price,
+        discount_str,
+        payload.stock if payload.stock is not None else 100,
+        json.dumps(images),
+        json.dumps(angles),
+        clean_shop_name,
+        1 if payload.is_flash_sale else 0,
+        product_id
+    ))
+    conn.commit()
+    conn.close()
+
+    return {"message": f"Cập nhật sản phẩm #{product_id} thành công!"}
 
 @router.get("/orders")
 def get_admin_orders(

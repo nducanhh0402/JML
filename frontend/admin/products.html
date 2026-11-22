@@ -280,10 +280,17 @@
             <!-- Modal Form Body -->
             <form id="productForm" class="p-5 overflow-y-auto space-y-4 text-xs">
                 <input type="hidden" id="productId">
+
+                <!-- Alert Validation Error Message -->
+                <div id="formValidationAlert" class="hidden p-3 rounded-lg bg-danger-50 border border-danger-200 text-danger-700 text-xs flex items-start gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 mt-0.5 text-danger-500"></i>
+                    <span id="formValidationMessage" class="flex-1 font-medium"></span>
+                </div>
                 
                 <div>
                     <label class="block font-semibold text-neutral-700 mb-1">Tên sản phẩm <span class="text-danger-500">*</span></label>
                     <input type="text" id="title" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500" placeholder="VD: Đồng hồ nam dây da cổ điển..." required>
+                    <p class="text-[10px] text-neutral-400 mt-0.5">Tên sản phẩm phải là duy nhất, không trùng lặp trên sàn.</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -300,11 +307,13 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="block font-semibold text-neutral-700 mb-1">Giá bán (VNĐ) <span class="text-danger-500">*</span></label>
-                        <input type="number" id="price" min="1000" step="1000" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500" placeholder="100000" required>
+                        <input type="number" id="price" min="1" step="1000" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500" placeholder="100000" required>
+                        <p class="text-[10px] text-neutral-400 mt-0.5">Giá bắt buộc > 0 VNĐ</p>
                     </div>
                     <div>
                         <label class="block font-semibold text-neutral-700 mb-1">Tồn kho <span class="text-danger-500">*</span></label>
                         <input type="number" id="stock" min="0" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500" placeholder="50" required>
+                        <p class="text-[10px] text-neutral-400 mt-0.5">Tối thiểu 0 (không âm)</p>
                     </div>
                     <div>
                         <label class="block font-semibold text-neutral-700 mb-1">Trạng thái</label>
@@ -317,13 +326,14 @@
 
                 <!-- Image URL & File Upload with Preview -->
                 <div>
-                    <label class="block font-semibold text-neutral-700 mb-1">Ảnh sản phẩm</label>
+                    <label class="block font-semibold text-neutral-700 mb-1">Ảnh sản phẩm <span class="text-neutral-400 text-[11px] font-normal">(Chấp nhận JPG, PNG, WEBP, GIF; Tối đa 2MB)</span></label>
                     <div class="space-y-2">
-                        <input type="text" id="imageUrlInput" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500" placeholder="Nhập liên kết ảnh URL trực tiếp (https://...)">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] text-neutral-400">hoặc tải từ máy:</span>
-                            <input type="file" id="imageFileInput" accept="image/*" class="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                        <input type="text" id="imageUrlInput" class="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500" placeholder="Nhập liên kết ảnh URL trực tiếp (vd: https://.../anh.jpg)">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <span class="text-[11px] text-neutral-400 shrink-0">hoặc tải từ máy:</span>
+                            <input type="file" id="imageFileInput" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" class="text-xs file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
                         </div>
+                        <p id="imageFileInfo" class="hidden text-[11px] text-emerald-600 font-semibold"></p>
                     </div>
                     <div id="imagePreviewContainer" class="mt-2.5 flex items-center gap-2">
                         <img id="previewImg" src="" alt="Preview" class="w-16 h-16 object-cover rounded-lg border border-neutral-200 hidden">
@@ -684,28 +694,91 @@
             renderFilteredTable();
         }
 
-        // Image Preview Handler
+        // Image Preview & Validation Handler (TF171B5)
         const imageUrlInput = document.getElementById('imageUrlInput');
         const imageFileInput = document.getElementById('imageFileInput');
         const previewImg = document.getElementById('previewImg');
+        const imageFileInfo = document.getElementById('imageFileInfo');
+        const formErrorBox = document.getElementById('formValidationAlert');
+        const formErrorMessage = document.getElementById('formValidationMessage');
+
+        const ALLOWED_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+        const ALLOWED_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+
+        function showFormError(msg) {
+            if (formErrorBox && formErrorMessage) {
+                formErrorMessage.textContent = msg;
+                formErrorBox.classList.remove('hidden');
+                formErrorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                alert(msg);
+            }
+        }
+
+        function clearFormError() {
+            if (formErrorBox && formErrorMessage) {
+                formErrorMessage.textContent = '';
+                formErrorBox.classList.add('hidden');
+            }
+        }
 
         imageUrlInput.addEventListener('input', () => {
             const val = imageUrlInput.value.trim();
             if (val) {
+                // Kiểm tra định dạng url ảnh
+                const clean = val.toLowerCase().split('?')[0];
+                const isValidExt = ALLOWED_IMAGE_EXTS.some(ext => clean.endsWith(ext));
+                if (!isValidExt) {
+                    showFormError('URL ảnh không đúng định dạng. Chỉ chấp nhận liên kết kết thúc bằng .jpg, .jpeg, .png, .webp, .gif!');
+                    previewImg.classList.add('hidden');
+                    return;
+                }
+                clearFormError();
                 previewImg.src = val;
                 previewImg.classList.remove('hidden');
+                if (imageFileInfo) imageFileInfo.classList.add('hidden');
             } else if (!imageFileInput.files[0]) {
                 previewImg.classList.add('hidden');
+                clearFormError();
             }
         });
 
         imageFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                // 1. Kiểm tra giới hạn loại định dạng ảnh
+                const ext = '.' + file.name.split('.').pop().toLowerCase();
+                const isTypeValid = ALLOWED_IMAGE_MIMES.includes(file.type.toLowerCase()) || ALLOWED_IMAGE_EXTS.includes(ext);
+                if (!isTypeValid) {
+                    showFormError(`Loại ảnh không được hỗ trợ (${ext}). Chỉ chấp nhận file JPG, JPEG, PNG, WEBP, GIF!`);
+                    e.target.value = '';
+                    previewImg.src = '';
+                    previewImg.classList.add('hidden');
+                    if (imageFileInfo) imageFileInfo.classList.add('hidden');
+                    return;
+                }
+
+                // 2. Kiểm tra giới hạn dung lượng ảnh (Tối đa 2MB)
+                if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    showFormError(`Dung lượng ảnh vượt quá giới hạn 2MB (Ảnh hiện tại: ${sizeMB}MB). Vui lòng nén hoặc chọn ảnh nhỏ hơn!`);
+                    e.target.value = '';
+                    previewImg.src = '';
+                    previewImg.classList.add('hidden');
+                    if (imageFileInfo) imageFileInfo.classList.add('hidden');
+                    return;
+                }
+
+                clearFormError();
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     previewImg.src = ev.target.result;
                     previewImg.classList.remove('hidden');
+                    if (imageFileInfo) {
+                        imageFileInfo.textContent = `✓ ${file.name} (${(file.size / 1024).toFixed(0)} KB) - Định dạng & dung lượng hợp lệ`;
+                        imageFileInfo.classList.remove('hidden');
+                    }
                 };
                 reader.readAsDataURL(file);
             }
@@ -713,20 +786,24 @@
 
         // Modal Helpers
         function openAddModal() {
+            clearFormError();
             document.getElementById('modalTitle').textContent = 'Thêm Sản Phẩm Mới';
             document.getElementById('productId').value = '';
             document.getElementById('productForm').reset();
             previewImg.src = '';
             previewImg.classList.add('hidden');
+            if (imageFileInfo) imageFileInfo.classList.add('hidden');
             document.getElementById('productModal').classList.remove('hidden');
             if (window.lucide) lucide.createIcons();
         }
 
         function closeModal() {
+            clearFormError();
             document.getElementById('productModal').classList.add('hidden');
         }
 
         async function openEditModal(id) {
+            clearFormError();
             const prod = ALL_PRODUCTS.find(p => p.id === id);
             if (!prod) return;
 
@@ -738,6 +815,7 @@
             document.getElementById('price').value = prod.price || 0;
             document.getElementById('stock').value = prod.total_stock ?? prod.stock ?? 0;
             document.getElementById('status').value = prod.status || 'approved';
+            if (imageFileInfo) imageFileInfo.classList.add('hidden');
 
             let imgUrl = '';
             if (Array.isArray(prod.images) && prod.images.length > 0) imgUrl = prod.images[0];
@@ -755,9 +833,11 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // Form Submit
+        // Form Submit with Validation (TF171B5)
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            clearFormError();
+
             const id = document.getElementById('productId').value;
             const title = document.getElementById('title').value.trim();
             const category = document.getElementById('modalCategory').value;
@@ -766,6 +846,60 @@
             const stock = parseInt(document.getElementById('stock').value, 10);
             const status = document.getElementById('status').value;
             const image = previewImg.src || 'https://placehold.co/400x400?text=Product';
+
+            // 1. Kiểm tra tên không để trống
+            if (!title) {
+                showFormError('Tên sản phẩm không được để trống!');
+                document.getElementById('title').focus();
+                return;
+            }
+
+            // 2. Kiểm tra tên không trùng (unique name validation)
+            const isDuplicate = ALL_PRODUCTS.some(p => {
+                const currentId = String(id || '');
+                if (currentId && String(p.id) === currentId) return false;
+                return (p.title || '').trim().toLowerCase() === title.toLowerCase();
+            });
+            if (isDuplicate) {
+                showFormError(`Tên sản phẩm "${title}" đã tồn tại trên hệ thống. Vui lòng đặt tên khác để tránh trùng lặp!`);
+                document.getElementById('title').focus();
+                return;
+            }
+
+            // 3. Kiểm tra giá lớn hơn 0
+            if (isNaN(price) || price <= 0) {
+                showFormError('Giá sản phẩm bắt buộc phải lớn hơn 0 VNĐ!');
+                document.getElementById('price').focus();
+                return;
+            }
+
+            // 4. Kiểm tra tồn kho không âm
+            if (isNaN(stock) || stock < 0) {
+                showFormError('Số lượng tồn kho không được là số âm (tối thiểu là 0)!');
+                document.getElementById('stock').focus();
+                return;
+            }
+
+            // 5. Kiểm tra giới hạn loại và dung lượng ảnh
+            if (image && image.startsWith('data:image/')) {
+                const mimeMatch = image.match(/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/);
+                if (!mimeMatch || !ALLOWED_IMAGE_MIMES.includes(mimeMatch[1].toLowerCase())) {
+                    showFormError('Loại ảnh không hợp lệ! Chỉ chấp nhận file JPG, JPEG, PNG, WEBP, GIF.');
+                    return;
+                }
+                const b64Data = image.split(',')[1] || '';
+                const approxSize = b64Data.length * 3 / 4;
+                if (approxSize > MAX_IMAGE_SIZE_BYTES) {
+                    showFormError('Dung lượng ảnh vượt quá giới hạn cho phép (tối đa 2MB)!');
+                    return;
+                }
+            } else if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
+                const clean = image.toLowerCase().split('?')[0];
+                if (!clean.includes('placehold.co') && !ALLOWED_IMAGE_EXTS.some(ext => clean.endsWith(ext))) {
+                    showFormError('Đường dẫn ảnh phải kết thúc bằng đuôi mở rộng hợp lệ: .jpg, .jpeg, .png, .webp, .gif!');
+                    return;
+                }
+            }
 
             const payload = { title, category, brand, price, stock, status, image };
             const isEdit = Boolean(id);
@@ -784,10 +918,10 @@
                     await fetchProducts();
                 } else {
                     const err = await res.json().catch(() => ({}));
-                    alert(`Lỗi: ${err.detail || 'Không thể lưu sản phẩm'}`);
+                    showFormError(`Lỗi máy chủ: ${err.detail || 'Không thể lưu sản phẩm'}`);
                 }
             } catch (err) {
-                alert('Lỗi kết nối tới máy chủ khi lưu sản phẩm.');
+                showFormError('Lỗi kết nối tới máy chủ khi lưu sản phẩm.');
             }
         });
 
