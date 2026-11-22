@@ -359,6 +359,19 @@ def get_admin_orders(
     limit: int = Query(default=20, ge=1, le=100),
 ):
     """Danh sách đơn admin có lọc trạng thái, khoảng ngày, tìm mã đơn và phân trang."""
+    if hasattr(status, "default"):
+        status = None
+    if hasattr(date_from, "default"):
+        date_from = None
+    if hasattr(date_to, "default"):
+        date_to = None
+    if hasattr(search, "default"):
+        search = ""
+    if hasattr(page, "default"):
+        page = 1
+    if hasattr(limit, "default"):
+        limit = 20
+
     if date_from and date_to and date_from > date_to:
         raise HTTPException(status_code=400, detail="date_from không được lớn hơn date_to")
 

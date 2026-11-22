@@ -31,12 +31,17 @@ class CursorWrapper:
     def __init__(self, cursor):
         self.cur = cursor
 
+    def _convert_sql(self, sql, args=None):
+        if args and "?" in sql:
+            return sql.replace("%", "%%").replace("?", "%s")
+        return sql.replace("?", "%s")
+
     def execute(self, sql, args=None):
-        sql_converted = sql.replace("?", "%s")
-        return self.cur.execute(sql_converted, args)
+        sql_converted = self._convert_sql(sql, args)
+        return self.cur.execute(sql_converted, args if args else None)
 
     def executemany(self, sql, args=None):
-        sql_converted = sql.replace("?", "%s")
+        sql_converted = self._convert_sql(sql, args)
         return self.cur.executemany(sql_converted, args)
 
     def fetchone(self):

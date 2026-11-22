@@ -170,13 +170,14 @@ class RegisterRequest(BaseModel):
         if len(v) > 191 or not _EMAIL_RE.match(v):
             raise ValueError("Email không hợp lệ!")
         return v.lower()
-    shop_badge: str = "TIÊU CHUẨN"
 
 
 class ShopUpdateRequest(BaseModel):
     shop_key: str
     name: str
     badge: str = "TIÊU CHUẨN"
+    owner_name: str = ""
+    phone: str = ""
     address: str = ""
 
 
@@ -199,7 +200,7 @@ class VNPayPaymentResponse(BaseModel):
 
 
 class OrderStatusUpdate(BaseModel):
-    status: Literal["preparing", "shipping", "delivered", "released", "dispute", "cancelled"]
+    status: str
     note: str = Field(default="", max_length=255)
 
 
