@@ -157,7 +157,8 @@ CREATE TABLE IF NOT EXISTS `banners` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX `idx_banner_active` (`is_active`),
-    INDEX `idx_banner_sort` (`sort_order`)
+    INDEX `idx_banner_sort` (`sort_order`),
+    INDEX `idx_banner_active_sort` (`is_active`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Du lieu mau banner trang chu

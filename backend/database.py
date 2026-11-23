@@ -523,6 +523,11 @@ def init_db(seed=False):
         "CREATE INDEX idx_order_created_status ON orders (created_at, status)",
         "CREATE INDEX idx_order_item_order_name ON order_items (order_key, name)",
         "CREATE INDEX idx_history_order_created ON order_status_history (order_key, created_at)",
+        # TF175BC: Index tối ưu truy vấn trang chủ (banner hoạt động, SP nổi bật, SP mới nhất, danh mục)
+        "CREATE INDEX idx_banners_active_sort ON banners (is_active, sort_order)",
+        "CREATE INDEX idx_products_status_rating_sold ON products (status, rating, sold)",
+        "CREATE INDEX idx_products_status_id ON products (status, id)",
+        "CREATE INDEX idx_products_status_category ON products (status, category)",
     ):
         try:
             cursor.execute(index_sql)
