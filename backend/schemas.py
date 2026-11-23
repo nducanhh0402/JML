@@ -242,5 +242,12 @@ class AdminOrderResponse(BaseModel):
     items: List[AdminOrderItemResponse] = []
 
 
+class RecentSearchCreate(BaseModel):
+    keyword: str = Field(..., max_length=200)
+    session_id: Optional[str] = Field(default=None, max_length=100)
+    user_id: Optional[int] = Field(default=None, ge=1)
+
+
+
 
 

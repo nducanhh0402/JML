@@ -1,13 +1,18 @@
 import json
 import math
+import re
 from typing import Any, Dict, List, Optional, Tuple
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
+from backend.schemas import RecentSearchCreate
 from backend.src.config.database import get_db_connection
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
 
 MAX_KEYWORD_LENGTH = 100
+MAX_RECENT_SEARCHES_PER_USER = 20
 LIKE_ESCAPE_CHAR = "!"
+_SEARCH_HISTORY_TABLE_READY = False
+_SESSION_ID_RE = re.compile(r"[^a-zA-Z0-9_-]")
 
 SORT_ORDER_SQL = {
     "newest": "p.id DESC",
@@ -400,6 +405,9 @@ def search_products(
     limit: Optional[int] = Query(None, ge=1, le=100, description="Alias của page_size"),
     offset: Optional[int] = Query(None, ge=0, description="Offset thủ công nếu dùng limit/offset"),
     empty_behavior: str = Query("default", description="'default' trả gợi ý mặc định; 'empty' trả mảng rỗng khi từ khóa rỗng"),
+    session_id: Optional[str] = Query(None, description="Mã phiên khách (dùng khi chưa đăng nhập để lưu lịch sử tìm kiếm)"),
+    save_history: bool = Query(True, description="Tự động lưu từ khóa tìm kiếm vào lịch sử người dùng"),
+    request: Request = None,
 ):
     """API tìm kiếm sản phẩm theo từ khóa kết hợp lọc, sắp xếp và phân trang."""
     effective_size = limit if limit is not None else page_size
@@ -430,6 +438,13 @@ def search_products(
         page_size=effective_size,
         keyword=raw_input,
     )
+    if not is_empty and save_history and (request is not None or session_id is not None):
+        try:
+            user_key, user_id = _resolve_search_actor(request, session_id=session_id)
+            _record_search_keyword(user_key=user_key, user_id=user_id, raw_keyword=normalized_kw)
+        except Exception:
+            pass
+
     result["keyword"] = normalized_kw
     result["raw_keyword"] = raw_input or ""
     result["is_empty_keyword"] = is_empty
@@ -440,6 +455,291 @@ def search_products(
         else f"Tìm thấy {result['total']} sản phẩm phù hợp với từ khóa '{normalized_kw}'."
     )
     return result
+
+
+# ==============================================================================
+# LƯU VÀ GỢI Ý TỪ KHÓA TÌM KIẾM GẦN ĐÂY (TF16EF3)
+# ==============================================================================
+def _extract_optional_user(request: Optional[Request]) -> Optional[Dict[str, Any]]:
+    """Giải mã user tùy chọn từ request.state.user hoặc header Authorization (không bắt buộc đăng nhập)."""
+    if request is None:
+        return None
+    if hasattr(request.state, "user") and isinstance(request.state.user, dict):
+        return request.state.user
+
+    auth_header = request.headers.get("Authorization") if hasattr(request, "headers") else None
+    if not auth_header:
+        return None
+    parts = auth_header.strip().split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+    try:
+        from backend.src.middlewares.auth_middleware import decode_access_token
+        return decode_access_token(parts[1])
+    except Exception:
+        return None
+
+
+def _resolve_search_actor(
+    request: Optional[Request] = None,
+    session_id: Optional[str] = None,
+    user_id: Optional[int] = None,
+) -> Tuple[str, Optional[int]]:
+    """Xác định định danh lưu lịch sử tìm kiếm: ưu tiên JWT user -> user_id -> session_id -> anonymous."""
+    user_payload = _extract_optional_user(request)
+    if user_payload and user_payload.get("sub") is not None:
+        try:
+            uid = int(user_payload["sub"])
+            return f"user:{uid}", uid
+        except (TypeError, ValueError):
+            sub_str = str(user_payload["sub"]).strip()
+            if sub_str:
+                return f"user:{sub_str}", None
+
+    if user_id is not None:
+        return f"user:{int(user_id)}", int(user_id)
+
+    raw_sid = session_id
+    if not raw_sid and request is not None and hasattr(request, "headers"):
+        raw_sid = request.headers.get("X-Session-Id")
+    if raw_sid:
+        clean_sid = _SESSION_ID_RE.sub("", str(raw_sid).strip())[:80]
+        if clean_sid:
+            return f"guest:{clean_sid}", None
+
+    return "guest:anonymous", None
+
+
+def _ensure_search_history_table(cursor) -> None:
+    """Đảm bảo bảng search_history tồn tại (chạy một lần trên mỗi process)."""
+    global _SEARCH_HISTORY_TABLE_READY
+    if _SEARCH_HISTORY_TABLE_READY:
+        return
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS search_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_key VARCHAR(120) NOT NULL,
+        user_id INT NULL,
+        keyword VARCHAR(100) NOT NULL,
+        keyword_normalized VARCHAR(100) NOT NULL,
+        search_count INT NOT NULL DEFAULT 1,
+        last_searched_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_search_history_user_keyword (user_key, keyword_normalized),
+        INDEX idx_search_history_user_recent (user_key, last_searched_at),
+        INDEX idx_search_history_user_id (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+    try:
+        cursor.execute("ALTER TABLE search_history MODIFY COLUMN last_searched_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6);")
+    except Exception:
+        pass
+    _SEARCH_HISTORY_TABLE_READY = True
+
+
+def _serialize_recent_search_row(r: dict) -> Dict[str, Any]:
+    last_at = r.get("last_searched_at")
+    return {
+        "id": r["id"],
+        "keyword": r["keyword"],
+        "search_count": int(r.get("search_count") or 1),
+        "last_searched_at": last_at.isoformat() if hasattr(last_at, "isoformat") else str(last_at or ""),
+    }
+
+
+def _fetch_recent_searches(
+    cursor,
+    user_key: str,
+    limit: int = 10,
+    prefix: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Lấy danh sách từ khóa tìm gần đây theo thứ tự mới nhất trước."""
+    _ensure_search_history_table(cursor)
+    norm_prefix, is_empty_prefix = _normalize_keyword(prefix)
+
+    if not is_empty_prefix:
+        escaped = norm_prefix.lower().replace(LIKE_ESCAPE_CHAR, LIKE_ESCAPE_CHAR * 2)
+        escaped = escaped.replace("%", f"{LIKE_ESCAPE_CHAR}%").replace("_", f"{LIKE_ESCAPE_CHAR}_")
+        pattern = f"{escaped}%"
+        cursor.execute(
+            """
+            SELECT id, keyword, search_count, last_searched_at
+            FROM search_history
+            WHERE user_key = ? AND keyword_normalized LIKE ? ESCAPE '!'
+            ORDER BY last_searched_at DESC, id DESC
+            LIMIT ?;
+            """,
+            (user_key, pattern, limit),
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, keyword, search_count, last_searched_at
+            FROM search_history
+            WHERE user_key = ?
+            ORDER BY last_searched_at DESC, id DESC
+            LIMIT ?;
+            """,
+            (user_key, limit),
+        )
+    return [_serialize_recent_search_row(r) for r in cursor.fetchall()]
+
+
+def _upsert_recent_search_in_cursor(cursor, user_key: str, user_id: Optional[int], normalized_kw: str) -> None:
+    """Lưu hoặc đẩy từ khóa lên đầu nếu đã tồn tại, đồng thời giới hạn tối đa MAX_RECENT_SEARCHES_PER_USER."""
+    _ensure_search_history_table(cursor)
+    kw_norm = normalized_kw.lower()
+
+    cursor.execute(
+        """
+        INSERT INTO search_history (user_key, user_id, keyword, keyword_normalized, search_count, last_searched_at)
+        VALUES (?, ?, ?, ?, 1, NOW(6))
+        ON DUPLICATE KEY UPDATE
+            keyword = VALUES(keyword),
+            user_id = COALESCE(VALUES(user_id), user_id),
+            search_count = search_count + 1,
+            last_searched_at = NOW(6);
+        """,
+        (user_key, user_id, normalized_kw, kw_norm),
+    )
+
+    cursor.execute(
+        """
+        SELECT id
+        FROM search_history
+        WHERE user_key = ?
+        ORDER BY last_searched_at DESC, id DESC
+        LIMIT 100 OFFSET ?;
+        """,
+        (user_key, MAX_RECENT_SEARCHES_PER_USER),
+    )
+    overflow_ids = [row["id"] for row in cursor.fetchall()]
+    if overflow_ids:
+        placeholders = ", ".join(["?"] * len(overflow_ids))
+        cursor.execute(f"DELETE FROM search_history WHERE id IN ({placeholders});", tuple(overflow_ids))
+
+
+def _record_search_keyword(user_key: str, user_id: Optional[int], raw_keyword: str) -> Optional[str]:
+    normalized_kw, is_empty = _normalize_keyword(raw_keyword)
+    if is_empty:
+        return None
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        _upsert_recent_search_in_cursor(cursor, user_key=user_key, user_id=user_id, normalized_kw=normalized_kw)
+        conn.commit()
+        return normalized_kw
+    finally:
+        conn.close()
+
+
+@router.get("/recent-searches")
+def get_recent_searches(
+    limit: int = Query(10, ge=1, le=20, description="Số lượng từ khóa gợi ý gần đây tối đa"),
+    prefix: Optional[str] = Query(None, description="Lọc theo tiền tố đang gõ để gợi ý lại"),
+    q: Optional[str] = Query(None, description="Alias của tham số prefix"),
+    session_id: Optional[str] = Query(None, description="Mã phiên khách nếu chưa đăng nhập"),
+    user_id: Optional[int] = Query(None, ge=1, description="Mã người dùng (tùy chọn khi test nội bộ)"),
+    request: Request = None,
+):
+    """Trả về danh sách các từ khóa tìm kiếm gần đây của người dùng để gợi ý lại."""
+    user_key, _ = _resolve_search_actor(request, session_id=session_id, user_id=user_id)
+    effective_prefix = prefix if prefix is not None else q
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        items = _fetch_recent_searches(cursor, user_key=user_key, limit=limit, prefix=effective_prefix)
+    finally:
+        conn.close()
+
+    return {
+        "user_key": user_key,
+        "total": len(items),
+        "keywords": [it["keyword"] for it in items],
+        "items": items,
+    }
+
+
+@router.post("/recent-searches")
+def save_recent_search(payload: RecentSearchCreate, request: Request = None):
+    """Lưu từ khóa tìm kiếm gần đây cho người dùng (chống trùng, đẩy từ khóa mới tìm lên đầu)."""
+    normalized_kw, is_empty = _normalize_keyword(payload.keyword)
+    if is_empty:
+        raise HTTPException(status_code=400, detail="Từ khóa tìm kiếm không được để trống.")
+
+    user_key, user_id = _resolve_search_actor(request, session_id=payload.session_id, user_id=payload.user_id)
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        _upsert_recent_search_in_cursor(cursor, user_key=user_key, user_id=user_id, normalized_kw=normalized_kw)
+        conn.commit()
+        items = _fetch_recent_searches(cursor, user_key=user_key, limit=10)
+    finally:
+        conn.close()
+
+    return {
+        "saved": True,
+        "keyword": normalized_kw,
+        "user_key": user_key,
+        "total": len(items),
+        "keywords": [it["keyword"] for it in items],
+        "items": items,
+    }
+
+
+@router.delete("/recent-searches")
+def clear_recent_searches(
+    session_id: Optional[str] = Query(None, description="Mã phiên khách nếu chưa đăng nhập"),
+    user_id: Optional[int] = Query(None, ge=1, description="Mã người dùng (tùy chọn)"),
+    request: Request = None,
+):
+    """Xóa toàn bộ lịch sử từ khóa tìm kiếm gần đây của người dùng hiện tại."""
+    user_key, _ = _resolve_search_actor(request, session_id=session_id, user_id=user_id)
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        _ensure_search_history_table(cursor)
+        cursor.execute("DELETE FROM search_history WHERE user_key = ?;", (user_key,))
+        deleted_count = cursor.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+
+    return {
+        "deleted": deleted_count,
+        "user_key": user_key,
+        "message": "Đã xóa toàn bộ lịch sử từ khóa tìm kiếm gần đây.",
+    }
+
+
+@router.delete("/recent-searches/{keyword_id}")
+def delete_recent_search_item(
+    keyword_id: int,
+    session_id: Optional[str] = Query(None, description="Mã phiên khách nếu chưa đăng nhập"),
+    user_id: Optional[int] = Query(None, ge=1, description="Mã người dùng (tùy chọn)"),
+    request: Request = None,
+):
+    """Xóa một từ khóa tìm kiếm gần đây theo ID thuộc về người dùng hiện tại."""
+    user_key, _ = _resolve_search_actor(request, session_id=session_id, user_id=user_id)
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        _ensure_search_history_table(cursor)
+        cursor.execute("DELETE FROM search_history WHERE id = ? AND user_key = ?;", (keyword_id, user_key))
+        affected = cursor.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+
+    if affected == 0:
+        raise HTTPException(status_code=404, detail="Không tìm thấy từ khóa trong lịch sử của bạn.")
+
+    return {
+        "deleted": True,
+        "id": keyword_id,
+        "user_key": user_key,
+    }
 
 
 @router.get("")
