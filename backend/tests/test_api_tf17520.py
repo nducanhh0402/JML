@@ -37,6 +37,38 @@ class _FakeHomepageCursor:
         if sql_lower.startswith("create table if not exists banners"):
             return
 
+        if sql_lower.startswith("create index"):
+            return
+
+        if "union all" in sql_lower and "'banner' as section" in sql_lower:
+            feat_limit = int(params[0]) if params and len(params) >= 1 else 10
+            lat_limit = int(params[1]) if params and len(params) >= 2 else 10
+            rows = []
+
+            active_banners = [b for b in self.state["banners"] if b.get("is_active", 1) == 1]
+            active_banners.sort(key=lambda x: x["sort_order"])
+            for b in active_banners:
+                rows.append({**b, "section": "banner", "product_count": 0})
+
+            approved = [p for p in self.state["products"] if p.get("status") == "approved"]
+            featured = sorted(approved, key=lambda x: (x["rating"], x["sold"]), reverse=True)[:feat_limit]
+            for p in featured:
+                rows.append({**p, "section": "featured", "product_count": 0})
+
+            latest = sorted(approved, key=lambda x: x["id"], reverse=True)[:lat_limit]
+            for p in latest:
+                rows.append({**p, "section": "latest", "product_count": 0})
+
+            counts = {}
+            for p in approved:
+                cat = p["category"]
+                counts[cat] = counts.get(cat, 0) + 1
+            for cat, cnt in sorted(counts.items(), key=lambda item: item[1], reverse=True):
+                rows.append({"section": "category", "category": cat, "product_count": cnt})
+
+            self._all = rows
+            return
+
         if sql_lower.startswith("select count(*) as cnt from banners"):
             self._one = {"cnt": len(self.state["banners"])}
             return
