@@ -760,3 +760,18 @@ def seed_initial_data(conn):
             conn.commit()
     except Exception:
         pass
+
+    # Thêm tự động tạo order_date/index khi startup để dashboard query luôn tối ưu.
+    try:
+        cursor.execute("SHOW COLUMNS FROM orders LIKE 'order_date';")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orders ADD COLUMN order_date DATE GENERATED ALWAYS AS (STR_TO_DATE(created_at, '%d/%m/%Y')) STORED")
+    except Exception:
+        pass
+    for index_sql in (
+        "CREATE INDEX idx_order_status_date ON orders (status, order_date)",
+    ):
+        try:
+            cursor.execute(index_sql)
+        except Exception:
+            pass
