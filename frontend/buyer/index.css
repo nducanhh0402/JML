@@ -57,7 +57,7 @@
         background-color: var(--background);
         color: var(--text-main);
         line-height: 1.5;
-        overflow-x: hidden;
+        overflow-x: clip;
         -webkit-font-smoothing: antialiased;
       }
 
@@ -2660,7 +2660,7 @@
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img {
