@@ -20,8 +20,6 @@
     '.flash-sale-header',
     '.promo-banner',
     '.page-header',
-    '.top-bar',
-    '.topbar',
     '[data-koi-banner]',
     '[class*="bg-gradient-to-"]',
   ].join(', ');
