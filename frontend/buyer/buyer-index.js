@@ -2206,13 +2206,27 @@ document.addEventListener("click", () => {
   closeAllDropdowns();
 });
 
-function addToCart(title, price, image, shopName = "") {
+async function addToCart(title, price, image, shopName = "") {
   const productShop = shopName || "Trungshop";
-  const existing = cartItems.find((item) => item.title === title);
+  const matchedProd =
+    FLASH_PRODUCTS.find((p) => p.title === title) ||
+    RECOMMEND_PRODUCTS.find((p) => p.title === title) ||
+    null;
+  const prodId = matchedProd ? matchedProd.id : null;
+
+  const existing = cartItems.find(
+    (item) => (prodId && (item.product_id === prodId || item.id === prodId)) || item.title === title,
+  );
   if (existing) {
     existing.qty = (existing.qty || 1) + 1;
+    if (prodId && !existing.product_id) {
+      existing.product_id = prodId;
+      existing.id = prodId;
+    }
   } else {
     cartItems.push({
+      id: prodId || Date.now(),
+      product_id: prodId,
       title,
       price,
       image,
@@ -2227,6 +2241,22 @@ function addToCart(title, price, image, shopName = "") {
     cartCountBadge.classList.remove("bounce");
     void cartCountBadge.offsetWidth; // Trigger reflow
     cartCountBadge.classList.add("bounce");
+  }
+
+  // Đồng bộ với Backend /api/cart/items nếu đã đăng nhập và có product_id thực
+  const user = typeof Auth !== "undefined" ? Auth.getUser() : null;
+  if (user && user.id && prodId) {
+    try {
+      await fetch(`${API_BASE_URL}/api/cart/items`, {
+        method: "POST",
+        headers: getIndexSearchHeaders(true),
+        body: JSON.stringify({
+          user_id: Number(user.id),
+          product_id: Number(prodId),
+          quantity: 1,
+        }),
+      });
+    } catch (e) {}
   }
 
   // Bật Toast notification
@@ -2482,6 +2512,9 @@ async function handleCustomerRegisterSubmit(e) {
 document.addEventListener("DOMContentLoaded", () => {
   syncCustomerAuthHeader();
   syncCartAfterLogin();
+  if (typeof loadIndexRecentSearches === "function") {
+    loadIndexRecentSearches();
+  }
 });
 
 // Lắng nghe sự kiện đăng nhập / đăng xuất để đồng bộ biểu tượng giỏ hàng tức thì
@@ -3157,9 +3190,77 @@ document.querySelectorAll(".reveal-on-scroll").forEach((el) => {
 // --------------------------------------------------------------------------
 // 8. TÌM KIẾM THÔNG MINH
 // --------------------------------------------------------------------------
-function handleSearch() {
+function getIndexSearchSessionId() {
+  let sid = localStorage.getItem("JML_SEARCH_SESSION_ID");
+  if (!sid) {
+    sid = "sess_" + Math.random().toString(36).slice(2, 11) + Date.now().toString(36);
+    localStorage.setItem("JML_SEARCH_SESSION_ID", sid);
+  }
+  return sid;
+}
+
+function getIndexSearchHeaders(includeJson = false) {
+  const headers = {};
+  if (includeJson) headers["Content-Type"] = "application/json";
+  const token =
+    typeof Auth !== "undefined"
+      ? Auth.getToken()
+      : localStorage.getItem("JML_ACCESS_TOKEN") || localStorage.getItem("access_token");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
+function escapeSearchHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+async function loadIndexRecentSearches() {
+  const keywordsWrap = document.querySelector(".search-keywords");
+  if (!keywordsWrap) return;
+  let bar = document.getElementById("indexRecentSearches");
+  if (!bar) {
+    bar = document.createElement("span");
+    bar.id = "indexRecentSearches";
+    bar.style.cssText = "display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;margin-right:8px;";
+    keywordsWrap.insertBefore(bar, keywordsWrap.firstChild);
+  }
+  try {
+    const qs = new URLSearchParams({
+      limit: "5",
+      session_id: getIndexSearchSessionId(),
+    });
+    const res = await fetch(`${API_BASE_URL}/api/products/recent-searches?${qs.toString()}`, {
+      headers: getIndexSearchHeaders(false),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const items = data.items || [];
+    if (!items.length) {
+      bar.innerHTML = "";
+      return;
+    }
+    bar.innerHTML =
+      `<span style="font-weight:600;color:var(--primary);">Gần đây:</span>` +
+      items
+        .map(
+          (item) =>
+            `<a href="#" onclick="applyQuickSearch('${escapeSearchHtml(item.keyword)}'); return false;" style="background:rgba(234,88,12,0.08);border-radius:99px;padding:1px 8px;">${escapeSearchHtml(item.keyword)}</a>`,
+        )
+        .join("");
+  } catch (e) {
+    // Bỏ qua khi backend chưa chạy
+  }
+}
+
+async function handleSearch() {
   const input = document.getElementById("searchInput");
-  const query = (input ? input.value : "").trim().toLowerCase();
+  const rawQuery = (input ? input.value : "").trim();
+  const query = rawQuery.toLowerCase();
 
   // Đảm bảo đang ở view home khi tìm kiếm
   showHomeView();
@@ -3169,11 +3270,51 @@ function handleSearch() {
     return;
   }
 
-  const matched = RECOMMEND_PRODUCTS.filter(
+  let matched = RECOMMEND_PRODUCTS.filter(
     (p) =>
       p.title.toLowerCase().includes(query) ||
       p.category.toLowerCase().includes(query),
   );
+
+  // Gọi API tìm kiếm + lưu từ khóa tìm kiếm gần đây (TF16EF3)
+  try {
+    const qs = new URLSearchParams({
+      q: rawQuery,
+      page: "1",
+      page_size: "24",
+      session_id: getIndexSearchSessionId(),
+    });
+    const res = await fetch(`${API_BASE_URL}/api/products/search?${qs.toString()}`, {
+      headers: getIndexSearchHeaders(false),
+    });
+    if (res.ok) {
+      const apiData = await res.json();
+      if (Array.isArray(apiData.items)) {
+        matched = apiData.items.map((item) => {
+          let imgs = ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"];
+          try {
+            const parsed = JSON.parse(item.images_json || "[]");
+            if (Array.isArray(parsed) && parsed.length) imgs = parsed;
+          } catch (e) {}
+          return {
+            id: item.id,
+            title: item.title,
+            category: item.category || "tech",
+            price: Number(item.price) || 0,
+            originalPrice: Number(item.original_price) || Number(item.price) || 0,
+            rating: Number(item.rating) || 4.9,
+            soldCount: Number(item.sold) || 0,
+            shopName: item.shop_name || "JML Official Store",
+            images: imgs,
+            image: imgs[0],
+          };
+        });
+      }
+      loadIndexRecentSearches();
+    }
+  } catch (e) {
+    // Fallback sang RECOMMEND_PRODUCTS cục bộ
+  }
 
   const container = document.getElementById("recommendProductsContainer");
   if (container) {

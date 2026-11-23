@@ -147,7 +147,7 @@ def _category_to_dict(cat_key, product_count, include_image=False):
 
 
 def _ensure_banners_table_and_index(cursor):
-    """Khởi tạo bảng banners và index tối ưu khi chưa tồn tại (fallback)."""
+    """Khởi tạo/bổ sung cột cho bảng banners và index tối ưu khi chưa tương thích (fallback)."""
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS banners (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -161,6 +161,22 @@ def _ensure_banners_table_and_index(cursor):
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
+    cursor.execute("SHOW COLUMNS FROM banners;")
+    cols = {row["Field"] for row in cursor.fetchall()}
+    if "link_url" not in cols:
+        cursor.execute("ALTER TABLE banners ADD COLUMN link_url VARCHAR(500) DEFAULT '';")
+        if "target_url" in cols:
+            cursor.execute("UPDATE banners SET link_url = COALESCE(target_url, '');")
+    if "description" not in cols:
+        cursor.execute("ALTER TABLE banners ADD COLUMN description TEXT;")
+        if "subtitle" in cols:
+            cursor.execute("UPDATE banners SET description = subtitle;")
+    if "sort_order" not in cols:
+        cursor.execute("ALTER TABLE banners ADD COLUMN sort_order INT DEFAULT 0;")
+        if "display_order" in cols:
+            cursor.execute("UPDATE banners SET sort_order = COALESCE(display_order, 0);")
+    if "is_active" not in cols:
+        cursor.execute("ALTER TABLE banners ADD COLUMN is_active TINYINT(1) DEFAULT 1;")
     try:
         cursor.execute("CREATE INDEX idx_banners_active_sort ON banners (is_active, sort_order);")
     except Exception:

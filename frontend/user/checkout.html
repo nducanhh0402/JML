@@ -1552,7 +1552,8 @@
         const storedCart = JSON.parse(localStorage.getItem("JML_CART_ITEMS") || "[]");
         if (storedCart.length > 0) {
           checkoutItems = storedCart.map(it => ({
-            id: it.id || 1,
+            id: it.product_id || it.id || 1,
+            product_id: it.product_id || it.id || null,
             title: it.title || "Sản phẩm",
             variant: it.variant || "Tiêu chuẩn",
             price: Number(it.price) || 0,
@@ -1930,7 +1931,15 @@
 
         setSubmitButtonLoading(true);
 
+        const authUser = typeof Auth !== "undefined"
+          ? Auth.getUser()
+          : JSON.parse(localStorage.getItem("JML_AUTH_USER") || localStorage.getItem("user") || "null");
+        const authToken = typeof Auth !== "undefined"
+          ? Auth.getToken()
+          : (localStorage.getItem("JML_ACCESS_TOKEN") || localStorage.getItem("access_token") || null);
+
         const payload = {
+          user_id: authUser && authUser.id ? Number(authUser.id) : undefined,
           buyer_name: fullName,
           buyer_phone: phone,
           buyer_address: fullAddress,
@@ -1946,6 +1955,7 @@
           payment_method: paymentMethod.toLowerCase(),
           bank_code: paymentMethod === "VNPAY" && selectedVNPaySub !== "ALL" ? selectedVNPaySub : undefined,
           items: checkoutItems.map(item => ({
+            product_id: item.product_id || item.id || undefined,
             name: item.title,
             variant: item.variant || "Tiêu chuẩn",
             price: formatCurrency(item.price),
@@ -1955,12 +1965,17 @@
           clear_cart: true
         };
 
+        const headers = {
+          "Content-Type": "application/json"
+        };
+        if (authToken) {
+          headers["Authorization"] = `Bearer ${authToken}`;
+        }
+
         try {
           const response = await fetch(`${API_BASE}/api/orders`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
+            headers,
             body: JSON.stringify(payload)
           });
 
