@@ -33,8 +33,12 @@
     --danger-500: #c92a22;
 }
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+body,
+button,
+input,
+select,
+textarea {
+    font-family: "Be Vietnam Pro", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--neutral-50);
     color: var(--neutral-900);
 }
