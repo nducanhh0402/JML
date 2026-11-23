@@ -47,17 +47,17 @@
     // ------------------------------------------------------------------
     let sharedRenderer;
     try {
-      sharedRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      sharedRenderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
     } catch (e) {
       return; // Trình duyệt không hỗ trợ WebGL
     }
     sharedRenderer.setClearColor(0x000000, 0);
-    sharedRenderer.shadowMap.enabled = true;
-    sharedRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    sharedRenderer.shadowMap.enabled = false;
     sharedRenderer.outputEncoding = THREE.sRGBEncoding;
     sharedRenderer.toneMapping = THREE.ACESFilmicToneMapping;
     sharedRenderer.toneMappingExposure = 1.18;
-    const maxAniso = Math.min(8, sharedRenderer.capabilities.getMaxAnisotropy());
+    sharedRenderer.setPixelRatio(1);
+    const maxAniso = Math.min(4, sharedRenderer.capabilities.getMaxAnisotropy());
     let curBufW = 0, curBufH = 0;
 
     // Bản đồ môi trường IBL tạo độ bóng ướt & ánh kim 24K cho cá Koi Vàng Kim
@@ -605,27 +605,14 @@
       scene.add(new THREE.HemisphereLight(0xf6f9ee, 0x3b4024, 1.22));
       const sun = new THREE.DirectionalLight(0xfff7e2, 1.60);
       sun.position.set(-4.5, 11.5, 6.5);
-      sun.castShadow = true;
-      sun.shadow.mapSize.width = 512;
-      sun.shadow.mapSize.height = 512;
-      sun.shadow.camera.near = 2;
-      sun.shadow.camera.far = 34;
-      sun.shadow.radius = 3.5;
+      sun.castShadow = false;
       scene.add(sun);
 
       const rim = new THREE.DirectionalLight(0xfff2cf, 0.68);
       rim.position.set(6, 4.0, -7);
       scene.add(rim);
 
-      // Mặt phẳng hứng bóng trong suốt (ShadowMaterial) -> thả bóng 3D mềm ngay lên nền màu banner
-      const shadowPlane = new THREE.Mesh(
-        new THREE.PlaneGeometry(320, 80),
-        new THREE.ShadowMaterial({ opacity: 0.25 })
-      );
-      shadowPlane.rotation.x = -Math.PI / 2;
-      shadowPlane.position.y = -1.15;
-      shadowPlane.receiveShadow = true;
-      scene.add(shadowPlane);
+      const shadowPlane = { position: { y: -1.15 } };
 
       // OrthographicCamera:
       // - Trên banner lớn/vừa (Hero, Side Banner, Flash Sale...): góc nhìn hồ từ trên chếch xuống cực nghệ thuật & hài hòa
@@ -643,16 +630,15 @@
       function syncSize() {
         const rect = el.getBoundingClientRect();
         if (rect.width < 20 || rect.height < 16) return;
-        inst.w = rect.width;
-        inst.h = rect.height;
-        inst.dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.round(inst.w * inst.dpr);
-        canvas.height = Math.round(inst.h * inst.dpr);
-        ctx.setTransform(inst.dpr, 0, 0, inst.dpr, 0, 0);
+        inst.w = Math.round(rect.width);
+        inst.h = Math.round(rect.height);
+        inst.dpr = 1;
+        canvas.width = inst.w;
+        canvas.height = inst.h;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
 
         inst.isSlim = inst.h < 68;
         if (inst.isSlim) {
-          // Góc nhìn ngang 3/4 cho thanh topbar / top-bar mảnh
           camera.position.set(0, 1.5, 14.5);
           camera.lookAt(0, 0, 0);
           const pxPerUnit = Math.max(10.5, inst.h / 3.2);
@@ -660,7 +646,6 @@
           inst.halfH = (inst.h / pxPerUnit) * 0.5;
           shadowPlane.position.y = -inst.halfH + 0.12;
         } else {
-          // Góc nhìn hồ từ trên chếch xuống sang trọng cho Hero Slider, Side Banner & các banner màu lớn/vừa
           camera.position.set(0, 14.0, 2.6);
           camera.lookAt(0, -0.1, 0);
           const pxPerUnit = Math.max(22, Math.min(44, inst.h / 7.6));
@@ -675,17 +660,9 @@
         camera.bottom = -inst.halfH;
         camera.updateProjectionMatrix();
 
-        const shadowX = Math.min(inst.halfW + 6, 90);
-        const shadowZ = Math.min(inst.halfH + 6, 20);
-        sun.shadow.camera.left = -shadowX;
-        sun.shadow.camera.right = shadowX;
-        sun.shadow.camera.top = shadowZ;
-        sun.shadow.camera.bottom = -shadowZ;
-        sun.shadow.camera.updateProjectionMatrix();
-
         if (!inst.actors.length) {
           const isLarge = inst.h >= 210 && inst.w >= 420;
-          const count = inst.isSlim ? 4 : (isLarge ? 3 : 2);
+          const count = inst.isSlim ? 2 : (isLarge ? 2 : 1);
           const breeds = ['sanke', 'gold', 'tancho', 'showa'];
           const baseScale = inst.isSlim ? 0.62 : (isLarge ? 0.60 : 0.50);
           for (let i = 0; i < count; i++) {
@@ -861,12 +838,28 @@
     }
 
     // ------------------------------------------------------------------
-    // 5. VÒNG LẶP RENDER 60FPS DÙNG CHUNG 1 WEBGL RENDERER
+    // 5. VÒNG LẶP RENDER TỐI ƯU (KHÔNG REALLOCATE WEBGL BUFFER, TẠM DỪNG KHI CUỘN)
     // ------------------------------------------------------------------
     let lastNow = performance.now();
+    let isScrolling = false;
+    let scrollResumeTimer = null;
+    window.addEventListener('scroll', () => {
+      isScrolling = true;
+      clearTimeout(scrollResumeTimer);
+      scrollResumeTimer = setTimeout(() => { isScrolling = false; }, 120);
+    }, { passive: true });
+
+    const FRAME_INTERVAL = 1000 / 30; // 30fps mượt và nhẹ GPU
+
     function tick(now) {
       requestAnimationFrame(tick);
-      const dt = Math.min((now - lastNow) / 1000, 0.05);
+      if (document.hidden || isScrolling) {
+        lastNow = now;
+        return;
+      }
+      const deltaMs = now - lastNow;
+      if (deltaMs < FRAME_INTERVAL) return;
+      const dt = Math.min(deltaMs / 1000, 0.05);
       lastNow = now;
       const elapsed = now * 0.001;
 
@@ -877,20 +870,24 @@
 
         updateBannerActors(inst, dt, elapsed);
 
-        const pw = Math.round(inst.w * inst.dpr);
-        const ph = Math.round(inst.h * inst.dpr);
-        if (pw !== curBufW || ph !== curBufH) {
-          sharedRenderer.setPixelRatio(1);
-          sharedRenderer.setSize(pw, ph, false);
-          curBufW = pw; curBufH = ph;
+        const pw = inst.w;
+        const ph = inst.h;
+        if (pw > curBufW || ph > curBufH) {
+          curBufW = Math.max(curBufW, pw, 1280);
+          curBufH = Math.max(curBufH, ph, 420);
+          sharedRenderer.setSize(curBufW, curBufH, false);
         }
 
+        const vy = curBufH - ph;
+        sharedRenderer.setViewport(0, vy, pw, ph);
+        sharedRenderer.setScissor(0, vy, pw, ph);
+        sharedRenderer.setScissorTest(true);
         sharedRenderer.clear();
         sharedRenderer.render(inst.scene, inst.camera);
 
-        // Vẽ gợn sóng mảnh & blit ảnh 3D WebGL trong suốt lên canvas của banner
+        // Vẽ gợn sóng mảnh & blit vùng (0, 0, pw, ph) từ WebGL sang canvas 2D của banner
         const ctx = inst.ctx;
-        ctx.clearRect(0, 0, inst.w, inst.h);
+        ctx.clearRect(0, 0, pw, ph);
 
         for (let r = inst.ripples.length - 1; r >= 0; r--) {
           const rp = inst.ripples[r];
@@ -902,10 +899,8 @@
           ctx.beginPath(); ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2); ctx.stroke();
         }
 
-        ctx.save();
         ctx.globalAlpha = inst.isSlim ? 0.80 : 0.74;
-        ctx.drawImage(sharedRenderer.domElement, 0, 0, pw, ph, 0, 0, inst.w, inst.h);
-        ctx.restore();
+        ctx.drawImage(sharedRenderer.domElement, 0, 0, pw, ph, 0, 0, pw, ph);
       }
     }
 
@@ -914,14 +909,8 @@
     }
 
     scanAndMount();
-    if (window.MutationObserver && document.body) {
-      let timer = null;
-      new MutationObserver(() => {
-        clearTimeout(timer);
-        timer = setTimeout(scanAndMount, 200);
-      }).observe(document.body, { childList: true, subtree: true });
-    }
     setTimeout(scanAndMount, 650);
+    setTimeout(scanAndMount, 1800);
     requestAnimationFrame(tick);
   }
 
