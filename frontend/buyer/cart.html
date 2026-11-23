@@ -188,7 +188,7 @@
     /* ========== CART PAGE LAYOUT ========== */
     .cart-page {
       display: grid;
-      grid-template-columns: 1fr 385px;
+      grid-template-columns: 1fr 360px;
       gap: 24px;
       align-items: start;
       margin-bottom: 48px;
@@ -2060,6 +2060,8 @@
       document.getElementById('cartItemsList').style.display = show ? 'none' : '';
       document.getElementById('cartEmpty').style.display = 'none';
     }
+
+
 
     function formatCurrency(amount) {
       return Number(amount).toLocaleString('vi-VN') + ' ₫';
