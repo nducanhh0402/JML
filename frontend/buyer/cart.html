@@ -50,7 +50,7 @@
       background-color: var(--background);
       color: var(--text-main);
       line-height: 1.5;
-      overflow-x: hidden;
+      overflow-x: clip;
     }
 
     a {
@@ -188,10 +188,204 @@
     /* ========== CART PAGE LAYOUT ========== */
     .cart-page {
       display: grid;
-      grid-template-columns: 1fr 360px;
+      grid-template-columns: 1fr 385px;
       gap: 24px;
       align-items: start;
       margin-bottom: 48px;
+    }
+
+    .cart-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    /* Checkout Progress Stepper */
+    .checkout-stepper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: var(--surface-dim);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .step-pill.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: #efc4be;
+      box-shadow: 0 2px 8px rgba(201, 42, 34, 0.10);
+    }
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .step-pill.active .step-num {
+      background: var(--primary);
+      color: #fff;
+    }
+    .step-line {
+      width: 24px;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    /* Free shipping perk banner */
+    .perk-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #fffdf9 0%, #fdf0ee 55%, #fbf4dc 100%);
+      border: 1px solid #efc4be;
+      box-shadow: var(--shadow-sm);
+      font-size: 13px;
+      color: var(--secondary);
+    }
+    .perk-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    .perk-badge {
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 99px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Quick voucher chips & Recommended section */
+    .voucher-quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 9px;
+    }
+    .voucher-chip-btn {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      border: 1px dashed #d49b1a;
+      background: #fbf4dc;
+      color: #7c580b;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .voucher-chip-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .recommend-card-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+    }
+    .recommend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .recommend-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .recommend-grid-mini {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .rec-mini-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .rec-mini-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: #efc4be;
+    }
+    .rec-mini-img {
+      width: 100%;
+      height: 115px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: var(--surface-dim);
+    }
+    .rec-mini-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--secondary);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 32px;
+    }
+    .rec-mini-price {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .btn-rec-add {
+      margin-top: auto;
+      padding: 7px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-rec-add:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+    @media (max-width: 900px) {
+      .checkout-stepper { display: none; }
+      .recommend-grid-mini { grid-template-columns: repeat(2, 1fr); }
     }
 
     /* ========== CART ITEMS PANEL ========== */
@@ -970,12 +1164,18 @@
         <span>STORE</span>
       </a>
 
-      <div
-        style="font-size: 18px; font-weight: 800; color: var(--secondary); display: flex; align-items: center; gap: 8px;">
-        🛒 Giỏ Hàng Của Tôi
+      <div class="checkout-stepper" aria-label="Tiến trình đặt hàng">
+        <span class="step-pill active"><span class="step-num">1</span> Giỏ hàng</span>
+        <span class="step-line"></span>
+        <span class="step-pill"><span class="step-num">2</span> Thanh toán</span>
+        <span class="step-line"></span>
+        <span class="step-pill"><span class="step-num">3</span> Hoàn tất</span>
       </div>
 
       <div class="header-actions">
+        <a href="products.html" style="font-size:13px;font-weight:700;color:var(--secondary);padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:var(--surface-dim);">
+          🛍️ Sản Phẩm
+        </a>
         <button class="btn-action" onclick="window.location.href='products.html'" title="Tiếp tục mua sắm">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"></circle>
@@ -994,12 +1194,24 @@
     <div class="breadcrumb">
       <a href="index.html">Trang chủ</a>
       <span class="breadcrumb-sep">/</span>
+      <a href="products.html">Danh sách sản phẩm</a>
+      <span class="breadcrumb-sep">/</span>
       <span style="color: var(--secondary); font-weight: 700;">Giỏ Hàng</span>
+    </div>
+
+    <!-- Perk Strip -->
+    <div class="perk-banner">
+      <div class="perk-banner-left">
+        <span class="perk-badge">JML MALL</span>
+        <span>🚚 Miễn phí vận chuyển Hỏa tốc 2h nội thành • Bảo vệ người mua 100% qua ví trung gian Escrow</span>
+      </div>
+      <span style="font-size:12px;font-weight:700;color:var(--primary);">Ưu đãi hôm nay: FREESHIP • JML50K • GIAM10</span>
     </div>
 
     <!-- Cart Layout -->
     <div class="cart-page">
-      <!-- Left: Cart Items -->
+      <!-- Left: Cart Items + Quick Recommendations -->
+      <div class="cart-left-col">
       <div class="cart-panel">
         <div class="cart-panel-header">
           <div class="cart-panel-title">
@@ -1027,17 +1239,32 @@
 
         <!-- Empty State -->
         <div class="cart-empty" id="cartEmpty">
-          <div class="cart-empty-icon">🛒</div>
-          <div class="cart-empty-title">Giỏ hàng đang trống</div>
-          <div class="cart-empty-desc">Bạn chưa thêm sản phẩm nào. Hãy khám phá các sản phẩm tuyệt vời!</div>
-          <a href="products.html" class="btn-shop-now">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            Khám Phá Sản Phẩm
-          </a>
+          <div class="cart-empty-icon" style="width:84px;height:84px;margin:0 auto 16px;border-radius:50%;background:linear-gradient(135deg,#fdf0ee,#fbf4dc);border:1px solid #efc4be;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 8px 20px rgba(201,42,34,0.10);">🛒</div>
+          <div class="cart-empty-title">Giỏ hàng của bạn đang trống</div>
+          <div class="cart-empty-desc">Hãy chọn sản phẩm từ bộ sưu tập gợi ý bên dưới hoặc nạp nhanh giỏ hàng mẫu để trải nghiệm thanh toán!</div>
+          <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:10px;">
+            <a href="products.html" class="btn-shop-now">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Khám Phá Sản Phẩm
+            </a>
+            <button type="button" onclick="loadSampleDemoCart()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;border:1px solid var(--primary);background:var(--primary-light);color:var(--primary);cursor:pointer;">
+              ✨ Nạp Giỏ Hàng Mẫu
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Recommended Quick-Add Panel -->
+      <div class="recommend-card-panel">
+        <div class="recommend-header">
+          <div class="recommend-title">🔥 Gợi Ý Sản Phẩm Nổi Bật — Thêm Nhanh Vào Giỏ</div>
+          <a href="products.html" style="font-size:12px;font-weight:700;color:var(--primary);">Xem tất cả →</a>
+        </div>
+        <div class="recommend-grid-mini" id="cartRecommendGrid"></div>
+      </div>
       </div>
 
       <!-- Right: Summary -->
@@ -1077,7 +1304,7 @@
               type="text"
               id="voucherInput"
               class="voucher-input"
-              placeholder="Nhập mã ưu đãi (VD: JML50K)"
+              placeholder="Mã ưu đãi (VD: JML50K)"
               maxlength="30"
               autocomplete="off"
             />
@@ -1089,6 +1316,11 @@
             >
               Áp Dụng
             </button>
+          </div>
+          <div class="voucher-quick-chips">
+            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('JML50K')">🎟️ JML50K (-50K)</button>
+            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('GIAM10')">🎟️ GIAM10 (-10%)</button>
+            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('FREESHIP')">🚚 FREESHIP</button>
           </div>
           <div class="voucher-msg" id="voucherMsg"></div>
           <div class="voucher-applied-tag" id="voucherAppliedTag">
@@ -1181,9 +1413,95 @@
       // Kiểm tra API backend
       await checkApiStatus();
 
-      // Load giỏ hàng
+      // Load giỏ hàng + gợi ý sản phẩm
       await loadCart();
+      loadCartRecommendations();
     });
+
+    const FALLBACK_RECOMMEND_ITEMS = [
+      { id: 1, title: "Tai Nghe Chụp Tai Apple AirPods Max Siêu Chống Ồn ANC", price: 12490000, originalPrice: 14990000, shopName: "SoundMax & Marshall Audio", image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80" },
+      { id: 3, title: "Tai Nghe Chống Ồn Cao Cấp Sony WH-1000XM5 Pin 30 Giờ", price: 7690000, originalPrice: 8990000, shopName: "SoundMax & Marshall Audio", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" },
+      { id: 13, title: "Máy Tính Bảng Apple iPad Pro M4 11 inch Wi-Fi 256GB", price: 26890000, originalPrice: 28990000, shopName: "GearVN Official Store", image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=600&q=80" },
+      { id: 15, title: "Chuột Công Thái Học Không Dây Logitech MX Master 3S", price: 2490000, originalPrice: 2990000, shopName: "GearVN Official Store", image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=600&q=80" }
+    ];
+    let recommendedPool = [...FALLBACK_RECOMMEND_ITEMS];
+
+    async function loadCartRecommendations() {
+      const grid = document.getElementById('cartRecommendGrid');
+      if (!grid) return;
+      try {
+        if (apiOnline) {
+          const res = await fetch(`${API_BASE}/api/products/filter?page=1&page_size=4&sort=rating_desc`);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.items) && data.items.length) {
+              recommendedPool = data.items.slice(0, 4).map(p => ({
+                id: p.id,
+                title: p.title,
+                price: Number(p.price) || 0,
+                originalPrice: Number(p.originalPrice || p.original_price || p.price) || 0,
+                shopName: p.shopName || p.shop_name || 'JML Official Store',
+                image: (p.images && p.images[0]) ? p.images[0] : parseImages(p.images_json)
+              }));
+            }
+          }
+        }
+      } catch (e) {}
+
+      grid.innerHTML = recommendedPool.map((p, i) => `
+        <div class="rec-mini-card">
+          <img class="rec-mini-img" src="${p.image}" alt="${p.title}" onerror="this.src='${getPlaceholderImg()}'" />
+          <div class="rec-mini-name" title="${p.title}">${p.title}</div>
+          <div class="rec-mini-price">${formatCurrency(p.price)}</div>
+          <button type="button" class="btn-rec-add" onclick="quickAddRecommendToCart(${i})">+ Thêm vào giỏ</button>
+        </div>
+      `).join('');
+    }
+
+    async function quickAddRecommendToCart(idx) {
+      const p = recommendedPool[idx];
+      if (!p) return;
+      const existing = cartItems.find(it => it.id === p.id || it.product_id === p.id);
+      if (existing) {
+        existing.qty = (existing.qty || 1) + 1;
+      } else {
+        cartItems.push({
+          id: p.id,
+          product_id: p.id,
+          title: p.title,
+          price: p.price,
+          originalPrice: p.originalPrice || p.price,
+          image: p.image,
+          shopName: p.shopName,
+          qty: 1
+        });
+      }
+      syncLocalStorage();
+      renderCart();
+      if (apiOnline && currentUser && currentUser.id) {
+        try {
+          await fetch(`${API_BASE}/api/cart/items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: Number(currentUser.id), product_id: Number(p.id), quantity: 1 })
+          });
+        } catch (e) {}
+      }
+      showToast(`✓ Đã thêm "${p.title.substring(0, 26)}..." vào giỏ hàng!`);
+    }
+
+    async function loadSampleDemoCart() {
+      await quickAddRecommendToCart(0);
+      await quickAddRecommendToCart(3);
+    }
+
+    function quickSelectCartVoucher(code) {
+      const inp = document.getElementById('voucherInput');
+      if (inp) {
+        inp.value = code;
+        handleApplyVoucher();
+      }
+    }
 
     async function checkApiStatus() {
       try {

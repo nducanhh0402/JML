@@ -311,6 +311,7 @@
         loadFilterFacetsFromAPI();
         fetchFilteredProductsFromAPI({ updateUrl: false });
         updateCartBadge();
+        loadRecentSearches();
       });
 
       window.addEventListener("popstate", () => {
@@ -622,6 +623,96 @@
         applyAllFilters();
       }
 
+      function getProductsSearchSessionId() {
+        let sid = localStorage.getItem("JML_SEARCH_SESSION_ID");
+        if (!sid) {
+          sid = "sess_" + Math.random().toString(36).slice(2, 11) + Date.now().toString(36);
+          localStorage.setItem("JML_SEARCH_SESSION_ID", sid);
+        }
+        return sid;
+      }
+
+      function getProductsAuthHeaders(includeJson = false) {
+        const headers = {};
+        if (includeJson) headers["Content-Type"] = "application/json";
+        const token = typeof Auth !== "undefined"
+          ? Auth.getToken()
+          : (localStorage.getItem("JML_ACCESS_TOKEN") || localStorage.getItem("access_token"));
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        return headers;
+      }
+
+      async function saveRecentSearchKeyword(keyword) {
+        const clean = String(keyword || "").trim();
+        if (!clean) return;
+        try {
+          await fetch(`${API_BASE_URL}/api/products/recent-searches`, {
+            method: "POST",
+            headers: getProductsAuthHeaders(true),
+            body: JSON.stringify({
+              keyword: clean,
+              session_id: getProductsSearchSessionId(),
+            }),
+          });
+          await loadRecentSearches();
+        } catch (e) {
+          // Không chặn tìm kiếm nếu API lịch sử gặp lỗi tạm thời
+        }
+      }
+
+      async function loadRecentSearches(prefix = "") {
+        const searchBox = document.querySelector(".search-box");
+        if (!searchBox) return;
+        let container = document.getElementById("productsRecentSearches");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "productsRecentSearches";
+          container.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;font-size:12px;";
+          searchBox.parentNode.insertBefore(container, searchBox.nextSibling);
+        }
+        try {
+          const qs = new URLSearchParams({
+            limit: "6",
+            session_id: getProductsSearchSessionId(),
+          });
+          if (prefix) qs.set("prefix", prefix);
+          const res = await fetch(`${API_BASE_URL}/api/products/recent-searches?${qs.toString()}`, {
+            headers: getProductsAuthHeaders(false),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const items = data.items || [];
+          if (!items.length) {
+            container.innerHTML = "";
+            return;
+          }
+          container.innerHTML = `<span style="color:var(--text-muted);font-weight:600;">Tìm gần đây:</span>` + items.map((item) => `
+            <span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface-dim,#f3f4f6);border:1px solid var(--border,#e5e7eb);border-radius:99px;padding:2px 9px;color:var(--text-main);">
+              <button type="button" onclick="applyRecentSearchKeyword('${escapeHtml(item.keyword)}')" style="background:none;border:none;color:inherit;font-size:12px;cursor:pointer;padding:0;">${escapeHtml(item.keyword)}</button>
+              <button type="button" onclick="removeRecentSearchKeyword(${Number(item.id)})" aria-label="Xóa từ khóa" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:0 2px;line-height:1;">×</button>
+            </span>
+          `).join("");
+        } catch (e) {
+          // Bỏ qua nếu backend chưa chạy
+        }
+      }
+
+      function applyRecentSearchKeyword(keyword) {
+        const searchEl = document.getElementById("searchInput");
+        if (searchEl) searchEl.value = keyword;
+        executeSearch();
+      }
+
+      async function removeRecentSearchKeyword(id) {
+        try {
+          await fetch(`${API_BASE_URL}/api/products/recent-searches/${id}?session_id=${encodeURIComponent(getProductsSearchSessionId())}`, {
+            method: "DELETE",
+            headers: getProductsAuthHeaders(false),
+          });
+          await loadRecentSearches();
+        } catch (e) {}
+      }
+
       function handleSearch(val) {
         searchQuery = val.trim().toLowerCase();
         currentPage = 1;
@@ -633,9 +724,13 @@
 
       function executeSearch() {
         clearTimeout(searchDebounceTimer);
-        searchQuery = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+        const rawVal = (document.getElementById("searchInput")?.value || "").trim();
+        searchQuery = rawVal.toLowerCase();
         currentPage = 1;
         applyAllFilters();
+        if (rawVal) {
+          saveRecentSearchKeyword(rawVal);
+        }
         const searchEl = document.getElementById("searchInput");
         if (searchEl && window.innerWidth <= 900) {
           searchEl.blur();
@@ -1104,30 +1199,53 @@
       }
 
       function goToCart() {
-        window.location.href = 'index.html#cart';
+        window.location.href = 'cart.html';
       }
 
-      function addToCart(event, id) {
+      async function addToCart(event, id) {
         event.stopPropagation();
         const p = allProducts.find(item => item.id === id);
         if (!p) return;
 
         let cart = JSON.parse(localStorage.getItem("JML_CART_ITEMS") || "[]");
-        const existing = cart.find(item => item.id === id);
+        const existing = cart.find(item => item.id === id || item.product_id === id);
         if (existing) {
           existing.qty = (existing.qty || 1) + 1;
         } else {
           cart.push({
             id: p.id,
+            product_id: p.id,
             title: p.title,
             price: p.price,
             image: p.image,
             shopName: p.shopName,
+            stock: p.totalStock || 100,
             qty: 1
           });
         }
         localStorage.setItem("JML_CART_ITEMS", JSON.stringify(cart));
         updateCartBadge();
+
+        // Đồng bộ với Backend /api/cart/items nếu người dùng đã đăng nhập
+        const user = typeof Auth !== "undefined"
+          ? Auth.getUser()
+          : JSON.parse(localStorage.getItem("JML_AUTH_USER") || localStorage.getItem("user") || "null");
+        if (user && user.id) {
+          try {
+            await fetch(`${API_BASE_URL}/api/cart/items`, {
+              method: "POST",
+              headers: getProductsAuthHeaders(true),
+              body: JSON.stringify({
+                user_id: Number(user.id),
+                product_id: Number(p.id),
+                quantity: 1,
+              }),
+            });
+          } catch (e) {
+            console.warn("Không đồng bộ được giỏ hàng lên API:", e);
+          }
+        }
+
         showToast(`Đã thêm "${p.title.substring(0, 24)}..." vào giỏ hàng!`);
       }
 

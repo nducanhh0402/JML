@@ -187,3 +187,21 @@ CREATE TABLE IF NOT EXISTS `reviews` (
     INDEX `idx_review_product` (`product_id`),
     INDEX `idx_review_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- BANG LICH SU TU KHOA TIM KIEM GAN DAY (SEARCH_HISTORY) - TASK TF16EF3
+-- Luu va goi y lai cac tu khoa tim kiem gan day cua tung nguoi dung / phien
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS `search_history` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_key` VARCHAR(120) NOT NULL,
+    `user_id` INT NULL,
+    `keyword` VARCHAR(100) NOT NULL,
+    `keyword_normalized` VARCHAR(100) NOT NULL,
+    `search_count` INT NOT NULL DEFAULT 1,
+    `last_searched_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `uq_search_history_user_keyword` (`user_key`, `keyword_normalized`),
+    INDEX `idx_search_history_user_recent` (`user_key`, `last_searched_at`),
+    INDEX `idx_search_history_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

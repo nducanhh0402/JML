@@ -38,6 +38,29 @@ def to_dict(obj: Any) -> Dict[str, Any]:
     return dict(obj)
 
 
+def _extract_optional_user_id_from_request(request: Optional[Request]) -> Optional[int]:
+    """Lấy user_id từ Authorization Bearer token nếu client không truyền user_id trong body."""
+    if request is None:
+        return None
+    if hasattr(request.state, "user") and isinstance(request.state.user, dict):
+        uid = request.state.user.get("user_id") or request.state.user.get("sub")
+        if uid is not None and str(uid).isdigit():
+            return int(uid)
+    auth_header = request.headers.get("Authorization") if hasattr(request, "headers") else None
+    if not auth_header:
+        return None
+    parts = auth_header.strip().split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+    payload = decode_access_token(parts[1])
+    if not payload:
+        return None
+    uid = payload.get("user_id") or payload.get("sub")
+    if uid is not None and str(uid).isdigit():
+        return int(uid)
+    return None
+
+
 def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Quy trình nghiệp vụ tạo đơn hàng chuẩn ACID Transaction:
@@ -83,6 +106,11 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
         )
 
     user_id = payload_data.get("user_id")
+    if not user_id and buyer_phone:
+        cursor.execute("SELECT id FROM users WHERE phone = ? LIMIT 1;", (buyer_phone,))
+        matched_user = cursor.fetchone()
+        if matched_user:
+            user_id = matched_user["id"]
     cart_id = payload_data.get("cart_id")
     items_input = payload_data.get("items")
     target_cart_id = cart_id
@@ -499,7 +527,7 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
 
 
 @router.post("/api/orders/from-cart")
-def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreate]):
+def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreate], request: Request):
     """
     API Tạo đơn hàng từ giỏ hàng (TF1734A):
     - Kiểm tra khóa tài khoản người mua.
@@ -512,6 +540,10 @@ def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreat
     conn = get_db_connection()
     try:
         payload_data = to_dict(payload)
+        if not payload_data.get("user_id"):
+            token_uid = _extract_optional_user_id_from_request(request)
+            if token_uid:
+                payload_data["user_id"] = token_uid
         res = execute_order_creation_transaction(conn, payload_data)
         return res
     finally:
@@ -519,7 +551,7 @@ def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreat
 
 
 @router.post("/api/orders")
-def create_order(payload: OrderCreate):
+def create_order(payload: OrderCreate, request: Request):
     """
     Tạo đơn hàng từ giỏ hàng hoặc từ form thanh toán.
     Tự động chạy Transaction kiểm tra tồn kho, trừ kho, sinh mã và xóa giỏ.
@@ -527,6 +559,10 @@ def create_order(payload: OrderCreate):
     conn = get_db_connection()
     try:
         payload_data = to_dict(payload)
+        if not payload_data.get("user_id"):
+            token_uid = _extract_optional_user_id_from_request(request)
+            if token_uid:
+                payload_data["user_id"] = token_uid
         res = execute_order_creation_transaction(conn, payload_data)
         return res
     finally:
