@@ -50,6 +50,7 @@ class OrderCreate(BaseModel):
     discount_code: Optional[str] = ""
     discount_amount: Optional[int] = 0
     payment_method: Optional[str] = "cod"
+    bank_code: Optional[str] = None
     clear_cart: Optional[bool] = True
 
 

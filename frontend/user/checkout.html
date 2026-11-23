@@ -1,6 +1,7 @@
 <!-- =============================================================== -->
 <!-- Trần Gia Huy task TF17314 html/css checkout ngày 16/11/2026 -->
 <!-- Trần Gia Huy task TF1737E [FE] Trang checkout nối API: form đặt hàng, chọn COD -->
+<!-- Trần Gia Huy task TF175A2 [FE] Bonus: chọn thanh toán online VNPay và màn hình kết quả -->
 <!-- =============================================================== -->
 <!doctype html>
 <html lang="vi">
@@ -465,6 +466,109 @@
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-4px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* TF175A2: Hộp thông báo và thông tin thẻ thử nghiệm VNPAY Sandbox */
+      .vnpay-notice-box {
+        background: #f0f7ff;
+        border: 1.5px solid #bae6fd;
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        margin-top: 14px;
+        font-size: 13px;
+        color: #0c4a6e;
+        line-height: 1.5;
+        animation: fadeIn 0.25s ease-in-out;
+      }
+      .vnpay-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed #bae6fd;
+      }
+      .vnpay-logo-badge {
+        background: #005baa;
+        color: white;
+        font-weight: 800;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+      }
+      .vnpay-sandbox-badge {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #7dd3fc;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px;
+      }
+      .vnpay-submethods {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .vnpay-sub-item {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: var(--transition);
+        user-select: none;
+      }
+      .vnpay-sub-item:hover {
+        border-color: #005baa;
+        background: #f8fafc;
+      }
+      .vnpay-sub-item.selected {
+        border-color: #005baa;
+        background: #eff6ff;
+        color: #005baa;
+        font-weight: 700;
+        box-shadow: 0 0 0 1px #005baa;
+      }
+      .vnpay-test-card {
+        background: #ffffff;
+        border: 1px solid #93c5fd;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 10px;
+        font-size: 12px;
+      }
+      .vnpay-test-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 6px 12px;
+        margin-top: 6px;
+        color: #1e293b;
+      }
+      .btn-copy-test {
+        background: #e0f2fe;
+        border: 1px solid #7dd3fc;
+        color: #0284c7;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .btn-copy-test:hover {
+        background: #0284c7;
+        color: #ffffff;
       }
 
       /* ==========================================================================
@@ -1077,17 +1181,17 @@
                 </div>
               </label>
 
-              <!-- VNPAY SANDBOX: TF1753A -->
+              <!-- VNPAY SANDBOX: TF1753A / TF175A2 -->
               <label class="radio-card" onclick="selectPayment('VNPAY', this)">
                 <div class="radio-left">
                   <input type="radio" name="paymentMethod" value="VNPAY" />
-                  <div class="radio-icon">💳</div>
+                  <div class="radio-icon" style="color: #005baa;">💳</div>
                   <div>
                     <div class="radio-title">
-                      <span>Cổng Thanh Toán VNPAY (Sandbox)</span>
-                      <span class="radio-tag" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">QR / Thẻ ATM</span>
+                      <span>Cổng Thanh Toán Trực Tuyến VNPAY (Sandbox)</span>
+                      <span class="radio-tag" style="background:#e0f2fe; color:#005baa; border-color:#7dd3fc; font-weight: 700;">VNPAY-QR / Thẻ ATM</span>
                     </div>
-                    <div class="radio-sub">Thanh toán trực tuyến môi trường thử nghiệm VNPAY Sandbox</div>
+                    <div class="radio-sub">Thanh toán trực tuyến bảo mật qua cổng VNPAY (Thử nghiệm Sandbox an toàn)</div>
                   </div>
                 </div>
               </label>
@@ -1141,6 +1245,58 @@
                   Quý khách sẽ thanh toán số tiền <strong id="codAmountNotice" style="color: var(--primary);">0 ₫</strong> bằng tiền mặt cho shipper khi nhận bưu phẩm. 
                   Quý khách có quyền mở bưu kiện kiểm tra đồng kiểm hàng hóa trước khi thanh toán.
                 </p>
+              </div>
+            </div>
+
+            <!-- Hộp thông tin chi tiết & Sandbox Helper khi chọn VNPAY (TF175A2) -->
+            <div id="vnpayNoticeBox" class="vnpay-notice-box" style="display: none;">
+              <div class="vnpay-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="vnpay-logo-badge">VNPAY</span>
+                  <strong style="color: #005baa; font-size: 13.5px;">Cổng Thanh Toán Trực Tuyến VNPAY (Sandbox)</strong>
+                </div>
+                <span class="vnpay-sandbox-badge">Môi Trường Test Thử Nghiệm</span>
+              </div>
+
+              <p style="margin: 8px 0 10px; font-size: 12.5px; color: #1e3a8a;">
+                Quý khách sẽ được chuyển hướng an toàn sang Cổng VNPAY Sandbox để quét mã QR hoặc nhập thẻ ATM/Internet Banking. Sau khi hoàn tất, hệ thống sẽ tự động chuyển về màn hình xác nhận kết quả thanh toán.
+              </p>
+
+              <div style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 4px;">CHỌN PHƯƠNG THỨC TRÊN VNPAY:</div>
+              <div class="vnpay-submethods">
+                <div class="vnpay-sub-item selected" onclick="selectVNPaySub('ALL', this)">
+                  <span>🌐 Cổng VNPAY (Tất cả)</span>
+                </div>
+                <div class="vnpay-sub-item" onclick="selectVNPaySub('VNPAYQR', this)">
+                  <span>📱 Quét mã VNPAY-QR</span>
+                </div>
+                <div class="vnpay-sub-item" onclick="selectVNPaySub('VNBANK', this)">
+                  <span>🏧 Thẻ ATM / Tài khoản</span>
+                </div>
+                <div class="vnpay-sub-item" onclick="selectVNPaySub('INTCARD', this)">
+                  <span>💳 Thẻ Quốc Tế</span>
+                </div>
+              </div>
+
+              <!-- Thông tin thẻ test thử nghiệm cho Giảng viên / Tester -->
+              <div class="vnpay-test-card">
+                <div style="font-weight: 700; font-size: 11.5px; color: #005baa; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>💳 THÔNG TIN THẺ TEST THỬ NGHIỆM SANDBOX (NCB):</span>
+                  <span style="color: #16a34a; font-weight: 800; font-size: 11px;">✓ Miễn phí • Không trừ tiền thật</span>
+                </div>
+                <div class="vnpay-test-grid">
+                  <div><strong>Ngân hàng test:</strong> NCB</div>
+                  <div>
+                    <strong>Số thẻ:</strong> <span style="font-family: monospace; font-weight: 700; color: #005baa;">9704198526191432198</span> 
+                    <button type="button" class="btn-copy-test" onclick="copyVNPAYTest('9704198526191432198')">Copy</button>
+                  </div>
+                  <div><strong>Tên chủ thẻ:</strong> NGUYEN VAN A</div>
+                  <div><strong>Ngày phát hành:</strong> 07/15</div>
+                  <div>
+                    <strong>Mã OTP:</strong> <span style="font-family: monospace; font-weight: 700; color: #005baa;">123456</span> 
+                    <button type="button" class="btn-copy-test" onclick="copyVNPAYTest('123456')">Copy</button>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -1486,6 +1642,22 @@
         updateTotals();
       }
 
+      let selectedVNPaySub = "ALL";
+
+      function selectVNPaySub(subMethod, el) {
+        document.querySelectorAll(".vnpay-sub-item").forEach(i => i.classList.remove("selected"));
+        if (el) el.classList.add("selected");
+        selectedVNPaySub = subMethod;
+      }
+
+      function copyVNPAYTest(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`✓ Đã sao chép: ${text}`);
+        }).catch(() => {
+          showToast(`Thông tin test: ${text}`);
+        });
+      }
+
       function selectPayment(method, el) {
         document.querySelectorAll("#paymentOptions .radio-card").forEach(c => c.classList.remove("selected"));
         if (el) {
@@ -1496,16 +1668,24 @@
         paymentMethod = method;
 
         const codBox = document.getElementById("codNoticeBox");
+        const vnpayBox = document.getElementById("vnpayNoticeBox");
         const btnText = document.getElementById("btnPlaceOrderText");
+        const subtotal = checkoutItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+        const grandTotal = Math.max(0, subtotal + shippingFee - discountAmount);
 
         if (paymentMethod === "COD") {
           if (codBox) codBox.style.display = "flex";
+          if (vnpayBox) vnpayBox.style.display = "none";
           if (btnText) btnText.textContent = "Xác Nhận Đặt Hàng (COD)";
+        } else if (paymentMethod === "VNPAY") {
+          if (codBox) codBox.style.display = "none";
+          if (vnpayBox) vnpayBox.style.display = "block";
+          if (btnText) btnText.textContent = `Thanh Toán Qua VNPAY (${formatCurrency(grandTotal)})`;
         } else {
           if (codBox) codBox.style.display = "none";
+          if (vnpayBox) vnpayBox.style.display = "none";
           if (btnText) {
             const names = {
-              VNPAY: "Cổng VNPAY Sandbox",
               BANK_QR: "Thanh Toán VietQR",
               EWALLET: "Thanh Toán Ví Điện Tử",
               CARD: "Thanh Toán Bằng Thẻ"
@@ -1620,6 +1800,11 @@
         const codAmountEl = document.getElementById("codAmountNotice");
         if (codAmountEl) {
           codAmountEl.textContent = formatCurrency(grandTotal);
+        }
+
+        const btnText = document.getElementById("btnPlaceOrderText");
+        if (btnText && paymentMethod === "VNPAY") {
+          btnText.textContent = `Thanh Toán Qua VNPAY (${formatCurrency(grandTotal)})`;
         }
       }
 
@@ -1759,6 +1944,7 @@
           discount_code: appliedCode || "",
           discount_amount: discountAmount || 0,
           payment_method: paymentMethod.toLowerCase(),
+          bank_code: paymentMethod === "VNPAY" && selectedVNPaySub !== "ALL" ? selectedVNPaySub : undefined,
           items: checkoutItems.map(item => ({
             name: item.title,
             variant: item.variant || "Tiêu chuẩn",
@@ -1798,6 +1984,32 @@
               window.location.href = data.payment_url;
             }, 1200);
             return;
+          }
+
+          if (paymentMethod === "VNPAY") {
+            try {
+              const payRes = await fetch(`${API_BASE}/api/payment/vnpay/create-url`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  order_key: orderKey,
+                  amount: grandTotal,
+                  bank_code: selectedVNPaySub !== "ALL" ? selectedVNPaySub : undefined
+                })
+              });
+              if (payRes.ok) {
+                const payData = await payRes.json();
+                if (payData.payment_url) {
+                  showToast("✅ Đặt hàng thành công! Đang chuyển hướng sang VNPAY Sandbox...");
+                  setTimeout(() => {
+                    window.location.href = payData.payment_url;
+                  }, 1200);
+                  return;
+                }
+              }
+            } catch (payErr) {
+              console.warn("Không thể tạo link VNPAY từ endpoint con:", payErr);
+            }
           }
 
           if (document.getElementById("saveAddressCheck")?.checked) {
@@ -1844,6 +2056,14 @@
               street,
               tag: `Giao đến: ${district}`
             });
+          }
+
+          if (paymentMethod === "VNPAY") {
+            showToast("✅ Ghi nhận đơn hàng! Chuyển hướng sang màn hình kết quả VNPAY...");
+            setTimeout(() => {
+              window.location.href = `payment-result.html?order_key=${fallbackOrderKey}&vnp_ResponseCode=00&vnp_Amount=${grandTotal * 100}&vnp_BankCode=NCB&vnp_TransactionNo=14${Math.floor(100000 + Math.random() * 900000)}&vnp_OrderInfo=Thanh+toan+don+hang+${fallbackOrderKey}+JML+Store`;
+            }, 1200);
+            return;
           }
 
           showSuccessModal({

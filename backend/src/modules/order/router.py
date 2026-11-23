@@ -376,10 +376,12 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
                     p_status = "pending"
                     try:
                         from backend.src.utils.vnpay import build_payment_url
+                        req_bank_code = payload_data.get("bank_code")
                         vnpay_url, vnp_params = build_payment_url(
                             order_key=order_key,
                             amount=numeric_total,
-                            order_desc=f"Thanh toan don hang {order_key}"
+                            order_desc=f"Thanh toan don hang {order_key}",
+                            bank_code=req_bank_code
                         )
                         txn_code = vnp_params.get("vnp_TxnRef", txn_code)
                     except Exception:

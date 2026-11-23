@@ -1,0 +1,1136 @@
+<!-- =============================================================== -->
+<!-- Trần Gia Huy task TF175A2 [FE] Màn hình kết quả thanh toán trực tuyến (VNPay Sandbox) -->
+<!-- MSSV: B25DTCN180 - Lớp K25 - JML Store Marketplace -->
+<!-- =============================================================== -->
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Kết Quả Thanh Toán VNPay | JML Store</title>
+    <link rel="icon" type="image/svg+xml" href="jml-store-icon.svg" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ==========================================================================
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ 100% VỚI INDEX & CHECKOUT)
+         ========================================================================== */
+      :root {
+        --primary: #ea580c;
+        --primary-hover: #c2410c;
+        --primary-light: #ffedd5;
+        --secondary: #111827;
+        --secondary-light: #4b5563;
+        --accent: #f97316;
+        --success: #10b981;
+        --success-hover: #059669;
+        --success-light: #d1fae5;
+        --danger: #ef4444;
+        --danger-hover: #dc2626;
+        --danger-light: #fee2e2;
+        --warning: #f59e0b;
+        --warning-light: #fef3c7;
+        --vnpay-blue: #005baa;
+        --background: #f8fafc;
+        --surface: #ffffff;
+        --surface-dim: #f1f5f9;
+        --border: #e2e8f0;
+        --border-focus: #fdba74;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.07);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 24px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: var(--background);
+        color: var(--text-main);
+        line-height: 1.5;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { max-width: 960px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+      /* ==========================================================================
+         2. TOPBAR & HEADER
+         ========================================================================== */
+      .top-bar {
+        background-color: var(--secondary);
+        color: #94a3b8;
+        font-size: 12.5px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .top-bar-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .top-links {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+      .top-links a:hover { color: #fff; }
+
+      .header-main {
+        background: #ffffff;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow-sm);
+      }
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        max-width: 1240px;
+        margin: 0 auto;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        font-size: 21px;
+        color: var(--secondary);
+      }
+      .logo-badge {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+      }
+      .header-title-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-muted);
+        border-left: 2px solid var(--border);
+        padding-left: 14px;
+        margin-left: 6px;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .btn-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--secondary);
+        background: #fff;
+        transition: var(--transition);
+      }
+      .btn-header:hover {
+        background: var(--surface-dim);
+        border-color: #cbd5e1;
+      }
+
+      /* ==========================================================================
+         3. DEMO / TESTER TOOLBAR (DÀNH CHO GIẢNG VIÊN & TESTER)
+         ========================================================================== */
+      .demo-bar {
+        background: #fffbeb;
+        border-bottom: 1px solid #fde68a;
+        padding: 9px 16px;
+        font-size: 12.5px;
+        color: #92400e;
+      }
+      .demo-bar-inner {
+        max-width: 1240px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .demo-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+      }
+      .demo-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .demo-btn {
+        background: #ffffff;
+        border: 1px solid #d97706;
+        color: #b45309;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      .demo-btn:hover {
+        background: #fef3c7;
+      }
+      .demo-btn.active {
+        background: #d97706;
+        color: #ffffff;
+      }
+
+      /* ==========================================================================
+         4. BREADCRUMB
+         ========================================================================== */
+      .breadcrumb {
+        padding: 16px 0 8px 0;
+        font-size: 13px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .breadcrumb a:hover { color: var(--primary); }
+      .breadcrumb-separator { color: #cbd5e1; font-size: 11px; }
+
+      /* ==========================================================================
+         5. MAIN RESULT CARD
+         ========================================================================== */
+      .main-content {
+        flex: 1;
+        padding: 24px 0 50px;
+      }
+      .result-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 40px 32px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Banner trang trí đỉnh thẻ */
+      .result-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: var(--card-accent-color, var(--success));
+      }
+
+      /* Icon trạng thái */
+      .status-icon-wrapper {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 44px;
+        position: relative;
+        animation: scalePop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .status-icon-wrapper.success {
+        background: var(--success-light);
+        color: var(--success);
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.12);
+      }
+      .status-icon-wrapper.failed {
+        background: var(--danger-light);
+        color: var(--danger);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.12);
+      }
+
+      @keyframes scalePop {
+        0% { transform: scale(0.4); opacity: 0; }
+        80% { transform: scale(1.08); opacity: 1; }
+        100% { transform: scale(1); }
+      }
+
+      .result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .result-badge.success {
+        background: var(--success-light);
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+      .result-badge.failed {
+        background: var(--danger-light);
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .result-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: 10px;
+      }
+      .result-subtitle {
+        color: var(--text-muted);
+        font-size: 14.5px;
+        max-width: 580px;
+        margin: 0 auto 28px;
+        line-height: 1.6;
+      }
+
+      /* Bảng chi tiết biên lai giao dịch */
+      .receipt-box {
+        background: var(--surface-dim);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        max-width: 620px;
+        margin: 0 auto 28px;
+        text-align: left;
+      }
+      .receipt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 14px;
+        border-bottom: 1px dashed #cbd5e1;
+        margin-bottom: 14px;
+      }
+      .receipt-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .receipt-logo {
+        height: 22px;
+        object-fit: contain;
+      }
+
+      .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 0;
+        font-size: 13.5px;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+      }
+      .receipt-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .receipt-label {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .receipt-val {
+        font-weight: 600;
+        color: var(--secondary);
+        text-align: right;
+      }
+      .receipt-val.highlight {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+      .receipt-val.badge-val {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+
+      .copy-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        margin-left: 6px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: var(--transition);
+      }
+      .copy-btn:hover {
+        background: var(--primary-light);
+      }
+
+      /* Hộp ghi chú / cam kết bảo vệ Escrow */
+      .security-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        max-width: 620px;
+        margin: 0 auto 28px;
+        text-align: left;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        font-size: 13px;
+        color: #166534;
+      }
+      .security-box.warning {
+        background: #fffbeb;
+        border-color: #fde68a;
+        color: #92400e;
+      }
+
+      /* Nhóm nút hành động */
+      .action-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        max-width: 620px;
+        margin: 0 auto;
+      }
+      .btn-action {
+        padding: 13px 26px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        flex: 1;
+        min-width: 170px;
+      }
+      .btn-action.btn-primary {
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28);
+      }
+      .btn-action.btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+      }
+      .btn-action.btn-secondary {
+        background: var(--secondary);
+        color: #ffffff;
+      }
+      .btn-action.btn-secondary:hover {
+        background: #1f2937;
+        transform: translateY(-1px);
+      }
+      .btn-action.btn-outline {
+        background: #ffffff;
+        color: var(--secondary);
+        border: 1.5px solid var(--border);
+      }
+      .btn-action.btn-outline:hover {
+        background: var(--surface-dim);
+        border-color: #cbd5e1;
+      }
+
+      /* ==========================================================================
+         6. FOOTER
+         ========================================================================== */
+      .footer {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 24px 0;
+        font-size: 12.5px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: auto;
+      }
+
+      /* Toast thông báo nhanh */
+      .toast-msg {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--secondary);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        box-shadow: var(--shadow-lg);
+        display: none;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999;
+        animation: slideUp 0.3s ease;
+      }
+      @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      /* In ấn hóa đơn */
+      @media print {
+        .top-bar, .header-main, .demo-bar, .breadcrumb, .action-group, .footer, .copy-btn {
+          display: none !important;
+        }
+        body { background: #fff !important; }
+        .result-card {
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+        .receipt-box {
+          background: #fff !important;
+          border: 1px solid #000 !important;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .result-card { padding: 28px 18px; }
+        .result-title { font-size: 21px; }
+        .action-group { flex-direction: column; }
+        .btn-action { width: 100%; }
+        .demo-bar-inner { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="container top-bar-inner">
+        <div>Hotline CSKH 24/7: <strong style="color: #fff;">1900 8888</strong> • Hỗ trợ thanh toán VNPAY Sandbox</div>
+        <div class="top-links">
+          <a href="orders.html">Tra cứu đơn hàng</a>
+          <a href="index.html">Kênh Người Bán</a>
+          <a href="#">Trợ giúp</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="header-main">
+      <div class="header-inner">
+        <div style="display: flex; align-items: center;">
+          <a class="logo" href="index.html">
+            <span class="logo-badge">🛒</span>
+            <span>JML<span style="color: var(--primary);">STORE</span></span>
+          </a>
+          <div class="header-title-badge">
+            <span>Cổng Thanh Toán Trực Tuyến VNPAY</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <a href="orders.html" class="btn-header">
+            <span>📦</span>
+            <span>Đơn Mua Của Tôi</span>
+          </a>
+          <a href="index.html" class="btn-header">
+            <span>🏠</span>
+            <span>Trang Chủ</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- THANH CÔNG CỤ DÀNH CHO GIẢNG VIÊN & TESTER -->
+    <div class="demo-bar">
+      <div class="demo-bar-inner">
+        <div class="demo-title">
+          <span>🛠️</span>
+          <span>Công cụ Tester / Giảng viên chấm bài: Chọn nhanh trạng thái để xem giao diện:</span>
+        </div>
+        <div class="demo-chips">
+          <button class="demo-btn" onclick="applyDemoState('success')">✓ Thành Công (Mã 00)</button>
+          <button class="demo-btn" onclick="applyDemoState('cancel')">✕ Hủy Giao Dịch (Mã 24)</button>
+          <button class="demo-btn" onclick="applyDemoState('insufficient')">⚠️ Thiếu Số Dư (Mã 51)</button>
+          <button class="demo-btn" onclick="applyDemoState('timeout')">⚠️ Hết Hạn GD (Mã 11)</button>
+          <button class="demo-btn" onclick="applyDemoState('wrong_otp')">⚠️ Sai OTP (Mã 13)</button>
+          <button class="demo-btn" onclick="applyDemoState('checksum_fail')">⚠️ Sai Chữ Ký (Mã 97)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="main-content">
+      <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a href="index.html">Trang chủ</a>
+          <span class="breadcrumb-separator">/</span>
+          <a href="checkout.html">Thanh toán</a>
+          <span class="breadcrumb-separator">/</span>
+          <span style="color: var(--secondary); font-weight: 600;">Kết quả giao dịch VNPay</span>
+        </div>
+
+        <!-- Card kết quả -->
+        <div class="result-card" id="resultCard">
+          <!-- Icon trạng thái -->
+          <div class="status-icon-wrapper success" id="statusIcon">
+            <span id="iconText">✓</span>
+          </div>
+
+          <!-- Tag badge -->
+          <div>
+            <span class="result-badge success" id="resultBadge">
+              <span id="badgeDot">●</span>
+              <span id="badgeText">Thanh Toán Thành Công</span>
+            </span>
+          </div>
+
+          <!-- Tiêu đề & mô tả -->
+          <h1 class="result-title" id="resultTitle">Thanh Toán Đơn Hàng Thành Công!</h1>
+          <p class="result-subtitle" id="resultSubtitle">
+            Giao dịch thanh toán trực tuyến qua cổng VNPAY Sandbox đã được xử lý hoàn tất.
+            Hệ thống đã tự động xác nhận đơn hàng và chuyển đến người bán để chuẩn bị đóng gói.
+          </p>
+
+          <!-- Bảng biên lai chi tiết giao dịch -->
+          <div class="receipt-box">
+            <div class="receipt-header">
+              <div class="receipt-title">
+                <span>🧾</span>
+                <span>Biên Lai Xác Nhận Giao Dịch Trực Tuyến</span>
+              </div>
+              <span class="receipt-val badge-val">VNPAY API 2.1.0</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Mã Đơn Hàng:</span>
+              <span class="receipt-val">
+                <strong id="valOrderKey">#MP-17502</strong>
+                <button class="copy-btn" onclick="copyOrderCode()" title="Sao chép mã đơn">📋 Copy</button>
+              </span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Số Tiền Thanh Toán:</span>
+              <span class="receipt-val highlight" id="valAmount">450.000 ₫</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Cổng Thanh Toán:</span>
+              <span class="receipt-val">Cổng VNPAY Sandbox (Thử nghiệm)</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Ngân Hàng / Kênh Thanh Toán:</span>
+              <span class="receipt-val" id="valBank">NCB (Ngân hàng TMCP Quốc Dân)</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Mã Giao Dịch VNPAY:</span>
+              <span class="receipt-val" id="valTransactionNo" style="font-family: monospace; letter-spacing: 0.5px;">14892301</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Mã Tham Chiếu GD (TxnRef):</span>
+              <span class="receipt-val" id="valTxnRef" style="font-family: monospace;">MP-17502_170058</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Thời Gian Giao Dịch:</span>
+              <span class="receipt-val" id="valPayDate">--/--/---- --:--:--</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Nội Dung Thanh Toán:</span>
+              <span class="receipt-val" id="valOrderInfo" style="max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Thanh toan don hang JML Store</span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Mã Phản Hồi VNPay:</span>
+              <span class="receipt-val" id="valResponseCode">
+                <span class="receipt-val badge-val" style="background: #dcfce7; color: #15803d;" id="codeBadge">00 - Giao dịch thành công</span>
+              </span>
+            </div>
+
+            <div class="receipt-row">
+              <span class="receipt-label">Trạng Thái Đơn Hàng:</span>
+              <span class="receipt-val" id="valOrderStatus">
+                <span style="color: var(--success); font-weight: 700;">● Đang chuẩn bị hàng (Preparing)</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Thông báo cam kết an toàn / Hướng dẫn hỗ trợ -->
+          <div class="security-box" id="securityBox">
+            <span style="font-size: 20px;">🛡️</span>
+            <div>
+              <strong>Thanh toán bảo đảm qua sàn JML Escrow:</strong>
+              <div style="margin-top: 2px;">
+                Khoản tiền thanh toán của bạn đang được sàn bảo vệ an toàn 100%. Tiền chỉ được chuyển cho Người bán khi bạn bấm xác nhận đã nhận hàng đúng mô tả.
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhóm nút thao tác chuyển tiếp -->
+          <div class="action-group" id="actionGroup">
+            <a href="orders.html" id="btnPrimaryAction" class="btn-action btn-primary">
+              <span>📦</span>
+              <span>Xem Đơn Hàng Của Tôi</span>
+            </a>
+            <a href="index.html" class="btn-action btn-secondary">
+              <span>🛍️</span>
+              <span>Tiếp Tục Mua Sắm</span>
+            </a>
+            <button onclick="window.print()" class="btn-action btn-outline">
+              <span>🖨️</span>
+              <span>In Biên Lai</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container">
+        <div>© 2026 JML Store Marketplace. Dự án phân hệ Đặt hàng & Thanh toán điện tử (TF175A2).</div>
+        <div style="margin-top: 4px; color: #94a3b8;">
+          Sinh viên thực hiện: <strong>Trần Gia Huy</strong> (Mã SV: <strong>B25DTCN180</strong>) • Tích hợp Cổng thanh toán VNPAY Sandbox
+        </div>
+      </div>
+    </footer>
+
+    <!-- Toast box -->
+    <div id="toastBox" class="toast-msg"></div>
+
+    <script>
+      // =========================================================================
+      // CẤU HÌNH & TỪ ĐIỂN MÃ PHẢN HỒI VNPAY CHUẨN
+      // =========================================================================
+      const API_BASE = window.location.origin.includes(":8000") 
+        ? window.location.origin 
+        : "http://127.0.0.1:8000";
+
+      const VNPAY_RESPONSES = {
+        "00": {
+          isSuccess: true,
+          title: "Thanh Toán Đơn Hàng Thành Công!",
+          desc: "Giao dịch thanh toán trực tuyến qua cổng VNPAY Sandbox đã hoàn tất an toàn. Đơn hàng của bạn đã sẵn sàng và người bán đang tiến hành đóng gói.",
+          badgeText: "GIAO DỊCH THÀNH CÔNG",
+          badgeClass: "success",
+          statusText: "Đang chuẩn bị hàng (Preparing)",
+          detailMsg: "Giao dịch thành công qua VNPAY Sandbox"
+        },
+        "07": {
+          isSuccess: false,
+          title: "Giao Dịch Bị Nghi Ngờ",
+          desc: "Trừ tiền thành công nhưng giao dịch bị nghi ngờ bất thường. Đơn hàng đang được bộ phận an toàn kiểm tra.",
+          badgeText: "NGHI VẤN GIAO DỊCH",
+          badgeClass: "failed",
+          statusText: "Chờ đối soát an toàn",
+          detailMsg: "Giao dịch bị nghi ngờ bất thường (Mã: 07)"
+        },
+        "09": {
+          isSuccess: false,
+          title: "Thẻ Chưa Kích Hoạt Internet Banking",
+          desc: "Thẻ hoặc tài khoản ngân hàng của bạn chưa đăng ký dịch vụ thanh toán trực tuyến Internet Banking.",
+          badgeText: "CHƯA ĐĂNG KÝ BANKING",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Chưa đăng ký dịch vụ InternetBanking (Mã: 09)"
+        },
+        "10": {
+          isSuccess: false,
+          title: "Xác Thực Sai Quá 3 Lần",
+          desc: "Bạn đã nhập thông tin xác thực thẻ/tài khoản sai quá 3 lần. Giao dịch đã bị từ chối vì lý do an toàn.",
+          badgeText: "XÁC THỰC THẤT BẠI",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Xác thực không đúng quá 3 lần (Mã: 10)"
+        },
+        "11": {
+          isSuccess: false,
+          title: "Hết Hạn Chờ Thanh Toán",
+          desc: "Phiên giao dịch đã hết thời gian chờ thanh toán (15 phút). Vui lòng thử lại đơn hàng mới.",
+          badgeText: "HẾT HẠN PHIÊN",
+          badgeClass: "failed",
+          statusText: "Hết hạn thanh toán",
+          detailMsg: "Đã hết hạn chờ thanh toán (Mã: 11)"
+        },
+        "12": {
+          isSuccess: false,
+          title: "Thẻ / Tài Khoản Bị Khóa",
+          desc: "Thẻ hoặc tài khoản ngân hàng thanh toán của bạn hiện đang bị khóa. Vui lòng liên hệ ngân hàng phát hành thẻ.",
+          badgeText: "TÀI KHOẢN BỊ KHÓA",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Thẻ/Tài khoản đang bị khóa (Mã: 12)"
+        },
+        "13": {
+          isSuccess: false,
+          title: "Nhập Sai Mã OTP",
+          desc: "Bạn đã nhập sai mã xác thực OTP gửi về điện thoại. Vui lòng thực hiện lại thanh toán.",
+          badgeText: "SAI MÃ OTP",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Nhập sai mật khẩu OTP (Mã: 13)"
+        },
+        "24": {
+          isSuccess: false,
+          title: "Bạn Đã Hủy Giao Dịch",
+          desc: "Quý khách đã chủ động bấm hủy giao dịch trên cổng thanh toán VNPAY Sandbox.",
+          badgeText: "KHÁCH HÀNG HỦY GIAO DỊCH",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Khách hàng hủy giao dịch (Mã: 24)"
+        },
+        "51": {
+          isSuccess: false,
+          title: "Tài Khoản Không Đủ Số Dư",
+          desc: "Số dư khả dụng trong tài khoản hoặc thẻ ngân hàng không đủ để thực hiện thanh toán đơn hàng này.",
+          badgeText: "KHÔNG ĐỦ SỐ DƯ",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Tài khoản không đủ số dư thanh toán (Mã: 51)"
+        },
+        "65": {
+          isSuccess: false,
+          title: "Vượt Quá Hạn Mức Giao Dịch",
+          desc: "Tài khoản ngân hàng của bạn đã vượt quá hạn mức chi tiêu cho phép trong ngày.",
+          badgeText: "VƯỢT HẠN MỨC",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Vượt quá hạn mức giao dịch trong ngày (Mã: 65)"
+        },
+        "75": {
+          isSuccess: false,
+          title: "Ngân Hàng Đang Bảo Trì",
+          desc: "Hệ thống ngân hàng thanh toán đang tạm dừng để bảo trì định kỳ. Quý khách vui lòng thử lại sau.",
+          badgeText: "NGÂN HÀNG BẢO TRÌ",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Ngân hàng thanh toán đang bảo trì (Mã: 75)"
+        },
+        "97": {
+          isSuccess: false,
+          title: "Chữ Ký Số Không Hợp Lệ",
+          desc: "Dữ liệu trả về không khớp với mã bảo mật HMAC-SHA512 checksum. Giao dịch bị từ chối để phòng chống gian lận.",
+          badgeText: "SAI CHỮ KÝ SỐ",
+          badgeClass: "failed",
+          statusText: "Từ chối giao dịch",
+          detailMsg: "Chữ ký số checksum không hợp lệ (Mã: 97)"
+        },
+        "99": {
+          isSuccess: false,
+          title: "Giao Dịch Thất Bại",
+          desc: "Giao dịch chưa thể hoàn tất do lỗi kết nối ngân hàng hoặc hệ thống mạng.",
+          badgeText: "LỖI HỆ THỐNG",
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: "Lỗi kết nối hoặc sự cố hệ thống (Mã: 99)"
+        }
+      };
+
+      let currentOrderKey = "MP-17502";
+
+      // =========================================================================
+      // KHỞI CHẠY KHI TẢI TRANG: ĐỌC DỮ LIỆU URL TỪ VNPAY
+      // =========================================================================
+      document.addEventListener("DOMContentLoaded", () => {
+        parseAndRenderVNPAYResult();
+      });
+
+      function parseAndRenderVNPAYResult() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // 1. Lấy mã phản hồi VNPay (vnp_ResponseCode hoặc status)
+        let responseCode = urlParams.get("vnp_ResponseCode");
+        const statusParam = urlParams.get("status");
+
+        if (!responseCode) {
+          if (statusParam === "success") responseCode = "00";
+          else if (statusParam === "failed" || statusParam === "error") responseCode = "24";
+          else responseCode = "00"; // Mặc định hiển thị mẫu thành công nếu không có params
+        }
+
+        // 2. Lấy thông tin mã đơn hàng
+        const txnRef = urlParams.get("vnp_TxnRef") || "";
+        let orderKey = urlParams.get("order_key") || urlParams.get("order") || "";
+        if (!orderKey && txnRef) {
+          orderKey = txnRef.includes("_") ? txnRef.split("_")[0] : txnRef;
+        }
+        if (!orderKey) {
+          orderKey = `MP-${Math.floor(10000 + Math.random() * 90000)}`;
+        }
+        currentOrderKey = orderKey.replace("#", "");
+
+        // 3. Lấy số tiền thanh toán (VNPay chia 100)
+        let amount = 0;
+        const rawAmount = urlParams.get("vnp_Amount");
+        if (rawAmount) {
+          const parsed = parseInt(rawAmount, 10);
+          amount = parsed > 10000000 ? Math.round(parsed / 100) : (parsed >= 1000 ? (parsed % 100 === 0 && parsed > 5000000 ? parsed / 100 : parsed) : parsed);
+        } else if (urlParams.get("amount")) {
+          amount = parseInt(urlParams.get("amount"), 10) || 450000;
+        } else {
+          amount = 450000;
+        }
+
+        // 4. Lấy các thông tin khác
+        const bankCode = urlParams.get("vnp_BankCode") || "NCB";
+        const transactionNo = urlParams.get("vnp_TransactionNo") || (responseCode === "00" ? `14${Math.floor(100000 + Math.random() * 900000)}` : "Không có");
+        const payDateRaw = urlParams.get("vnp_PayDate") || "";
+        const orderInfo = urlParams.get("vnp_OrderInfo") || `Thanh toan don hang ${currentOrderKey} JML Store`;
+
+        // Định dạng ngày giờ
+        let formattedDate = "";
+        if (payDateRaw && payDateRaw.length >= 14) {
+          const y = payDateRaw.substring(0, 4);
+          const m = payDateRaw.substring(4, 6);
+          const d = payDateRaw.substring(6, 8);
+          const hh = payDateRaw.substring(8, 10);
+          const mm = payDateRaw.substring(10, 12);
+          const ss = payDateRaw.substring(12, 14);
+          formattedDate = `${hh}:${mm}:${ss} ${d}/${m}/${y}`;
+        } else {
+          const now = new Date();
+          formattedDate = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} ${now.toLocaleDateString('vi-VN')}`;
+        }
+
+        // Render ra giao diện
+        renderState(responseCode, {
+          orderKey: currentOrderKey,
+          amount,
+          bankCode,
+          transactionNo,
+          txnRef: txnRef || `${currentOrderKey}_${Date.now().toString().slice(-6)}`,
+          payDate: formattedDate,
+          orderInfo
+        });
+
+        // Đồng bộ lưu trạng thái đơn hàng vào LocalStorage để orders.html đọc được
+        syncOrderToLocalStorage(currentOrderKey, responseCode === "00", amount);
+      }
+
+      function renderState(code, data) {
+        const info = VNPAY_RESPONSES[code] || {
+          isSuccess: false,
+          title: `Giao Dịch Thất Bại (Mã ${code})`,
+          desc: "Giao dịch không thành công. Quý khách vui lòng kiểm tra lại thông tin thanh toán.",
+          badgeText: `LỖI GIAO DỊCH (${code})`,
+          badgeClass: "failed",
+          statusText: "Chờ thanh toán lại",
+          detailMsg: `Lỗi không xác định: ${code}`
+        };
+
+        const isSuccess = info.isSuccess;
+        const root = document.documentElement;
+
+        // Cập nhật màu sắc chủ đạo
+        root.style.setProperty("--card-accent-color", isSuccess ? "var(--success)" : "var(--danger)");
+
+        // 1. Icon & Wrapper
+        const iconWrapper = document.getElementById("statusIcon");
+        const iconText = document.getElementById("iconText");
+        iconWrapper.className = isSuccess ? "status-icon-wrapper success" : "status-icon-wrapper failed";
+        iconText.textContent = isSuccess ? "✓" : "✕";
+
+        // 2. Badge & Title
+        const badge = document.getElementById("resultBadge");
+        const badgeText = document.getElementById("badgeText");
+        badge.className = isSuccess ? "result-badge success" : "result-badge failed";
+        badgeText.textContent = info.badgeText;
+
+        document.getElementById("resultTitle").textContent = info.title;
+        document.getElementById("resultSubtitle").textContent = info.desc;
+
+        // 3. Biên lai
+        document.getElementById("valOrderKey").textContent = `#${data.orderKey}`;
+        document.getElementById("valAmount").textContent = formatCurrency(data.amount);
+        document.getElementById("valAmount").style.color = isSuccess ? "var(--success)" : "var(--danger)";
+        document.getElementById("valBank").textContent = getBankFullName(data.bankCode);
+        document.getElementById("valTransactionNo").textContent = data.transactionNo;
+        document.getElementById("valTxnRef").textContent = data.txnRef;
+        document.getElementById("valPayDate").textContent = data.payDate;
+        document.getElementById("valOrderInfo").textContent = decodeURIComponent(data.orderInfo).replace(/\+/g, " ");
+
+        // Code Badge
+        const codeBadge = document.getElementById("codeBadge");
+        codeBadge.textContent = `${code} - ${info.detailMsg}`;
+        if (isSuccess) {
+          codeBadge.style.background = "#dcfce7";
+          codeBadge.style.color = "#15803d";
+        } else {
+          codeBadge.style.background = "#fee2e2";
+          codeBadge.style.color = "#b91c1c";
+        }
+
+        // Trạng thái đơn hàng
+        const orderStatusEl = document.getElementById("valOrderStatus");
+        if (isSuccess) {
+          orderStatusEl.innerHTML = `<span style="color: var(--success); font-weight: 700;">● ${info.statusText}</span>`;
+        } else {
+          orderStatusEl.innerHTML = `<span style="color: var(--danger); font-weight: 700;">● ${info.statusText}</span>`;
+        }
+
+        // 4. Khối Security / Lưu ý
+        const secBox = document.getElementById("securityBox");
+        if (isSuccess) {
+          secBox.className = "security-box";
+          secBox.innerHTML = `
+            <span style="font-size: 20px;">🛡️</span>
+            <div>
+              <strong>Thanh toán bảo đảm qua sàn JML Escrow:</strong>
+              <div style="margin-top: 2px;">
+                Khoản tiền thanh toán của bạn đang được sàn bảo vệ an toàn 100%. Tiền chỉ được chuyển cho Người bán khi bạn bấm xác nhận đã nhận hàng đúng mô tả.
+              </div>
+            </div>
+          `;
+        } else {
+          secBox.className = "security-box warning";
+          secBox.innerHTML = `
+            <span style="font-size: 20px;">💡</span>
+            <div>
+              <strong>Hướng dẫn xử lý giao dịch chưa hoàn tất:</strong>
+              <div style="margin-top: 2px;">
+                Đơn hàng <strong>#${data.orderKey}</strong> vẫn đang được lưu tạm trên hệ thống. Quý khách có thể bấm <strong>"Thử Thanh Toán Lại"</strong> hoặc chuyển sang phương thức <strong>Thanh toán khi nhận hàng (COD)</strong> tại trang chi tiết đơn.
+              </div>
+            </div>
+          `;
+        }
+
+        // 5. Nút bấm chuyển hướng
+        const btnPrimary = document.getElementById("btnPrimaryAction");
+        if (isSuccess) {
+          btnPrimary.href = `orders.html?order=${data.orderKey}`;
+          btnPrimary.className = "btn-action btn-primary";
+          btnPrimary.innerHTML = `<span>📦</span><span>Xem Chi Tiết Đơn Mua</span>`;
+        } else {
+          btnPrimary.href = `checkout.html?retry_order=${data.orderKey}`;
+          btnPrimary.className = "btn-action btn-primary";
+          btnPrimary.style.background = "var(--primary)";
+          btnPrimary.innerHTML = `<span>🔄</span><span>Thử Thanh Toán Lại</span>`;
+        }
+      }
+
+      // =========================================================================
+      // BỘ CHUYỂN ĐỔI DEMO CHO TESTER / GIẢNG VIÊN CHẤM BÀI
+      // =========================================================================
+      function applyDemoState(stateKey) {
+        document.querySelectorAll(".demo-btn").forEach(b => b.classList.remove("active"));
+        if (event && event.target) event.target.classList.add("active");
+
+        const codesMap = {
+          success: "00",
+          cancel: "24",
+          insufficient: "51",
+          timeout: "11",
+          wrong_otp: "13",
+          checksum_fail: "97"
+        };
+
+        const targetCode = codesMap[stateKey] || "00";
+        const now = new Date();
+        const dateStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} ${now.toLocaleDateString('vi-VN')}`;
+
+        renderState(targetCode, {
+          orderKey: currentOrderKey,
+          amount: 450000,
+          bankCode: targetCode === "00" ? "NCB" : "NCB",
+          transactionNo: targetCode === "00" ? "14992831" : "Không có",
+          txnRef: `${currentOrderKey}_DEMO`,
+          payDate: dateStr,
+          orderInfo: `Thanh toan don hang ${currentOrderKey} (Che do Demo Tester)`
+        });
+
+        showToast(`Đã chuyển sang giao diện: ${VNPAY_RESPONSES[targetCode]?.badgeText || targetCode}`);
+      }
+
+      // Lưu trạng thái vào localStorage để đồng bộ với màn hình Quản lý đơn hàng orders.html
+      function syncOrderToLocalStorage(orderKey, isPaid, amount) {
+        try {
+          const raw = localStorage.getItem("JML_ORDERS_LOCAL") || "[]";
+          let list = JSON.parse(raw);
+          const found = list.find(o => o.order_key === orderKey || o.id_display === `#${orderKey}`);
+          if (found) {
+            if (isPaid) {
+              found.payment_status = "paid";
+              found.escrow_badge = "💳 Đã thanh toán VNPay Sandbox";
+              found.status = "preparing";
+            }
+            localStorage.setItem("JML_ORDERS_LOCAL", JSON.stringify(list));
+          }
+        } catch (e) {
+          // Bỏ qua nếu localStorage bị chặn
+        }
+      }
+
+      function getBankFullName(code) {
+        const banks = {
+          NCB: "NCB (Ngân hàng TMCP Quốc Dân - Sandbox)",
+          VIETCOMBANK: "Vietcombank (Ngoại thương Việt Nam)",
+          TECHCOMBANK: "Techcombank (Kỹ thương Việt Nam)",
+          BIDV: "BIDV (Đầu tư & Phát triển Việt Nam)",
+          VIETINBANK: "VietinBank (Công thương Việt Nam)",
+          AGRIBANK: "Agribank (Nông nghiệp & PTNT)",
+          MBBANK: "MB (Ngân hàng Quân Đội)",
+          VPBANK: "VPBank (Việt Nam Thịnh Vượng)",
+          VNPAYQR: "Cổng thanh toán quét mã VNPAY-QR"
+        };
+        return banks[code] || `${code} (Ngân hàng liên kết VNPAY)`;
+      }
+
+      function formatCurrency(amount) {
+        return Number(amount || 0).toLocaleString("vi-VN") + " ₫";
+      }
+
+      function copyOrderCode() {
+        navigator.clipboard.writeText(currentOrderKey).then(() => {
+          showToast(`✓ Đã sao chép mã đơn hàng #${currentOrderKey}`);
+        }).catch(() => {
+          showToast(`Mã đơn: #${currentOrderKey}`);
+        });
+      }
+
+      function showToast(msg) {
+        const box = document.getElementById("toastBox");
+        if (!box) return;
+        box.textContent = msg;
+        box.style.display = "flex";
+        if (window.toastTimer) clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => { box.style.display = "none"; }, 3000);
+      }
+    </script>
+  </body>
+</html>
