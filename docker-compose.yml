@@ -20,6 +20,7 @@ services:
       - ./backend/db/migrations/003_create_users_and_roles_schema.sql:/docker-entrypoint-initdb.d/04_roles_users_v2.sql
       - ./backend/db/migrations/005_add_order_query_indexes.sql:/docker-entrypoint-initdb.d/05_order_indexes.sql
       - ./backend/db/migrations/006_users_email_unique_index.sql:/docker-entrypoint-initdb.d/06_users_email_unique.sql
+      - ./backend/db/migrations/007_verify_dashboard_query_indexes.sql:/docker-entrypoint-initdb.d/07_dashboard_indexes.sql
       - ./backend/db/seeds/seed.sql:/docker-entrypoint-initdb.d/99_seed.sql
       - ./backend/db/seeds/seed_50_orders.sql:/docker-entrypoint-initdb.d/98_seed_50_orders.sql
     networks:
