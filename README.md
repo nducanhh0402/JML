@@ -308,3 +308,17 @@ flowchart LR
 > - Trang Chi tiết sản phẩm & Đánh giá: https://jml-teal.vercel.app/buyer/product-detail.html?id=101
 >
 > *(Ghi chú nộp bài `TF16BE7`: tự quay video màn hình ngắn ~2 phút theo 5 bước kịch bản trên bằng OBS / Xbox Game Bar `Win + G` / Loom, sau đó đính kèm link video hoặc file video cùng link nhánh/Pull Request này.)*
+
+### 8.5. Minh chứng nộp TF16BEF
+
+- **Kịch bản quay chi tiết:** [`backend/tests/DEMO_SCRIPT_TF16BEF.md`](./backend/tests/DEMO_SCRIPT_TF16BEF.md)
+- **Nhánh thực hiện:** [`feature/tf16bef-hoan-thien-readme-va-demo`](https://github.com/nducanhh0402/JML/tree/feature/tf16bef-hoan-thien-readme-va-demo)
+- **Video Demo:** đính kèm link YouTube/Loom hoặc file MP4 tại mục Pull Request khi hoàn tất quay màn hình.
+
+#### Checklist trước khi quay
+
+- [ ] Backend chạy tại `127.0.0.1:8000` và Swagger mở được.
+- [ ] Frontend chạy tại `127.0.0.1:5500` hoặc Vercel Live Demo.
+- [ ] Trình duyệt ở desktop 1280×900, sau đó chuyển sang mobile 390×844.
+- [ ] Tài khoản demo Admin/Buyer/Seller đã đăng nhập nếu cần chức năng tương ứng.
+- [ ] Terminal hiển thị kết quả test hoặc benchmark rõ ràng ở cuối video.
