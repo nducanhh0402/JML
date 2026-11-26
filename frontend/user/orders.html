@@ -1,5 +1,6 @@
 <!-- =============================================================== -->
 <!-- Trần Gia Huy task TF173E6 [FE] Trang lịch sử đơn hàng và trạng thái đơn -->
+<!-- Trần Gia Huy task TF1756E [Kiểm thử] Kiểm thử giao diện checkout và lịch sử đơn trên máy tính và điện thoại; ghi và sửa lỗi -->
 <!-- =============================================================== -->
 <!doctype html>
 <html lang="vi">
@@ -1137,23 +1138,30 @@
       .footer-links a:hover { color: #fff; }
 
       /* ==========================================================================
-         16. RESPONSIVE
+         16. RESPONSIVE - TF1756E: Tối ưu hiển thị Desktop & Mobile
          ========================================================================== */
+      html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
       @media (max-width: 768px) {
         .detail-grid { grid-template-columns: 1fr; }
-        .order-card-head { flex-direction: column; align-items: flex-start; }
-        .order-card-foot { flex-direction: column; align-items: flex-start; }
-        .order-actions { width: 100%; }
-        .btn-detail, .btn-cancel, .btn-received { flex: 1; justify-content: center; }
-        .modal-footer { justify-content: stretch; }
-        .btn-modal-cancel, .btn-modal-received, .btn-modal-close { flex: 1; justify-content: center; }
-        .page-header { flex-direction: column; align-items: flex-start; }
-        .filter-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+        .order-card-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .order-card-foot { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .order-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-detail, .btn-cancel, .btn-received { flex: 1; min-width: 120px; justify-content: center; }
+        .modal-footer { justify-content: stretch; display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-modal-cancel, .btn-modal-received, .btn-modal-close { flex: 1; min-width: 120px; justify-content: center; }
+        .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .filter-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; max-width: 100%; -webkit-overflow-scrolling: touch; }
+        .top-bar-inner { flex-direction: column; gap: 6px; }
+        .toast-msg { left: 16px; right: 16px; bottom: 16px; max-width: none; justify-content: center; }
       }
       @media (max-width: 480px) {
         .header-inner { padding: 10px 12px; }
-        .modal-box { max-height: 95vh; }
+        .modal-box { max-height: 95vh; width: 95%; margin: 10px; }
         .modal-header, .modal-body, .modal-footer { padding-left: 16px; padding-right: 16px; }
+        .order-total-block { width: 100%; display: flex; justify-content: space-between; align-items: center; }
       }
 
       @keyframes spin {
