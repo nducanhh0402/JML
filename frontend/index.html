@@ -1,420 +1,432 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JML Store - Demo Giao Diện Trực Tuyến (Vercel)</title>
-    <link rel="icon" type="image/svg+xml" href="./admin/jml-store-icon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./shared/css/koi-lotus-theme.css" />
-    <style>
-      :root {
-        --primary: #c92a22;
-        --primary-hover: #a61e18;
-        --primary-soft: #fdf0ee;
-        --lotus: #39522a;
-        --lotus-soft: #edf3e7;
-        --gold: #d49b1a;
-        --bg: #f5f5ee;
-        --surface: #ffffff;
-        --text: #1a261a;
-        --muted: #586552;
-        --border: #dce0d2;
-      }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JML Store - Demo Giao Diện Trực Tuyến (Vercel)</title>
+  <link rel="icon" type="image/svg+xml" href="./admin/jml-store-icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="./shared/css/jml-theme.css" />
+  <style>
+    :root {
+      --primary: #ff4267;
+      --primary-hover: #e11d48;
+      --primary-soft: #fff1f2;
+      --sapphire: #0a55ab;
+      --sapphire-soft: #eff6ff;
+      --gold: #ffb347;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+    }
 
-      body {
-        font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
-        background:
-          radial-gradient(circle at top right, rgba(200, 75, 122, 0.10) 0%, transparent 38%),
-          radial-gradient(circle at top left, rgba(57, 82, 42, 0.14) 0%, transparent 45%),
-          var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-        line-height: 1.5;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
+    body {
+      font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(255, 66, 103, 0.08) 0%, transparent 38%),
+        radial-gradient(circle at top left, rgba(29, 140, 248, 0.12) 0%, transparent 45%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 36px 20px 64px;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #0f172a 0%, #172554 55%, #3730a3 100%);
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(191, 219, 254, 0.35);
+      box-shadow: 0 8px 20px rgba(3, 25, 59, 0.28);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--sapphire-soft);
+      border: 1px solid #bfdbfe;
+      color: var(--sapphire);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 28% 50%, rgba(45, 166, 255, 0.42) 0%, rgba(16, 102, 204, 0.40) 34%, rgba(6, 52, 118, 0.86) 68%, #03193b 100%),
+        linear-gradient(135deg, #073f88 0%, #031a3e 100%);
+      border: 1px solid rgba(191, 219, 254, 0.22);
+      border-radius: 20px;
+      padding: 34px 32px;
+      margin-bottom: 28px;
+      color: #ffffff;
+      box-shadow: 0 14px 34px rgba(3, 25, 59, 0.22);
+    }
+
+    .hero h1 {
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .hero p {
+      color: rgba(219, 234, 254, 0.9);
+      max-width: 760px;
+      margin-bottom: 22px;
+      font-size: 15px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
+      color: #fff;
+      box-shadow: 0 10px 22px -6px rgba(225, 29, 72, 0.5);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09);
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--sapphire-soft);
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .card p {
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    .card-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: var(--primary-soft);
+      color: var(--primary-hover);
+      border: 1px solid #fecdd3;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .card-link:hover {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .note {
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .note strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 768px) {
       .container {
-        max-width: 1140px;
-        margin: 0 auto;
-        padding: 36px 20px 64px;
-      }
-
-      .header {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 28px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
-        color: var(--text);
-      }
-
-      .brand-badge {
-        background: linear-gradient(135deg, #d42b24 0%, #a61e18 65%, #242919 100%);
-        color: #fff;
-        font-weight: 800;
-        font-size: 18px;
-        padding: 8px 14px;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(201, 42, 34, 0.28);
-      }
-
-      .brand-title {
-        font-size: 20px;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-      }
-
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 14px;
-        border-radius: 999px;
-        background: var(--lotus-soft);
-        border: 1px solid #cddbc0;
-        color: #2b401f;
-        font-size: 13px;
-        font-weight: 700;
+        padding: 20px 14px 44px;
       }
 
       .hero {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, #1f3318 0%, #39522a 55%, #4e4b25 100%);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 20px;
-        padding: 34px 32px;
-        margin-bottom: 28px;
-        color: #ffffff;
-        box-shadow: 0 14px 34px rgba(26, 38, 26, 0.16);
-      }
-
-      .hero h1 {
-        font-size: clamp(22px, 4vw, 34px);
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        margin-bottom: 10px;
-        color: #ffffff;
+        padding: 24px 18px;
+        border-radius: 16px;
       }
 
       .hero p {
-        color: rgba(245, 247, 238, 0.9);
-        max-width: 760px;
-        margin-bottom: 22px;
-        font-size: 15px;
-      }
-
-      .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        border-radius: 12px;
-        font-weight: 700;
         font-size: 14px;
-        text-decoration: none;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-      }
-
-      .btn:hover {
-        transform: translateY(-1px);
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, #d42b24, #a61e18);
-        color: #fff;
-        box-shadow: 0 8px 18px rgba(201, 42, 34, 0.34);
-      }
-
-      .btn-primary:hover {
-        background: linear-gradient(135deg, #e0342c, #b6231c);
-      }
-
-      .btn-secondary {
-        background: rgba(255, 255, 255, 0.14);
-        color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.28);
-        backdrop-filter: blur(8px);
-      }
-
-      .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.24);
       }
 
       .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 18px;
-        margin-bottom: 28px;
+        grid-template-columns: 1fr;
+        gap: 14px;
       }
 
       .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 22px;
-        display: flex;
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
         flex-direction: column;
-        justify-content: space-between;
-        gap: 16px;
-        box-shadow: 0 8px 22px rgba(26, 38, 26, 0.05);
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        align-items: flex-start;
       }
 
-      .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 26px rgba(26, 38, 26, 0.09);
+      .brand-title {
+        font-size: 17px;
       }
 
-      .card-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--lotus-soft);
-        font-size: 20px;
-        margin-bottom: 12px;
+      .pill {
+        font-size: 12px;
+        padding: 5px 12px;
       }
 
-      .card h2 {
-        font-size: 18px;
-        font-weight: 800;
-        margin-bottom: 6px;
-        color: var(--text);
+      .hero-actions {
+        flex-direction: column;
       }
 
-      .card p {
-        font-size: 13.5px;
-        color: var(--muted);
+      .hero-actions .btn {
+        width: 100%;
       }
+    }
+  </style>
+  <script src="./shared/js/jml-banner-ambient.js" defer></script>
+</head>
 
-      .card-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
+<body>
+  <main class="container">
+    <header class="header">
+      <a class="brand" href="./buyer/index.html">
+        <span class="brand-badge">JML</span>
+        <span class="brand-title">STORE MARKETPLACE</span>
+      </a>
+      <span class="pill">Sprint 4 • Vercel Live Demo (TF16FD3)</span>
+    </header>
 
-      .card-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
-        border-radius: 10px;
-        background: var(--primary-soft);
-        color: var(--primary);
-        border: 1px solid rgba(201, 42, 34, 0.18);
-        font-size: 13px;
-        font-weight: 700;
-        text-decoration: none;
-        transition: background 0.15s ease, color 0.15s ease;
-      }
-
-      .card-link:hover {
-        background: var(--primary);
-        color: #ffffff;
-      }
-
-      .note {
-        padding: 16px 20px;
-        border-radius: 14px;
-        background: #eceee3;
-        border: 1px solid var(--border);
-        font-size: 13px;
-        color: var(--muted);
-      }
-
-      .note strong {
-        color: var(--text);
-      }
-
-      @media (max-width: 768px) {
-        .container {
-          padding: 20px 14px 44px;
-        }
-        .hero {
-          padding: 24px 18px;
-          border-radius: 16px;
-        }
-        .hero p {
-          font-size: 14px;
-        }
-        .grid {
-          grid-template-columns: 1fr;
-          gap: 14px;
-        }
-        .card {
-          padding: 18px;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .brand-title {
-          font-size: 17px;
-        }
-        .pill {
-          font-size: 12px;
-          padding: 5px 12px;
-        }
-        .hero-actions {
-          flex-direction: column;
-        }
-        .hero-actions .btn {
-          width: 100%;
-        }
-      }
-    </style>
-    <script src="./shared/js/koi-banner-ambient.js" defer></script>
-  </head>
-  <body>
-    <main class="container">
-      <header class="header">
-        <a class="brand" href="./buyer/index.html">
-          <span class="brand-badge">JML</span>
-          <span class="brand-title">STORE MARKETPLACE</span>
+    <section class="hero">
+      <h1>Demo Giao Diện JML Store — Multi-Vendor Marketplace</h1>
+      <p>
+        Cổng truy cập nhanh toàn bộ các phân hệ giao diện triển khai trên Vercel, tương thích
+        hiển thị cả máy tính (Desktop) và điện thoại (Mobile): Trang chủ Buyer, Tìm kiếm &amp;
+        Lọc sản phẩm, Chi tiết &amp; Đánh giá, Giỏ hàng, Checkout, Lịch sử đơn, Hồ sơ, Sổ địa chỉ,
+        Kênh Người bán và Quản trị Sàn.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="./buyer/index.html">
+          Mở Trang Chủ Người Mua (Buyer) →
         </a>
-        <span class="pill">Sprint 4 • Vercel Live Demo (TF16FD3)</span>
-      </header>
+        <a class="btn btn-secondary" href="./buyer/products.html">
+          Danh Sách &amp; Bộ Lọc Sản Phẩm
+        </a>
+        <a class="btn btn-secondary" href="./auth/index.html">
+          Đăng Nhập / Đăng Ký
+        </a>
+      </div>
+    </section>
 
-      <section class="hero">
-        <h1>Demo Giao Diện JML Store — Multi-Vendor Marketplace</h1>
-        <p>
-          Cổng truy cập nhanh toàn bộ các phân hệ giao diện triển khai trên Vercel, tương thích
-          hiển thị cả máy tính (Desktop) và điện thoại (Mobile): Trang chủ Buyer, Tìm kiếm &amp;
-          Lọc sản phẩm, Chi tiết &amp; Đánh giá, Giỏ hàng, Checkout, Lịch sử đơn, Hồ sơ, Sổ địa chỉ,
-          Kênh Người bán và Quản trị Sàn.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="./buyer/index.html">
-            Mở Trang Chủ Người Mua (Buyer) →
-          </a>
-          <a class="btn btn-secondary" href="./buyer/products.html">
-            Danh Sách &amp; Bộ Lọc Sản Phẩm
-          </a>
-          <a class="btn btn-secondary" href="./auth/index.html">
-            Đăng Nhập / Đăng Ký 3D
-          </a>
+    <section class="grid">
+      <article class="card">
+        <div>
+          <div class="card-icon">🛍️</div>
+          <h2>Phân Hệ Người Mua (Buyer)</h2>
+          <p>
+            Trang chủ Flash Sale, danh mục nổi bật, tìm kiếm &amp; lọc sản phẩm, trang chi tiết
+            kèm thư viện ảnh, đánh giá và giỏ hàng áp dụng mã giảm giá.
+          </p>
         </div>
-      </section>
+        <div class="card-links">
+          <a class="card-link" href="./buyer/index.html">Trang chủ Buyer</a>
+          <a class="card-link" href="./buyer/products.html">Sản phẩm &amp; Bộ lọc</a>
+          <a class="card-link" href="./buyer/product-detail.html?id=101">Chi tiết SP</a>
+          <a class="card-link" href="./buyer/cart.html">Giỏ hàng</a>
+        </div>
+      </article>
 
-      <section class="grid">
-        <article class="card">
-          <div>
-            <div class="card-icon">🛍️</div>
-            <h2>Phân Hệ Người Mua (Buyer)</h2>
-            <p>
-              Trang chủ Flash Sale, danh mục nổi bật, tìm kiếm &amp; lọc sản phẩm, trang chi tiết
-              kèm thư viện ảnh, đánh giá và giỏ hàng áp dụng mã giảm giá.
-            </p>
-          </div>
-          <div class="card-links">
-            <a class="card-link" href="./buyer/index.html">Trang chủ Buyer</a>
-            <a class="card-link" href="./buyer/products.html">Sản phẩm &amp; Bộ lọc</a>
-            <a class="card-link" href="./buyer/product-detail.html?id=101">Chi tiết SP</a>
-            <a class="card-link" href="./buyer/cart.html">Giỏ hàng</a>
-          </div>
-        </article>
+      <article class="card">
+        <div>
+          <div class="card-icon">📦</div>
+          <h2>Đặt Hàng &amp; Tài Khoản (User)</h2>
+          <p>
+            Luồng đặt hàng (Checkout), theo dõi lịch sử &amp; hủy đơn, cập nhật hồ sơ cá nhân,
+            đổi mật khẩu và quản lý sổ địa chỉ giao nhận.
+          </p>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="./user/checkout.html">Checkout</a>
+          <a class="card-link" href="./user/orders.html">Lịch sử đơn</a>
+          <a class="card-link" href="./user/profile.html">Hồ sơ &amp; Mật khẩu</a>
+          <a class="card-link" href="./user/addresses.html">Sổ địa chỉ</a>
+          <a class="card-link" href="./user/index.html">Storefront User</a>
+        </div>
+      </article>
 
-        <article class="card">
-          <div>
-            <div class="card-icon">📦</div>
-            <h2>Đặt Hàng &amp; Tài Khoản (User)</h2>
-            <p>
-              Luồng đặt hàng (Checkout), theo dõi lịch sử &amp; hủy đơn, cập nhật hồ sơ cá nhân,
-              đổi mật khẩu và quản lý sổ địa chỉ giao nhận.
-            </p>
-          </div>
-          <div class="card-links">
-            <a class="card-link" href="./user/checkout.html">Checkout</a>
-            <a class="card-link" href="./user/orders.html">Lịch sử đơn</a>
-            <a class="card-link" href="./user/profile.html">Hồ sơ &amp; Mật khẩu</a>
-            <a class="card-link" href="./user/addresses.html">Sổ địa chỉ</a>
-            <a class="card-link" href="./user/index.html">Storefront User</a>
-          </div>
-        </article>
+      <article class="card">
+        <div>
+          <div class="card-icon">🔐</div>
+          <h2>Xác Thực Đa Vai Trò (Auth)</h2>
+          <p>
+            Cổng đăng nhập và đăng ký hiện đại đồng bộ nhận diện JML Store với phân quyền JWT cho
+            Người mua (Buyer), Người bán (Seller) và Quản trị viên (Admin).
+          </p>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="./auth/index.html">Mở Trang Đăng Nhập</a>
+        </div>
+      </article>
 
-        <article class="card">
-          <div>
-            <div class="card-icon">🔐</div>
-            <h2>Xác Thực Đa Vai Trò (Auth 3D)</h2>
-            <p>
-              Sảnh đăng nhập và đăng ký 3D Cá Koi &amp; Hồ Sen với phân quyền JWT cho Người mua
-              (Buyer), Người bán (Seller) và Quản trị viên (Admin).
-            </p>
-          </div>
-          <div class="card-links">
-            <a class="card-link" href="./auth/index.html">Mở Trang Auth 3D</a>
-          </div>
-        </article>
+      <article class="card">
+        <div>
+          <div class="card-icon">🏪</div>
+          <h2>Kênh Người Bán (Seller Center)</h2>
+          <p>
+            Quản lý hồ sơ cửa hàng, đăng bán &amp; cập nhật tồn kho sản phẩm, xử lý trạng thái
+            đơn hàng và theo dõi ví doanh thu.
+          </p>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="./seller/index.html">Mở Seller Center</a>
+        </div>
+      </article>
 
-        <article class="card">
-          <div>
-            <div class="card-icon">🏪</div>
-            <h2>Kênh Người Bán (Seller Center)</h2>
-            <p>
-              Quản lý hồ sơ cửa hàng, đăng bán &amp; cập nhật tồn kho sản phẩm, xử lý trạng thái
-              đơn hàng và theo dõi ví doanh thu.
-            </p>
-          </div>
-          <div class="card-links">
-            <a class="card-link" href="./seller/index.html">Mở Seller Center</a>
-          </div>
-        </article>
+      <article class="card">
+        <div>
+          <div class="card-icon">🛡️</div>
+          <h2>Quản Trị Sàn (Admin Portal)</h2>
+          <p>
+            Dashboard tài chính toàn sàn, quản lý danh mục &amp; thương hiệu, kiểm duyệt sản phẩm,
+            quản lý shop, khách hàng và xử lý đơn trung gian Escrow.
+          </p>
+        </div>
+        <div class="card-links">
+          <a class="card-link" href="./admin/index.html">Tổng quan &amp; Đơn hàng</a>
+          <a class="card-link" href="./admin/categories_brands.html">Danh mục &amp; Thương hiệu</a>
+          <a class="card-link" href="./admin/products.html">Sản phẩm Admin</a>
+        </div>
+      </article>
+    </section>
 
-        <article class="card">
-          <div>
-            <div class="card-icon">🛡️</div>
-            <h2>Quản Trị Sàn (Admin Portal)</h2>
-            <p>
-              Dashboard tài chính toàn sàn, quản lý danh mục &amp; thương hiệu, kiểm duyệt sản phẩm,
-              quản lý shop, khách hàng và xử lý đơn trung gian Escrow.
-            </p>
-          </div>
-          <div class="card-links">
-            <a class="card-link" href="./admin/index.html">Tổng quan &amp; Đơn hàng</a>
-            <a class="card-link" href="./admin/categories_brands.html">Danh mục &amp; Thương hiệu</a>
-            <a class="card-link" href="./admin/products.html">Sản phẩm Admin</a>
-          </div>
-        </article>
-      </section>
+    <aside class="note">
+      <strong>Lưu ý chế độ Demo Static trên Vercel:</strong> Các trang Storefront (Trang chủ
+      Buyer, Danh sách sản phẩm, Chi tiết sản phẩm, Giỏ hàng, Checkout) đã tích hợp sẵn dữ liệu
+      mẫu (fallback data) để hiển thị đầy đủ trên cả điện thoại và máy tính khi chưa kết nối
+      FastAPI Backend (<code>http://127.0.0.1:8000</code>).
+    </aside>
+  </main>
+</body>
 
-      <aside class="note">
-        <strong>Lưu ý chế độ Demo Static trên Vercel:</strong> Các trang Storefront (Trang chủ
-        Buyer, Danh sách sản phẩm, Chi tiết sản phẩm, Giỏ hàng, Checkout) đã tích hợp sẵn dữ liệu
-        mẫu (fallback data) để hiển thị đầy đủ trên cả điện thoại và máy tính khi chưa kết nối
-        FastAPI Backend (<code>http://127.0.0.1:8000</code>).
-      </aside>
-    </main>
-  </body>
 </html>

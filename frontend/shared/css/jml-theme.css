@@ -1,0 +1,414 @@
+/* ==============================================================================
+   JML STORE — MIDNIGHT SAPPHIRE & CORAL HORIZON MASTER THEME
+   Hệ thống giao diện đồng bộ toàn dự án theo trang Đăng nhập/Đăng ký mới:
+   - Coral Horizon (Primary CTA):     #ff4267 / #e11d48
+   - Amber Gold (Accent):             #ffb347 / #d97706
+   - Midnight Sapphire (Brand/Admin): #1d8cf8 / #0a55ab / #073f88 / #03193b
+   - Indigo Accent:                   #3730a3
+   - Cool Slate Surfaces:             #ffffff / #f8fafc / #f1f5f9
+   ============================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap");
+
+:root {
+  --font-sans: "Be Vietnam Pro", -apple-system, "Segoe UI", Roboto, BlinkMacSystemFont, sans-serif;
+
+  /* Core Midnight Sapphire & Coral Horizon Palette */
+  --jml-blue-core: #1d8cf8;
+  --jml-blue-mid: #0a55ab;
+  --jml-blue-deep: #042554;
+  --jml-navy-dark: #03193b;
+  --jml-indigo: #3730a3;
+  --jml-coral: #ff4267;
+  --jml-coral-hover: #e11d48;
+  --jml-amber: #ffb347;
+
+  /* Unified Semantic Tokens */
+  --primary: #ff4267;
+  --primary-hover: #e11d48;
+  --primary-light: #fff1f2;
+  --primary-soft: #fff1f2;
+  --secondary: #0f172a;
+  --secondary-light: #334155;
+  --accent: #ffb347;
+  --orange: #ff4267;
+  --orange-light: #fff1f2;
+
+  --success: #059669;
+  --success-light: #ecfdf5;
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+  --danger: #e11d48;
+  --danger-light: #fef2f2;
+  --info: #0a55ab;
+  --info-light: #eff6ff;
+
+  --bg: #f8fafc;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-dim: #f1f5f9;
+  --border: #e2e8f0;
+  --border-focus: #ff4267;
+  --text: #0f172a;
+  --text-main: #0f172a;
+  --muted: #475569;
+  --text-muted: #475569;
+
+  --neutral-0: #ffffff;
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+}
+
+/* Base backdrop & unified Vietnamese typography across all pages */
+html,
+body,
+button,
+input,
+select,
+textarea,
+optgroup {
+  font-family: var(--font-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  background-color: var(--background);
+  color: var(--text-main);
+}
+
+body {
+  background-image:
+    radial-gradient(circle at top right, rgba(255, 66, 103, 0.05) 0%, transparent 36%),
+    radial-gradient(circle at top left, rgba(29, 140, 248, 0.07) 0%, transparent 42%);
+}
+
+/* Scrollbar đồng bộ sắc Cool Slate */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==============================================================================
+   STOREFRONT (BUYER / USER / CART / CHECKOUT / ORDERS) COHESIVE STYLING
+   ============================================================================== */
+.top-bar,
+.topbar {
+  background: linear-gradient(90deg, #03193b 0%, #073f88 52%, #042554 100%) !important;
+  color: #dbeafe !important;
+  border-bottom: 1px solid rgba(96, 195, 255, 0.28) !important;
+}
+.top-bar a[style*="fb923c"],
+.top-bar a[style*="f97316"],
+.top-bar a[style*="ffb347"] {
+  color: #ffb347 !important;
+}
+.top-bar a:hover,
+.topbar a:hover {
+  color: #ffffff !important;
+}
+
+.header-main {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom: 1px solid var(--border) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 18px rgba(3, 25, 59, 0.06) !important;
+  transform: translateZ(0);
+}
+
+.jml-brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(3, 25, 59, 0.28);
+  display: block;
+  flex-shrink: 0;
+}
+
+footer.site-footer,
+footer:not(.page-footer) {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(29, 140, 248, 0.22) 0%, transparent 45%),
+    linear-gradient(180deg, #042554 0%, #03193b 100%) !important;
+  color: #cbd5e1 !important;
+  border-top: 1px solid rgba(96, 195, 255, 0.26) !important;
+}
+footer:not(.page-footer) .footer-bottom {
+  border-top-color: rgba(191, 219, 254, 0.16) !important;
+}
+footer:not(.page-footer) .footer-links a:hover {
+  color: #ffb347 !important;
+}
+
+/* Logo & huy hiệu thương hiệu JML Sapphire-Indigo */
+.logo-badge,
+.brand-badge,
+.brand-icon {
+  background: linear-gradient(135deg, #0f172a 0%, #172554 55%, #3730a3 100%) !important;
+  border: 1px solid rgba(191, 219, 254, 0.35);
+  box-shadow: 0 6px 16px rgba(3, 25, 59, 0.28) !important;
+}
+
+.btn-primary,
+.search-btn,
+.btn-checkout,
+.btn-submit,
+.btn-place-order {
+  background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%) !important;
+  border-color: #e11d48 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px -6px rgba(225, 29, 72, 0.36);
+}
+.btn-primary:hover,
+.search-btn:hover,
+.btn-checkout:hover,
+.btn-submit:hover,
+.btn-place-order:hover {
+  filter: brightness(1.06);
+  background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%) !important;
+}
+
+/* Banner & Hero đậm chất Midnight Sapphire */
+.hero-banner,
+.flash-sale-header,
+.promo-banner {
+  border-color: var(--border) !important;
+}
+
+.category-pill.active,
+.filter-chip.active,
+.tab-btn.active:not(.auth-tab) {
+  background-color: var(--jml-coral) !important;
+  color: #ffffff !important;
+  border-color: var(--jml-coral) !important;
+}
+
+.card,
+.product-card,
+.order-card,
+.checkout-card,
+.summary-card,
+.cart-item-card,
+.filter-sidebar {
+  border-color: var(--border);
+}
+
+.product-card:hover {
+  border-color: #fda4af !important;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09) !important;
+}
+
+/* Focus ring thống nhất Coral Horizon */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #ff4267 !important;
+  box-shadow: 0 0 0 3px rgba(255, 66, 103, 0.16) !important;
+}
+
+/* ==============================================================================
+   SELLER CENTER & ADMIN PORTAL (TAILWIND PAGES) HARMONIZATION
+   ============================================================================== */
+body[data-theme-role="seller"],
+body[data-theme-role="admin"],
+html[data-theme-role="admin"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Remap legacy Tailwind surfaces on Admin & Seller */
+body[data-theme-role="seller"] .bg-slate-50,
+body[data-theme-role="admin"] .bg-\[\#F6F7F9\],
+body[data-theme-role="admin"] .bg-\[\#f8fafc\],
+body[data-theme-role="admin"] .bg-neutral-50,
+body[data-theme-role="admin"] .bg-gray-100 {
+  background-color: #f8fafc !important;
+}
+
+body[data-theme-role="seller"] aside,
+body[data-theme-role="admin"] aside {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  border-right-color: #e2e8f0 !important;
+}
+
+body[data-theme-role="seller"] header,
+body[data-theme-role="admin"] header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* Seller: Coral Horizon & Amber Gold đồng bộ với nút CTA Auth */
+body[data-theme-role="seller"] .nav-item.active {
+  background: linear-gradient(90deg, #fff1f2 0%, #fffbeb 100%) !important;
+  color: #e11d48 !important;
+  border-left: 3px solid #ff4267;
+}
+body[data-theme-role="seller"] .text-orange-600,
+body[data-theme-role="seller"] .text-orange-500 {
+  color: #e11d48 !important;
+}
+body[data-theme-role="seller"] .bg-orange-600,
+body[data-theme-role="seller"] .bg-orange-500 {
+  background-color: #ff4267 !important;
+}
+body[data-theme-role="seller"] .hover\:bg-orange-700:hover,
+body[data-theme-role="seller"] .hover\:bg-orange-600:hover {
+  background-color: #e11d48 !important;
+}
+body[data-theme-role="seller"] .bg-orange-50,
+body[data-theme-role="seller"] .bg-orange-100 {
+  background-color: #fff1f2 !important;
+}
+body[data-theme-role="seller"] .border-orange-200,
+body[data-theme-role="seller"] .border-orange-300,
+body[data-theme-role="seller"] .border-orange-500 {
+  border-color: #fecdd3 !important;
+}
+
+/* Admin: Midnight Sapphire (#0a55ab / #1d8cf8) làm chủ đạo quản trị + điểm nhấn Coral #ff4d8d */
+body[data-theme-role="admin"] .nav-item.active {
+  background: linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%) !important;
+  color: #0a55ab !important;
+  border-left: 3px solid #1d8cf8;
+}
+body[data-theme-role="admin"] .nav-item.active svg {
+  color: #0a55ab !important;
+}
+body[data-theme-role="admin"] .text-blue-600,
+body[data-theme-role="admin"] .text-blue-500,
+body[data-theme-role="seller"] .text-blue-600,
+body[data-theme-role="seller"] .text-blue-500 {
+  color: #0a55ab !important;
+}
+body[data-theme-role="admin"] .bg-blue-600,
+body[data-theme-role="admin"] .bg-blue-500,
+body[data-theme-role="seller"] .bg-blue-600,
+body[data-theme-role="seller"] .bg-blue-500 {
+  background-color: #0a55ab !important;
+}
+body[data-theme-role="admin"] .hover\:bg-blue-700:hover,
+body[data-theme-role="seller"] .hover\:bg-blue-700:hover {
+  background-color: #073f88 !important;
+}
+body[data-theme-role="admin"] .bg-blue-50,
+body[data-theme-role="admin"] .bg-blue-100,
+body[data-theme-role="seller"] .bg-blue-50,
+body[data-theme-role="seller"] .bg-blue-100 {
+  background-color: #eff6ff !important;
+}
+body[data-theme-role="admin"] .text-\[\#ff4d8d\] {
+  color: #ff4d8d !important;
+}
+
+/* Đồng bộ màu các banner gradient trên Admin & Seller theo Midnight Sapphire & Coral Horizon */
+body[data-theme-role="admin"] [class*="from-blue-700"],
+body[data-theme-role="admin"] [class*="bg-gradient-to-r"] {
+  background:
+    radial-gradient(circle at 28% 50%, rgba(45, 166, 255, 0.42) 0%, rgba(16, 102, 204, 0.40) 34%, rgba(6, 52, 118, 0.88) 68%, #03193b 100%),
+    linear-gradient(135deg, #073f88 0%, #031a3e 100%) !important;
+}
+body[data-theme-role="seller"] [class*="from-amber-500"],
+body[data-theme-role="seller"] [class*="from-orange-500"] {
+  background: linear-gradient(135deg, #073f88 0%, #3730a3 48%, #e11d48 100%) !important;
+}
+
+/* ==============================================================================
+   AURORA & STARLIGHT AMBIENT OVERLAY CHO BANNER
+   ============================================================================== */
+.jml-banner-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none !important;
+  z-index: 1;
+}
+.main-slider .slide .jml-banner-ambient {
+  z-index: 2 !important;
+}
+.main-slider .slide .slide-content {
+  position: relative !important;
+  z-index: 4 !important;
+}
+.main-slider .slider-nav,
+.main-slider .slider-arrows {
+  z-index: 6 !important;
+}
+.side-banner > *:not(.jml-banner-ambient),
+.promo-banner > *:not(.jml-banner-ambient),
+.hero > *:not(.jml-banner-ambient) {
+  position: relative;
+  z-index: 3;
+}
+
+.jml-banner-glow {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  right: -60px;
+  top: 50%;
+  transform: translate3d(0, -50%, 0);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(96, 195, 255, 0.34) 0%, rgba(255, 66, 103, 0.16) 46%, transparent 72%);
+  filter: blur(18px);
+  transition: transform 0.25s ease-out;
+}
+
+.jml-banner-particles {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 18% 26%, rgba(255, 255, 255, 0.42) 0 1.4px, transparent 2px),
+    radial-gradient(circle at 42% 76%, rgba(186, 230, 253, 0.5) 0 1.8px, transparent 2.4px),
+    radial-gradient(circle at 68% 22%, rgba(255, 179, 71, 0.42) 0 1.6px, transparent 2.2px),
+    radial-gradient(circle at 86% 68%, rgba(255, 255, 255, 0.38) 0 1.5px, transparent 2.2px);
+  opacity: 0.72;
+}
+
+.jml-banner-orbit {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  right: -45px;
+  top: 50%;
+  margin-top: -120px;
+  border-radius: 50%;
+  border: 1px dashed rgba(191, 219, 254, 0.26);
+  animation: jmlOrbitSpin 32s linear infinite;
+}
+.jml-banner-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@keyframes jmlOrbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jml-banner-orbit { animation: none !important; }
+  .jml-banner-glow { transition: none !important; }
+}

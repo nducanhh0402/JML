@@ -1,1337 +1,1428 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Danh Sách Sản Phẩm - JML Store</title>
-    <link rel="icon" type="image/svg+xml" href="../admin/jml-store-icon.svg" />
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Auth & RBAC Controller (TF16DCF) -->
-    <script src="../shared/js/auth.js"></script>
-    <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css" />
-    <style>
-      /* ==========================================================================
-         1. RESET & CSS VARIABLES (ĐỒNG BỘ CHỦ ĐỀ CÁ KOI & HỒ HOA SEN)
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Danh Sách Sản Phẩm - JML Store</title>
+  <link rel="icon" type="image/svg+xml" href="../admin/jml-store-icon.svg" />
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <!-- Auth & RBAC Controller (TF16DCF) -->
+  <script src="../shared/js/auth.js"></script>
+  <link rel="stylesheet" href="../shared/css/jml-theme.css" />
+  <style>
+    /* ==========================================================================
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ CHỦ ĐỀ JML STORE MỚI)
          ========================================================================== */
-      :root {
-        --primary: #c92a22;
-        --primary-hover: #a61e18;
-        --primary-light: #fdf0ee;
-        --secondary: #222a19;
-        --secondary-light: #47543e;
-        --accent: #d49b1a;
-        --success: #39522a;
-        --background: #f5f5ee;
-        --surface: #ffffff;
-        --surface-dim: #eceee3;
-        --border: #dce0d2;
-        --border-focus: #c92a22;
-        --text-main: #1a261a;
-        --text-muted: #586552;
-        --shadow-sm: 0 1px 3px rgba(26, 38, 26, 0.06);
-        --shadow-md: 0 4px 14px rgba(26, 38, 26, 0.08);
-        --shadow-lg: 0 12px 28px rgba(26, 38, 26, 0.12);
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 20px;
-        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      }
+    :root {
+      --primary: #ff4267;
+      --primary-hover: #e11d48;
+      --primary-light: #fff1f2;
+      --secondary: #0f172a;
+      --secondary-light: #334155;
+      --accent: #ffb347;
+      --success: #059669;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --surface-dim: #f1f5f9;
+      --border: #e2e8f0;
+      --border-focus: #ff4267;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      body {
-        font-family: "Be Vietnam Pro", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: var(--background);
-        color: var(--text-main);
-        line-height: 1.5;
-        overflow-x: clip;
-      }
+    body {
+      font-family: "Be Vietnam Pro", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--background);
+      color: var(--text-main);
+      line-height: 1.5;
+      overflow-x: clip;
+    }
 
-      button, input, select, textarea {
-        font-family: inherit;
-      }
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
 
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
 
-      .container {
-        max-width: 1240px;
-        margin: 0 auto;
-        padding: 0 16px;
-      }
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
 
-      /* ==========================================================================
+    /* ==========================================================================
          2. HEADER & TOPBAR (KẾ THỪA TỪ INDEX.HTML)
          ========================================================================== */
-      .top-bar {
-        background-color: var(--secondary);
-        color: #94a3b8;
-        font-size: 12px;
-        padding: 7px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      .top-bar-inner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .top-links {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-      }
-      .top-links a:hover {
-        color: #fff;
-      }
+    .top-bar {
+      background-color: var(--secondary);
+      color: #94a3b8;
+      font-size: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-      .header-main {
-        background: #ffffff;
-        border-bottom: 1px solid var(--border);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: var(--shadow-sm);
-      }
-      .header-inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 12px 0;
-      }
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 22px;
-        font-weight: 800;
-        color: var(--secondary);
-      }
-      .logo-badge {
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        color: #fff;
-        padding: 4px 10px;
-        border-radius: var(--radius-sm);
-        font-size: 14px;
-        font-weight: 800;
-      }
+    .top-bar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-      /* Search Box */
-      .search-box {
-        flex: 1;
-        max-width: 600px;
-        position: relative;
-        display: flex;
-      }
-      .search-input {
-        width: 100%;
-        padding: 10px 16px;
-        border-radius: 99px 0 0 99px;
-        border: 2px solid var(--border);
-        border-right: none;
-        font-size: 13px;
-        outline: none;
-        transition: var(--transition);
-      }
-      .search-input:focus {
-        border-color: var(--primary);
-      }
-      .search-btn {
-        padding: 0 20px;
-        border-radius: 0 99px 99px 0;
-        border: 2px solid var(--primary);
-        background: var(--primary);
-        color: #fff;
-        font-weight: 700;
-        font-size: 13px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .search-btn:hover {
-        background: var(--primary-hover);
-      }
+    .top-links {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
 
-      .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .btn-action {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 1px solid var(--border);
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        position: relative;
-        color: var(--secondary);
-        transition: var(--transition);
-      }
-      .btn-action:hover {
-        background: var(--surface-dim);
-      }
-      .cart-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background: var(--primary);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 800;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid #fff;
-      }
+    .top-links a:hover {
+      color: #fff;
+    }
 
-      /* Breadcrumb */
-      .breadcrumb {
-        padding: 14px 0;
-        font-size: 13px;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .breadcrumb a:hover {
-        color: var(--primary);
-      }
-      .breadcrumb-sep {
-        color: #cbd5e1;
-      }
+    .header-main {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
 
-      /* ==========================================================================
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 12px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--secondary);
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    /* Search Box */
+    .search-box {
+      flex: 1;
+      max-width: 600px;
+      position: relative;
+      display: flex;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 99px 0 0 99px;
+      border: 2px solid var(--border);
+      border-right: none;
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .search-btn {
+      padding: 0 20px;
+      border-radius: 0 99px 99px 0;
+      border: 2px solid var(--primary);
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .search-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-action {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      color: var(--secondary);
+      transition: var(--transition);
+    }
+
+    .btn-action:hover {
+      background: var(--surface-dim);
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      padding: 14px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--primary);
+    }
+
+    .breadcrumb-sep {
+      color: #cbd5e1;
+    }
+
+    /* ==========================================================================
          3. BỐ CỤC 2 CỘT (2-COLUMN LAYOUT)
          ========================================================================== */
-      .products-layout {
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 24px;
-        align-items: start;
-        margin-bottom: 48px;
-      }
+    .products-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 48px;
+    }
 
-      /* ==========================================================================
+    /* ==========================================================================
          4. CỘT TRÁI: PANEL BỘ LỌC (FILTER PANEL)
          ========================================================================== */
-      .filter-panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 18px;
-        box-shadow: var(--shadow-sm);
+    .filter-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .filter-title {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-reset-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .filter-reset-btn:hover {
+      text-decoration: underline;
+    }
+
+    .filter-drawer-close {
+      display: none;
+      /* Chỉ hiện trên mobile drawer */
+      background: var(--surface-dim);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    /* Filter Groups */
+    .filter-group {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filter-group:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .filter-group-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Category Links */
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .category-item:hover,
+    .category-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .category-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--surface-dim);
+      padding: 2px 6px;
+      border-radius: 99px;
+    }
+
+    .category-item.active .category-count {
+      background: #fff;
+      color: var(--primary);
+    }
+
+    /* Checkbox & Radio Filters */
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-main);
+      padding: 5px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-option input[type="radio"],
+    .filter-option input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .filter-option:hover {
+      color: var(--primary);
+    }
+
+    /* Custom Price Range Input */
+    .price-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .price-input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .price-input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-apply-price {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-apply-price:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Rating Stars */
+    .stars-yellow {
+      color: #f59e0b;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    /* ==========================================================================
+         5. CỘT PHẢI: LƯỚI KẾT QUẢ & THANH SẮP XẾP
+         ========================================================================== */
+    .products-main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Sort Bar */
+    .sort-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sort-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sort-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    .sort-tab {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .sort-tab:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .sort-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .sort-select {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .sort-select:focus {
+      border-color: var(--primary);
+    }
+
+    .sort-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .product-count-badge {
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* Mobile Filter Toggle Button */
+    .btn-mobile-filter {
+      display: none;
+      /* Chỉ hiện trên mobile/tablet */
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-dim);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--secondary);
+      cursor: pointer;
+    }
+
+    /* Active Filter Chips Bar (TF16EBF) */
+    .active-filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .active-filters-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 2px;
+    }
+
+    .active-filters-count {
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 99px;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px 5px 12px;
+      border-radius: 99px;
+      background: var(--primary-light);
+      border: 1px solid #fecdd3;
+      color: #e11d48;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+      transition: var(--transition);
+    }
+
+    .filter-chip:hover {
+      border-color: var(--primary);
+      background: #ffe4e6;
+    }
+
+    .filter-chip-remove {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 66, 103, 0.14);
+      color: #e11d48;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 0;
+    }
+
+    .filter-chip-remove:hover {
+      background: var(--primary);
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+
+    .btn-clear-all-chips {
+      margin-left: auto;
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #dc2626;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition);
+    }
+
+    .btn-clear-all-chips:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: #ffffff;
+    }
+
+    /* Products Grid */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+      gap: 16px;
+    }
+
+    /* Product Card */
+    .product-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: #fda4af;
+    }
+
+    .product-img-wrap {
+      position: relative;
+      aspect-ratio: 1/1;
+      background: #f3f4f6;
+      overflow: hidden;
+    }
+
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-img {
+      transform: scale(1.05);
+    }
+
+    .discount-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .shop-tag {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(2px);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .product-info {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .product-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--secondary);
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 36px;
+    }
+
+    .product-card:hover .product-title {
+      color: var(--primary);
+    }
+
+    .product-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .price-current {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .price-original {
+      font-size: 12px;
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
+
+    .product-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .btn-add-cart {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--primary);
+      background: #fff;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-add-cart:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Empty State (TF16EBF) */
+    .empty-state {
+      grid-column: 1 / -1;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1.5px dashed #cbd5e1;
+      border-radius: var(--radius-lg);
+      padding: 52px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .empty-state-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      border: 1px solid #fecdd3;
+      box-shadow: 0 8px 20px -6px rgba(225, 29, 72, 0.22);
+    }
+
+    .empty-state-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+
+    .empty-state-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      max-width: 460px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .empty-state-summary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-empty-primary {
+      padding: 10px 22px;
+      border-radius: 99px;
+      border: none;
+      background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+      transition: var(--transition);
+    }
+
+    .btn-empty-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(225, 29, 72, 0.35);
+    }
+
+    .btn-empty-secondary {
+      padding: 10px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--secondary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-empty-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .empty-state-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .empty-suggest-pill {
+      padding: 4px 12px;
+      border-radius: 99px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .empty-suggest-pill:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Pagination (Responsive + Ellipsis TF16ED9) */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 24px;
+    }
+
+    .page-btn {
+      min-width: 38px;
+      height: 38px;
+      padding: 0 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .page-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-ellipsis {
+      min-width: 24px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-weight: 700;
+      user-select: none;
+    }
+
+    /* ==========================================================================
+         6. MOBILE DRAWER & RESPONSIVE (TF16ED9)
+         ========================================================================== */
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(3px);
+      z-index: 9998;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .drawer-footer-actions {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .products-layout {
+        grid-template-columns: 1fr;
       }
 
-      .filter-header {
+      .btn-mobile-filter {
+        display: inline-flex;
+        min-height: 36px;
+      }
+
+      /* Thu Panel Bộ Lọc thành Drawer trượt ra từ cạnh trái */
+      .filter-panel {
+        position: fixed;
+        top: 0;
+        left: calc(-1 * min(310px, 86vw) - 24px);
+        width: min(310px, 86vw);
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
+        z-index: 9999;
+        border-radius: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.22);
+        transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-bottom: 14px;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 16px;
+        flex-direction: column;
       }
-      .filter-title {
-        font-size: 14px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--secondary);
-        display: flex;
-        align-items: center;
-        gap: 8px;
+
+      .filter-panel.drawer-open {
+        left: 0;
       }
-      .filter-reset-btn {
-        background: none;
-        border: none;
-        color: var(--primary);
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-      .filter-reset-btn:hover {
-        text-decoration: underline;
+
+      .drawer-backdrop.active {
+        display: block;
+        opacity: 1;
       }
 
       .filter-drawer-close {
-        display: none; /* Chỉ hiện trên mobile drawer */
-        background: var(--surface-dim);
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 16px;
-        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      /* Filter Groups */
-      .filter-group {
-        padding-bottom: 16px;
-        margin-bottom: 16px;
-        border-bottom: 1px solid var(--border);
+      .drawer-footer-actions {
+        display: flex;
+        gap: 8px;
+        position: sticky;
+        bottom: -18px;
+        background: #ffffff;
+        padding: 12px 0 4px;
+        margin-top: auto;
+        border-top: 1px solid var(--border);
+        z-index: 2;
       }
-      .filter-group:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-        margin-bottom: 0;
-      }
-      .filter-group-title {
-        font-size: 13px;
-        font-weight: 700;
+
+      .btn-drawer-reset {
+        flex: 0 0 auto;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: #f8fafc;
         color: var(--secondary);
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      /* Category Links */
-      .category-list {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .category-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 7px 10px;
-        border-radius: var(--radius-sm);
-        font-size: 13px;
-        color: var(--text-main);
-        cursor: pointer;
-        transition: var(--transition);
-      }
-      .category-item:hover,
-      .category-item.active {
-        background: var(--primary-light);
-        color: var(--primary);
-        font-weight: 700;
-      }
-      .category-count {
-        font-size: 11px;
-        color: var(--text-muted);
-        background: var(--surface-dim);
-        padding: 2px 6px;
-        border-radius: 99px;
-      }
-      .category-item.active .category-count {
-        background: #fff;
-        color: var(--primary);
-      }
-
-      /* Checkbox & Radio Filters */
-      .filter-option {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 13px;
-        color: var(--text-main);
-        padding: 5px 0;
-        cursor: pointer;
-        user-select: none;
-      }
-      .filter-option input[type="radio"],
-      .filter-option input[type="checkbox"] {
-        accent-color: var(--primary);
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-      }
-      .filter-option:hover {
-        color: var(--primary);
-      }
-
-      /* Custom Price Range Input */
-      .price-input-wrap {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 8px;
-      }
-      .price-input {
-        width: 100%;
-        padding: 7px 10px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
         font-size: 12px;
-        outline: none;
+        font-weight: 700;
+        cursor: pointer;
       }
-      .price-input:focus {
-        border-color: var(--primary);
-      }
-      .btn-apply-price {
-        width: 100%;
-        margin-top: 8px;
-        padding: 8px;
+
+      .btn-drawer-apply {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
         border: none;
-        border-radius: var(--radius-sm);
         background: var(--primary);
-        color: #fff;
-        font-size: 12px;
+        color: #ffffff;
+        font-size: 12.5px;
         font-weight: 700;
         cursor: pointer;
-        transition: var(--transition);
       }
-      .btn-apply-price:hover {
-        background: var(--primary-hover);
+    }
+
+    @media (max-width: 640px) {
+      .top-links {
+        display: none;
       }
 
-      /* Rating Stars */
-      .stars-yellow {
-        color: #f59e0b;
-        font-size: 13px;
-        letter-spacing: 1px;
+      .header-inner {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px 0;
       }
 
-      /* ==========================================================================
-         5. CỘT PHẢI: LƯỚI KẾT QUẢ & THANH SẮP XẾP
-         ========================================================================== */
-      .products-main {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
+      .search-box {
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+        width: 100%;
       }
 
-      /* Sort Bar */
+      .search-input {
+        min-width: 0;
+        font-size: 16px;
+        padding: 9px 14px;
+      }
+
+      .search-btn {
+        padding: 0 16px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
       .sort-bar {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 12px 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-        box-shadow: var(--shadow-sm);
-      }
-      .sort-left {
-        display: flex;
-        align-items: center;
+        padding: 10px 12px;
         gap: 8px;
-        flex-wrap: wrap;
-      }
-      .sort-label {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--text-muted);
-        margin-right: 4px;
-      }
-      .sort-tab {
-        padding: 6px 14px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        background: #fff;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--text-main);
-        cursor: pointer;
-        transition: var(--transition);
-      }
-      .sort-tab:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-      .sort-tab.active {
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
       }
 
-      .sort-select {
-        padding: 6px 12px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--text-main);
-        outline: none;
-        background: #fff;
-        cursor: pointer;
+      .sort-left {
+        width: 100%;
       }
-      .sort-select:focus {
-        border-color: var(--primary);
+
+      .sort-label {
+        display: none;
       }
 
       .sort-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        color: var(--text-muted);
-      }
-      .product-count-badge {
-        font-weight: 800;
-        color: var(--primary);
+        width: 100%;
+        justify-content: flex-end;
+        font-size: 12px;
       }
 
-      /* Mobile Filter Toggle Button */
-      .btn-mobile-filter {
-        display: none; /* Chỉ hiện trên mobile/tablet */
-        align-items: center;
-        gap: 6px;
-        padding: 7px 14px;
-        border-radius: var(--radius-sm);
-        background: var(--surface-dim);
-        border: 1px solid var(--border);
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--secondary);
-        cursor: pointer;
-      }
-
-      /* Active Filter Chips Bar (TF16EBF) */
-      .active-filters-bar {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 12px 16px;
-        margin-bottom: 16px;
-        box-shadow: var(--shadow-sm);
-      }
-      .active-filters-label {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--text-muted);
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-right: 2px;
-      }
-      .active-filters-count {
-        background: var(--primary);
-        color: #ffffff;
-        font-size: 10px;
-        font-weight: 800;
-        padding: 1px 6px;
-        border-radius: 99px;
-      }
-      .filter-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 8px 5px 12px;
-        border-radius: 99px;
-        background: var(--primary-light);
-        border: 1px solid #fed7aa;
-        color: #a61e18;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 1.2;
-        transition: var(--transition);
-      }
-      .filter-chip:hover {
-        border-color: var(--primary);
-        background: #f6e2dc;
-      }
-      .filter-chip-remove {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(234, 88, 12, 0.14);
-        color: #a61e18;
-        font-size: 13px;
-        font-weight: 700;
-        line-height: 1;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: var(--transition);
-        padding: 0;
-      }
-      .filter-chip-remove:hover {
-        background: var(--primary);
-        color: #ffffff;
-        transform: scale(1.08);
-      }
-      .btn-clear-all-chips {
-        margin-left: auto;
-        padding: 5px 12px;
-        border-radius: 99px;
-        border: 1px solid #fecaca;
-        background: #fef2f2;
-        color: #dc2626;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        transition: var(--transition);
-      }
-      .btn-clear-all-chips:hover {
-        background: #dc2626;
-        border-color: #dc2626;
-        color: #ffffff;
-      }
-
-      /* Products Grid */
       .products-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
-        gap: 16px;
-      }
-
-      /* Product Card */
-      .product-card {
-        background: var(--surface);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: var(--transition);
-        position: relative;
-        cursor: pointer;
-      }
-      .product-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-md);
-        border-color: #e5c878;
-      }
-
-      .product-img-wrap {
-        position: relative;
-        aspect-ratio: 1/1;
-        background: #f3f4f6;
-        overflow: hidden;
-      }
-      .product-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-      }
-      .product-card:hover .product-img {
-        transform: scale(1.05);
-      }
-
-      .discount-tag {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        background: var(--primary);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 800;
-        padding: 2px 7px;
-        border-radius: 4px;
-      }
-
-      .shop-tag {
-        position: absolute;
-        bottom: 8px;
-        left: 8px;
-        background: rgba(17, 24, 39, 0.75);
-        backdrop-filter: blur(2px);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 600;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-
-      .product-info {
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-      }
-      .product-title {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--secondary);
-        line-height: 1.4;
-        margin-bottom: 8px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        height: 36px;
-      }
-      .product-card:hover .product-title {
-        color: var(--primary);
-      }
-
-      .product-price-row {
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      .price-current {
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--primary);
-      }
-      .price-original {
-        font-size: 12px;
-        color: #94a3b8;
-        text-decoration: line-through;
-      }
-
-      .product-meta-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 11px;
-        color: var(--text-muted);
-        margin-top: auto;
-        padding-top: 8px;
-        border-top: 1px dashed var(--border);
-      }
-
-      .btn-add-cart {
-        margin-top: 10px;
-        width: 100%;
-        padding: 8px 0;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--primary);
-        background: #fff;
-        color: var(--primary);
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        transition: var(--transition);
-      }
-      .btn-add-cart:hover {
-        background: var(--primary);
-        color: #fff;
-      }
-
-      /* Empty State (TF16EBF) */
-      .empty-state {
-        grid-column: 1 / -1;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        border: 1.5px dashed #cbd5e1;
-        border-radius: var(--radius-lg);
-        padding: 52px 24px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .empty-state-icon {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        background: var(--primary-light);
-        color: var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 16px;
-        border: 1px solid #fed7aa;
-        box-shadow: 0 8px 20px -6px rgba(234, 88, 12, 0.22);
-      }
-      .empty-state-title {
-        font-size: 18px;
-        font-weight: 800;
-        color: var(--secondary);
-        margin-bottom: 8px;
-      }
-      .empty-state-desc {
-        font-size: 13.5px;
-        color: var(--text-muted);
-        max-width: 460px;
-        line-height: 1.55;
-        margin-bottom: 14px;
-      }
-      .empty-state-summary {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 6px;
-        margin-bottom: 20px;
-      }
-      .empty-state-actions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
-        margin-bottom: 18px;
       }
-      .btn-empty-primary {
-        padding: 10px 22px;
-        border-radius: 99px;
-        border: none;
-        background: linear-gradient(135deg, var(--primary), #d49b1a);
-        color: #ffffff;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 6px 16px rgba(234, 88, 12, 0.25);
-        transition: var(--transition);
-      }
-      .btn-empty-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(234, 88, 12, 0.35);
-      }
-      .btn-empty-secondary {
-        padding: 10px 18px;
-        border-radius: 99px;
-        border: 1px solid var(--border);
-        background: #ffffff;
-        color: var(--secondary);
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-      .btn-empty-secondary:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-      .empty-state-suggestions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        padding-top: 14px;
-        border-top: 1px dashed var(--border);
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-      .empty-suggest-pill {
-        padding: 4px 12px;
-        border-radius: 99px;
-        background: #ffffff;
-        border: 1px solid var(--border);
-        color: var(--text-main);
-        font-weight: 600;
-        font-size: 12px;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-      .empty-suggest-pill:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-        background: var(--primary-light);
-      }
+    }
 
-      /* Pagination (Responsive + Ellipsis TF16ED9) */
-      .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 24px;
-      }
-      .page-btn {
-        min-width: 38px;
-        height: 38px;
-        padding: 0 8px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        background: #fff;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-main);
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition);
-      }
-      .page-btn:hover:not(:disabled) {
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-      .page-btn.active {
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-      }
-      .page-btn:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-      .page-ellipsis {
-        min-width: 24px;
-        height: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-muted);
-        font-weight: 700;
-        user-select: none;
-      }
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--secondary);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideInUp 0.3s ease;
+    }
 
-      /* ==========================================================================
-         6. MOBILE DRAWER & RESPONSIVE (TF16ED9)
-         ========================================================================== */
-      .drawer-backdrop {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(3px);
-        z-index: 9998;
+    @keyframes slideInUp {
+      from {
+        transform: translateY(20px);
         opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-      .drawer-footer-actions {
-        display: none;
       }
 
-      @media (max-width: 900px) {
-        .products-layout {
-          grid-template-columns: 1fr;
-        }
-
-        .btn-mobile-filter {
-          display: inline-flex;
-          min-height: 36px;
-        }
-
-        /* Thu Panel Bộ Lọc thành Drawer trượt ra từ cạnh trái */
-        .filter-panel {
-          position: fixed;
-          top: 0;
-          left: calc(-1 * min(310px, 86vw) - 24px);
-          width: min(310px, 86vw);
-          height: 100vh;
-          height: 100dvh;
-          max-height: 100dvh;
-          z-index: 9999;
-          border-radius: 0;
-          overflow-y: auto;
-          overscroll-behavior: contain;
-          box-shadow: 4px 0 24px rgba(0, 0, 0, 0.22);
-          transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-          display: flex;
-          flex-direction: column;
-        }
-
-        .filter-panel.drawer-open {
-          left: 0;
-        }
-
-        .drawer-backdrop.active {
-          display: block;
-          opacity: 1;
-        }
-
-        .filter-drawer-close {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .drawer-footer-actions {
-          display: flex;
-          gap: 8px;
-          position: sticky;
-          bottom: -18px;
-          background: #ffffff;
-          padding: 12px 0 4px;
-          margin-top: auto;
-          border-top: 1px solid var(--border);
-          z-index: 2;
-        }
-        .btn-drawer-reset {
-          flex: 0 0 auto;
-          padding: 10px 14px;
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--border);
-          background: #f8fafc;
-          color: var(--secondary);
-          font-size: 12px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-        .btn-drawer-apply {
-          flex: 1;
-          padding: 10px 12px;
-          border-radius: var(--radius-sm);
-          border: none;
-          background: var(--primary);
-          color: #ffffff;
-          font-size: 12.5px;
-          font-weight: 700;
-          cursor: pointer;
-        }
+      to {
+        transform: translateY(0);
+        opacity: 1;
       }
+    }
+  </style>
+  <script src="../shared/js/jml-banner-ambient.js" defer></script>
+</head>
 
-      @media (max-width: 640px) {
-        .top-links {
-          display: none;
-        }
-        .header-inner {
-          flex-wrap: wrap;
-          gap: 10px;
-          padding: 10px 0;
-        }
-        .search-box {
-          order: 3;
-          flex: 1 1 100%;
-          max-width: 100%;
-          width: 100%;
-        }
-        .search-input {
-          min-width: 0;
-          font-size: 16px;
-          padding: 9px 14px;
-        }
-        .search-btn {
-          padding: 0 16px;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .sort-bar {
-          padding: 10px 12px;
-          gap: 8px;
-        }
-        .sort-left {
-          width: 100%;
-        }
-        .sort-label {
-          display: none;
-        }
-        .sort-right {
-          width: 100%;
-          justify-content: flex-end;
-          font-size: 12px;
-        }
-        .products-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
-        }
-      }
-
-      /* Toast Notification */
-      .toast-msg {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: var(--secondary);
-        color: #fff;
-        padding: 12px 18px;
-        border-radius: 10px;
-        font-size: 13px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        animation: slideInUp 0.3s ease;
-      }
-      @keyframes slideInUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-    </style>
-      <script src="../shared/js/koi-banner-ambient.js" defer></script>
-  </head>
-  <body>
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <div class="container top-bar-inner">
-        <div>Kênh mua sắm hàng hiệu chính hãng • Giao hàng hỏa tốc trong 2h</div>
-        <div class="top-links" id="topAuthLinks">
-          <a href="index.html">Về Trang Chủ</a>
-          <span>|</span>
-          <a href="../auth/index.html">Đăng Nhập / Đăng Ký</a>
-        </div>
+<body>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div>Kênh mua sắm hàng hiệu chính hãng • Giao hàng hỏa tốc trong 2h</div>
+      <div class="top-links" id="topAuthLinks">
+        <a href="index.html">Về Trang Chủ</a>
+        <span>|</span>
+        <a href="../auth/index.html">Đăng Nhập / Đăng Ký</a>
       </div>
     </div>
+  </div>
 
-    <!-- Header Sticky -->
-    <header class="header-main">
-      <div class="container header-inner">
-        <a class="logo" href="index.html" title="Về Trang Chủ JML Store">
-          <span class="logo-badge">JML</span>
-          <span>STORE</span>
-        </a>
+  <!-- Header Sticky -->
+  <header class="header-main">
+    <div class="container header-inner">
+      <a class="logo" href="index.html" title="Về Trang Chủ JML Store">
+        <img src="../admin/jml-store-icon.svg" alt="JML Store" class="jml-brand-icon" />
+        <span>STORE</span>
+      </a>
 
-        <!-- Search Box -->
-        <div class="search-box">
-          <input
-            type="text"
-            id="searchInput"
-            class="search-input"
-            aria-label="Tìm kiếm sản phẩm"
-            placeholder="Tìm kiếm sản phẩm trong danh mục..."
-            oninput="handleSearch(this.value)"
-            onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeSearch(); }"
-          />
-          <button class="search-btn" type="button" onclick="executeSearch()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            Tìm
-          </button>
-        </div>
-
-        <!-- Header Actions -->
-        <div class="header-actions">
-          <button class="btn-action" onclick="goToCart()" title="Giỏ hàng">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-            <div class="cart-badge" id="cartBadgeCount">0</div>
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Container -->
-    <div class="container">
-      <!-- Breadcrumb -->
-      <div class="breadcrumb">
-        <a href="index.html">Trang chủ</a>
-        <span class="breadcrumb-sep">/</span>
-        <span style="color: var(--secondary); font-weight: 700;">Danh sách sản phẩm</span>
-        <span class="breadcrumb-sep">/</span>
-        <span id="breadcrumbCurrentCategory">Tất cả ngành hàng</span>
+      <!-- Search Box -->
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" aria-label="Tìm kiếm sản phẩm"
+          placeholder="Tìm kiếm sản phẩm trong danh mục..." oninput="handleSearch(this.value)"
+          onkeydown="if(event.key==='Enter'){ event.preventDefault(); executeSearch(); }" />
+        <button class="search-btn" type="button" onclick="executeSearch()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Tìm
+        </button>
       </div>
 
-      <!-- BỐ CỤC 2 CỘT: PANEL BỘ LỌC BÊN TRÁI & LƯỚI KẾT QUẢ BÊN PHẢI -->
-      <div class="products-layout">
-        <!-- 1. CỘT TRÁI: PANEL BỘ LỌC (FILTER PANEL & MOBILE DRAWER) -->
-        <aside class="filter-panel" id="filterSidebar">
-          <div class="filter-header">
-            <div class="filter-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <button class="btn-action" onclick="goToCart()" title="Giỏ hàng">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <div class="cart-badge" id="cartBadgeCount">0</div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">/</span>
+      <span style="color: var(--secondary); font-weight: 700;">Danh sách sản phẩm</span>
+      <span class="breadcrumb-sep">/</span>
+      <span id="breadcrumbCurrentCategory">Tất cả ngành hàng</span>
+    </div>
+
+    <!-- BỐ CỤC 2 CỘT: PANEL BỘ LỌC BÊN TRÁI & LƯỚI KẾT QUẢ BÊN PHẢI -->
+    <div class="products-layout">
+      <!-- 1. CỘT TRÁI: PANEL BỘ LỌC (FILTER PANEL & MOBILE DRAWER) -->
+      <aside class="filter-panel" id="filterSidebar">
+        <div class="filter-header">
+          <div class="filter-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            Bộ Lọc Tìm Kiếm
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="filter-reset-btn" onclick="resetAllFilters()">Đặt lại</button>
+            <button class="filter-drawer-close" onclick="closeFilterDrawer()" title="Đóng bộ lọc">✕</button>
+          </div>
+        </div>
+
+        <!-- Nhóm 1: Theo Danh Mục -->
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>Theo Danh Mục</span>
+          </div>
+          <div class="category-list">
+            <div class="category-item active" data-cat="all" onclick="selectCategory('all', this)">
+              <span>Tất Cả Sản Phẩm</span>
+              <span class="category-count" id="countAll">16</span>
+            </div>
+            <div class="category-item" data-cat="audio" onclick="selectCategory('audio', this)">
+              <span>🎧 Thiết Bị Âm Thanh</span>
+              <span class="category-count">4</span>
+            </div>
+            <div class="category-item" data-cat="watch" onclick="selectCategory('watch', this)">
+              <span>⌚ Đồng Hồ Cao Cấp</span>
+              <span class="category-count">4</span>
+            </div>
+            <div class="category-item" data-cat="fashion" onclick="selectCategory('fashion', this)">
+              <span>👔 Thời Trang & Đồ Da</span>
+              <span class="category-count">4</span>
+            </div>
+            <div class="category-item" data-cat="tech" onclick="selectCategory('tech', this)">
+              <span>📱 Thiết Bị Số & PC</span>
+              <span class="category-count">4</span>
+            </div>
+            <div class="category-item" data-cat="shoes" onclick="selectCategory('shoes', this)">
+              <span>👟 Giày &amp; Sneakers</span>
+              <span class="category-count">0</span>
+            </div>
+            <div class="category-item" data-cat="beauty" onclick="selectCategory('beauty', this)">
+              <span>✨ Mỹ Phẩm &amp; Nước Hoa</span>
+              <span class="category-count">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nhóm 1B: Thương Hiệu (Tải từ /api/products/facets) -->
+        <div class="filter-group" id="brandFilterGroup">
+          <div class="filter-group-title">
+            <span>Thương Hiệu</span>
+          </div>
+          <select id="brandFilterSelect" class="sort-select" style="width: 100%; padding: 8px 10px;"
+            onchange="handleBrandFilter(this.value)">
+            <option value="all">Tất cả thương hiệu</option>
+          </select>
+        </div>
+
+        <!-- Nhóm 2: Khoảng Giá -->
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>Khoảng Giá</span>
+          </div>
+          <label class="filter-option">
+            <input type="radio" name="priceRange" value="all" checked onchange="handlePriceFilter(this.value)" />
+            <span>Tất cả mức giá</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="priceRange" value="under-1m" onchange="handlePriceFilter(this.value)" />
+            <span>Dưới 1.000.000 ₫</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="priceRange" value="1m-5m" onchange="handlePriceFilter(this.value)" />
+            <span>1.000.000 ₫ - 5.000.000 ₫</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="priceRange" value="5m-15m" onchange="handlePriceFilter(this.value)" />
+            <span>5.000.000 ₫ - 15.000.000 ₫</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="priceRange" value="above-15m" onchange="handlePriceFilter(this.value)" />
+            <span>Trên 15.000.000 ₫</span>
+          </label>
+
+          <!-- Tự nhập khoảng giá min - max -->
+          <div class="price-input-wrap">
+            <input type="number" id="minPriceInput" placeholder="Từ ₫" class="price-input" />
+            <span style="color: #94a3b8;">-</span>
+            <input type="number" id="maxPriceInput" placeholder="Đến ₫" class="price-input" />
+          </div>
+          <button class="btn-apply-price" onclick="applyCustomPriceRange()">ÁP DỤNG KHOẢNG GIÁ</button>
+        </div>
+
+        <!-- Nhóm 3: Đánh Giá Sao -->
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>Đánh Giá</span>
+          </div>
+          <label class="filter-option">
+            <input type="radio" name="ratingFilter" value="all" checked onchange="handleRatingFilter(this.value)" />
+            <span>Tất cả đánh giá</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="ratingFilter" value="5" onchange="handleRatingFilter(this.value)" />
+            <span class="stars-yellow">★★★★★</span>
+            <span style="font-size: 11px; color: #64748b;">(5 sao)</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="ratingFilter" value="4" onchange="handleRatingFilter(this.value)" />
+            <span class="stars-yellow">★★★★☆</span>
+            <span style="font-size: 11px; color: #64748b;">(Từ 4 sao)</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="ratingFilter" value="3" onchange="handleRatingFilter(this.value)" />
+            <span class="stars-yellow">★★★☆☆</span>
+            <span style="font-size: 11px; color: #64748b;">(Từ 3 sao)</span>
+          </label>
+        </div>
+
+        <!-- Nhóm 4: Dịch Vụ & Khuyến Mãi -->
+        <div class="filter-group">
+          <div class="filter-group-title">
+            <span>Dịch Vụ & Ưu Đãi</span>
+          </div>
+          <label class="filter-option">
+            <input type="checkbox" id="chkFlashSale" onchange="applyOtherFilters()" />
+            <span>⚡ Đang Giảm Giá Sốc</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" id="chkExclusive" onchange="applyOtherFilters()" />
+            <span>🛡️ Hàng Chính Hãng 100%</span>
+          </label>
+        </div>
+
+        <!-- Thanh nút hành động cố định dưới đáy Mobile Drawer (TF16ED9) -->
+        <div class="drawer-footer-actions">
+          <button type="button" class="btn-drawer-reset" onclick="resetAllFilters()">Đặt lại</button>
+          <button type="button" class="btn-drawer-apply" onclick="closeFilterDrawer()">
+            Xem (<span id="drawerResultCount">0</span>) sản phẩm
+          </button>
+        </div>
+      </aside>
+
+      <!-- 2. CỘT PHẢI: LƯỚI KẾT QUẢ SẢN PHẨM & THANH SẮP XẾP -->
+      <main class="products-main">
+        <!-- Thanh sắp xếp (Sort Bar) -->
+        <div class="sort-bar">
+          <div class="sort-left">
+            <!-- Nút mở Drawer bộ lọc trên mobile -->
+            <button class="btn-mobile-filter" onclick="openFilterDrawer()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
-              Bộ Lọc Tìm Kiếm
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <button class="filter-reset-btn" onclick="resetAllFilters()">Đặt lại</button>
-              <button class="filter-drawer-close" onclick="closeFilterDrawer()" title="Đóng bộ lọc">✕</button>
-            </div>
-          </div>
+              Bộ Lọc (<span id="mobileActiveCount">0</span>)
+            </button>
 
-          <!-- Nhóm 1: Theo Danh Mục -->
-          <div class="filter-group">
-            <div class="filter-group-title">
-              <span>Theo Danh Mục</span>
-            </div>
-            <div class="category-list">
-              <div class="category-item active" data-cat="all" onclick="selectCategory('all', this)">
-                <span>Tất Cả Sản Phẩm</span>
-                <span class="category-count" id="countAll">16</span>
-              </div>
-              <div class="category-item" data-cat="audio" onclick="selectCategory('audio', this)">
-                <span>🎧 Thiết Bị Âm Thanh</span>
-                <span class="category-count">4</span>
-              </div>
-              <div class="category-item" data-cat="watch" onclick="selectCategory('watch', this)">
-                <span>⌚ Đồng Hồ Cao Cấp</span>
-                <span class="category-count">4</span>
-              </div>
-              <div class="category-item" data-cat="fashion" onclick="selectCategory('fashion', this)">
-                <span>👔 Thời Trang & Đồ Da</span>
-                <span class="category-count">4</span>
-              </div>
-              <div class="category-item" data-cat="tech" onclick="selectCategory('tech', this)">
-                <span>📱 Thiết Bị Số & PC</span>
-                <span class="category-count">4</span>
-              </div>
-              <div class="category-item" data-cat="shoes" onclick="selectCategory('shoes', this)">
-                <span>👟 Giày &amp; Sneakers</span>
-                <span class="category-count">0</span>
-              </div>
-              <div class="category-item" data-cat="beauty" onclick="selectCategory('beauty', this)">
-                <span>✨ Mỹ Phẩm &amp; Nước Hoa</span>
-                <span class="category-count">0</span>
-              </div>
-            </div>
-          </div>
+            <span class="sort-label">Sắp xếp theo:</span>
+            <button class="sort-tab active" data-sort="popular" onclick="changeSort('popular', this)">Phổ Biến</button>
+            <button class="sort-tab" data-sort="newest" onclick="changeSort('newest', this)">Mới Nhất</button>
+            <button class="sort-tab" data-sort="bestseller" onclick="changeSort('bestseller', this)">Bán Chạy</button>
 
-          <!-- Nhóm 1B: Thương Hiệu (Tải từ /api/products/facets) -->
-          <div class="filter-group" id="brandFilterGroup">
-            <div class="filter-group-title">
-              <span>Thương Hiệu</span>
-            </div>
-            <select id="brandFilterSelect" class="sort-select" style="width: 100%; padding: 8px 10px;" onchange="handleBrandFilter(this.value)">
-              <option value="all">Tất cả thương hiệu</option>
+            <select id="priceSortSelect" class="sort-select" onchange="handlePriceSortSelect(this.value)">
+              <option value="default">Giá: Mặc định</option>
+              <option value="price-asc">Giá: Thấp đến Cao ↑</option>
+              <option value="price-desc">Giá: Cao đến Thấp ↓</option>
             </select>
           </div>
 
-          <!-- Nhóm 2: Khoảng Giá -->
-          <div class="filter-group">
-            <div class="filter-group-title">
-              <span>Khoảng Giá</span>
-            </div>
-            <label class="filter-option">
-              <input type="radio" name="priceRange" value="all" checked onchange="handlePriceFilter(this.value)" />
-              <span>Tất cả mức giá</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="priceRange" value="under-1m" onchange="handlePriceFilter(this.value)" />
-              <span>Dưới 1.000.000 ₫</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="priceRange" value="1m-5m" onchange="handlePriceFilter(this.value)" />
-              <span>1.000.000 ₫ - 5.000.000 ₫</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="priceRange" value="5m-15m" onchange="handlePriceFilter(this.value)" />
-              <span>5.000.000 ₫ - 15.000.000 ₫</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="priceRange" value="above-15m" onchange="handlePriceFilter(this.value)" />
-              <span>Trên 15.000.000 ₫</span>
-            </label>
-
-            <!-- Tự nhập khoảng giá min - max -->
-            <div class="price-input-wrap">
-              <input type="number" id="minPriceInput" placeholder="Từ ₫" class="price-input" />
-              <span style="color: #94a3b8;">-</span>
-              <input type="number" id="maxPriceInput" placeholder="Đến ₫" class="price-input" />
-            </div>
-            <button class="btn-apply-price" onclick="applyCustomPriceRange()">ÁP DỤNG KHOẢNG GIÁ</button>
+          <div class="sort-right">
+            <span>Tìm thấy: <strong class="product-count-badge" id="productCountText">0</strong> sản phẩm</span>
           </div>
+        </div>
 
-          <!-- Nhóm 3: Đánh Giá Sao -->
-          <div class="filter-group">
-            <div class="filter-group-title">
-              <span>Đánh Giá</span>
-            </div>
-            <label class="filter-option">
-              <input type="radio" name="ratingFilter" value="all" checked onchange="handleRatingFilter(this.value)" />
-              <span>Tất cả đánh giá</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="ratingFilter" value="5" onchange="handleRatingFilter(this.value)" />
-              <span class="stars-yellow">★★★★★</span>
-              <span style="font-size: 11px; color: #64748b;">(5 sao)</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="ratingFilter" value="4" onchange="handleRatingFilter(this.value)" />
-              <span class="stars-yellow">★★★★☆</span>
-              <span style="font-size: 11px; color: #64748b;">(Từ 4 sao)</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="ratingFilter" value="3" onchange="handleRatingFilter(this.value)" />
-              <span class="stars-yellow">★★★☆☆</span>
-              <span style="font-size: 11px; color: #64748b;">(Từ 3 sao)</span>
-            </label>
-          </div>
+        <!-- Thanh Chip Bộ Lọc Đang Áp Dụng (TF16EBF) -->
+        <div class="active-filters-bar" id="activeFiltersBar" style="display: none;" aria-live="polite">
+          <!-- Rendered by JavaScript -->
+        </div>
 
-          <!-- Nhóm 4: Dịch Vụ & Khuyến Mãi -->
-          <div class="filter-group">
-            <div class="filter-group-title">
-              <span>Dịch Vụ & Ưu Đãi</span>
-            </div>
-            <label class="filter-option">
-              <input type="checkbox" id="chkFlashSale" onchange="applyOtherFilters()" />
-              <span>⚡ Đang Giảm Giá Sốc</span>
-            </label>
-            <label class="filter-option">
-              <input type="checkbox" id="chkExclusive" onchange="applyOtherFilters()" />
-              <span>🛡️ Hàng Chính Hãng 100%</span>
-            </label>
-          </div>
+        <!-- Lưới sản phẩm (Product Grid) -->
+        <div class="products-grid" id="productsGrid">
+          <!-- Rendered by JavaScript -->
+        </div>
 
-          <!-- Thanh nút hành động cố định dưới đáy Mobile Drawer (TF16ED9) -->
-          <div class="drawer-footer-actions">
-            <button type="button" class="btn-drawer-reset" onclick="resetAllFilters()">Đặt lại</button>
-            <button type="button" class="btn-drawer-apply" onclick="closeFilterDrawer()">
-              Xem (<span id="drawerResultCount">0</span>) sản phẩm
-            </button>
-          </div>
-        </aside>
-
-        <!-- 2. CỘT PHẢI: LƯỚI KẾT QUẢ SẢN PHẨM & THANH SẮP XẾP -->
-        <main class="products-main">
-          <!-- Thanh sắp xếp (Sort Bar) -->
-          <div class="sort-bar">
-            <div class="sort-left">
-              <!-- Nút mở Drawer bộ lọc trên mobile -->
-              <button class="btn-mobile-filter" onclick="openFilterDrawer()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                Bộ Lọc (<span id="mobileActiveCount">0</span>)
-              </button>
-
-              <span class="sort-label">Sắp xếp theo:</span>
-              <button class="sort-tab active" data-sort="popular" onclick="changeSort('popular', this)">Phổ Biến</button>
-              <button class="sort-tab" data-sort="newest" onclick="changeSort('newest', this)">Mới Nhất</button>
-              <button class="sort-tab" data-sort="bestseller" onclick="changeSort('bestseller', this)">Bán Chạy</button>
-              
-              <select id="priceSortSelect" class="sort-select" onchange="handlePriceSortSelect(this.value)">
-                <option value="default">Giá: Mặc định</option>
-                <option value="price-asc">Giá: Thấp đến Cao ↑</option>
-                <option value="price-desc">Giá: Cao đến Thấp ↓</option>
-              </select>
-            </div>
-
-            <div class="sort-right">
-              <span>Tìm thấy: <strong class="product-count-badge" id="productCountText">0</strong> sản phẩm</span>
-            </div>
-          </div>
-
-          <!-- Thanh Chip Bộ Lọc Đang Áp Dụng (TF16EBF) -->
-          <div class="active-filters-bar" id="activeFiltersBar" style="display: none;" aria-live="polite">
-            <!-- Rendered by JavaScript -->
-          </div>
-
-          <!-- Lưới sản phẩm (Product Grid) -->
-          <div class="products-grid" id="productsGrid">
-            <!-- Rendered by JavaScript -->
-          </div>
-
-          <!-- Phân trang (Pagination) -->
-          <div class="pagination" id="paginationWrapper">
-            <button class="page-btn" id="btnPrevPage" onclick="changePage(currentPage - 1)">‹</button>
-            <button class="page-btn active" onclick="changePage(1)">1</button>
-            <button class="page-btn" onclick="changePage(2)">2</button>
-            <button class="page-btn" id="btnNextPage" onclick="changePage(currentPage + 1)">›</button>
-          </div>
-        </main>
-      </div>
+        <!-- Phân trang (Pagination) -->
+        <div class="pagination" id="paginationWrapper">
+          <button class="page-btn" id="btnPrevPage" onclick="changePage(currentPage - 1)">‹</button>
+          <button class="page-btn active" onclick="changePage(1)">1</button>
+          <button class="page-btn" onclick="changePage(2)">2</button>
+          <button class="page-btn" id="btnNextPage" onclick="changePage(currentPage + 1)">›</button>
+        </div>
+      </main>
     </div>
+  </div>
 
-    <!-- Backdrop mờ cho Mobile Drawer -->
-    <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeFilterDrawer()"></div>
+  <!-- Backdrop mờ cho Mobile Drawer -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeFilterDrawer()"></div>
 
-    <!-- Toast Notification Container -->
-    <div id="toastBox" style="display: none;"></div>
+  <!-- Toast Notification Container -->
+  <div id="toastBox" style="display: none;"></div>
 
-    <!-- ==========================================================================
+  <!-- ==========================================================================
          JAVASCRIPT LOGIC CHO TRANG DANH SÁCH SẢN PHẨM & DRAWER
          ========================================================================== -->
-<script src="buyer-products.js"></script>
-  </body>
+  <script src="buyer-products.js"></script>
+</body>
+
 </html>

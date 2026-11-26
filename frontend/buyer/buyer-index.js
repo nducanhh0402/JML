@@ -689,7 +689,7 @@ function renderHomepageBanners(banners) {
           const desc = escapeHomepageHtml(b.description || "Khám phá ngay");
           return `
                   <div class="side-banner side-banner-${idx === 0 ? "1" : "2"}">
-                    <span style="font-size: 11px; font-weight: 700; color: #fed7aa; text-transform: uppercase;">${desc}</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #ffb347; text-transform: uppercase;">${desc}</span>
                     <h3 class="side-banner-title">${title}</h3>
                     <a class="side-banner-link" href="#flashSaleSection" onclick="scrollToFlashSale(); return false;">Khám phá chi tiết →</a>
                   </div>`;
@@ -3020,7 +3020,7 @@ function renderUserOrders(orders) {
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span style="font-weight: 800; color: #0f172a;">${o.id_display || "#" + o.order_key}</span>
                   <span style="color: #cbd5e1;">•</span>
-                  <span style="color: #64748b;">Shop: <strong style="color: #ea580c;">${o.shop_name || "Trungshop"}</strong></span>
+                  <span style="color: #64748b;">Shop: <strong style="color: #e11d48;">${o.shop_name || "Trungshop"}</strong></span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <span class="order-status-badge" style="padding: 4px 12px; border-radius: 99px; font-weight: 700; font-size: 11px; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder};">
@@ -3052,7 +3052,7 @@ function renderUserOrders(orders) {
                 <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
                   <div>
                     <span style="color: #64748b; margin-right: 6px;">Tổng thanh toán:</span>
-                    <strong style="font-size: 15px; color: #ea580c; font-weight: 800;">${o.total}</strong>
+                    <strong style="font-size: 15px; color: #e11d48; font-weight: 800;">${o.total}</strong>
                   </div>
                   <!-- Duy Nhất 1 Nút Xác Nhận Ở Chân Đơn Hàng -->
                   ${
@@ -3256,7 +3256,7 @@ async function loadIndexRecentSearches() {
       items
         .map(
           (item) =>
-            `<a href="#" onclick="applyQuickSearch('${escapeSearchHtml(item.keyword)}'); return false;" style="background:rgba(234,88,12,0.08);border-radius:99px;padding:1px 8px;">${escapeSearchHtml(item.keyword)}</a>`,
+            `<a href="#" onclick="applyQuickSearch('${escapeSearchHtml(item.keyword)}'); return false;" style="background:rgba(255,66,103,0.10);border-radius:99px;padding:1px 8px;">${escapeSearchHtml(item.keyword)}</a>`,
         )
         .join("");
   } catch (e) {

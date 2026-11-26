@@ -12,27 +12,27 @@
     rel="stylesheet" />
   <!-- Auth & RBAC Controller -->
   <script src="../shared/js/auth.js"></script>
-  <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css" />
+  <link rel="stylesheet" href="../shared/css/jml-theme.css" />
   <style>
-    /* ========== RESET & CSS VARIABLES (KOI & LOTUS POND THEME) ========== */
+    /* ========== RESET & CSS VARIABLES (MIDNIGHT SAPPHIRE & CORAL HORIZON) ========== */
     :root {
-      --primary: #c92a22;
-      --primary-hover: #a61e18;
-      --primary-light: #fdf0ee;
-      --secondary: #222a19;
-      --secondary-light: #47543e;
-      --accent: #d49b1a;
-      --success: #39522a;
-      --danger: #c92a22;
-      --background: #f5f5ee;
+      --primary: #ff4267;
+      --primary-hover: #e11d48;
+      --primary-light: #fff1f2;
+      --secondary: #0f172a;
+      --secondary-light: #334155;
+      --accent: #ffb347;
+      --success: #059669;
+      --danger: #e11d48;
+      --background: #f8fafc;
       --surface: #ffffff;
-      --surface-dim: #eceee3;
-      --border: #dce0d2;
-      --text-main: #1a261a;
-      --text-muted: #586552;
-      --shadow-sm: 0 1px 3px rgba(26, 38, 26, 0.06);
-      --shadow-md: 0 4px 14px rgba(26, 38, 26, 0.08);
-      --shadow-lg: 0 12px 28px rgba(26, 38, 26, 0.12);
+      --surface-dim: #f1f5f9;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 20px;
@@ -53,7 +53,10 @@
       overflow-x: clip;
     }
 
-    button, input, select, textarea {
+    button,
+    input,
+    select,
+    textarea {
       font-family: inherit;
     }
 
@@ -213,6 +216,7 @@
       font-size: 13px;
       font-weight: 700;
     }
+
     .step-pill {
       display: inline-flex;
       align-items: center;
@@ -223,12 +227,14 @@
       color: var(--text-muted);
       border: 1px solid var(--border);
     }
+
     .step-pill.active {
       background: var(--primary-light);
       color: var(--primary);
-      border-color: #efc4be;
-      box-shadow: 0 2px 8px rgba(201, 42, 34, 0.10);
+      border-color: #fecdd3;
+      box-shadow: 0 2px 8px rgba(225, 29, 72, 0.10);
     }
+
     .step-num {
       width: 20px;
       height: 20px;
@@ -240,10 +246,12 @@
       font-weight: 800;
       background: rgba(0, 0, 0, 0.08);
     }
+
     .step-pill.active .step-num {
       background: var(--primary);
       color: #fff;
     }
+
     .step-line {
       width: 24px;
       height: 2px;
@@ -261,18 +269,20 @@
       padding: 12px 18px;
       margin-bottom: 18px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, #fffdf9 0%, #fdf0ee 55%, #fbf4dc 100%);
-      border: 1px solid #efc4be;
+      background: linear-gradient(135deg, #eff6ff 0%, #fff1f2 55%, #fffbeb 100%);
+      border: 1px solid #fecdd3;
       box-shadow: var(--shadow-sm);
       font-size: 13px;
       color: var(--secondary);
     }
+
     .perk-banner-left {
       display: flex;
       align-items: center;
       gap: 10px;
       font-weight: 600;
     }
+
     .perk-badge {
       background: var(--primary);
       color: #fff;
@@ -290,17 +300,19 @@
       gap: 6px;
       margin-top: 9px;
     }
+
     .voucher-chip-btn {
       font-size: 11px;
       font-weight: 700;
       padding: 3px 9px;
       border-radius: 99px;
-      border: 1px dashed #d49b1a;
-      background: #fbf4dc;
-      color: #7c580b;
+      border: 1px dashed #ff4267;
+      background: #fff1f2;
+      color: #e11d48;
       cursor: pointer;
       transition: var(--transition);
     }
+
     .voucher-chip-btn:hover {
       background: var(--primary);
       color: #fff;
@@ -314,12 +326,14 @@
       box-shadow: var(--shadow-sm);
       padding: 18px 20px;
     }
+
     .recommend-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 14px;
     }
+
     .recommend-title {
       font-size: 15px;
       font-weight: 800;
@@ -328,11 +342,13 @@
       align-items: center;
       gap: 8px;
     }
+
     .recommend-grid-mini {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 14px;
     }
+
     .rec-mini-card {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -343,11 +359,13 @@
       gap: 8px;
       transition: var(--transition);
     }
+
     .rec-mini-card:hover {
       transform: translateY(-3px);
       box-shadow: var(--shadow-md);
-      border-color: #efc4be;
+      border-color: #fecdd3;
     }
+
     .rec-mini-img {
       width: 100%;
       height: 115px;
@@ -355,6 +373,7 @@
       border-radius: 8px;
       background: var(--surface-dim);
     }
+
     .rec-mini-name {
       font-size: 12px;
       font-weight: 700;
@@ -366,11 +385,13 @@
       overflow: hidden;
       min-height: 32px;
     }
+
     .rec-mini-price {
       font-size: 13px;
       font-weight: 800;
       color: var(--primary);
     }
+
     .btn-rec-add {
       margin-top: auto;
       padding: 7px 10px;
@@ -383,13 +404,20 @@
       cursor: pointer;
       transition: var(--transition);
     }
+
     .btn-rec-add:hover {
       background: var(--primary);
       color: #fff;
     }
+
     @media (max-width: 900px) {
-      .checkout-stepper { display: none; }
-      .recommend-grid-mini { grid-template-columns: repeat(2, 1fr); }
+      .checkout-stepper {
+        display: none;
+      }
+
+      .recommend-grid-mini {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     /* ========== CART ITEMS PANEL ========== */
@@ -773,7 +801,7 @@
 
     .voucher-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(201, 42, 34, 0.12);
+      box-shadow: 0 0 0 3px rgba(255, 66, 103, 0.14);
     }
 
     .voucher-input.is-invalid {
@@ -1144,8 +1172,8 @@
       }
     }
   </style>
-    <script src="../shared/js/koi-banner-ambient.js" defer></script>
-  </head>
+  <script src="../shared/js/jml-banner-ambient.js" defer></script>
+</head>
 
 <body>
   <!-- Top Bar -->
@@ -1164,7 +1192,7 @@
   <header class="header-main">
     <div class="container header-inner">
       <a class="logo" href="index.html" title="Về Trang Chủ JML Store">
-        <span class="logo-badge">JML</span>
+        <img src="../admin/jml-store-icon.svg" alt="JML Store" class="jml-brand-icon" />
         <span>STORE</span>
       </a>
 
@@ -1177,7 +1205,8 @@
       </div>
 
       <div class="header-actions">
-        <a href="products.html" style="font-size:13px;font-weight:700;color:var(--secondary);padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:var(--surface-dim);">
+        <a href="products.html"
+          style="font-size:13px;font-weight:700;color:var(--secondary);padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:var(--surface-dim);">
           🛍️ Sản Phẩm
         </a>
         <button class="btn-action" onclick="window.location.href='products.html'" title="Tiếp tục mua sắm">
@@ -1209,66 +1238,71 @@
         <span class="perk-badge">JML MALL</span>
         <span>🚚 Miễn phí vận chuyển Hỏa tốc 2h nội thành • Bảo vệ người mua 100% qua ví trung gian Escrow</span>
       </div>
-      <span style="font-size:12px;font-weight:700;color:var(--primary);">Ưu đãi hôm nay: FREESHIP • JML50K • GIAM10</span>
+      <span style="font-size:12px;font-weight:700;color:var(--primary);">Ưu đãi hôm nay: FREESHIP • JML50K •
+        GIAM10</span>
     </div>
 
     <!-- Cart Layout -->
     <div class="cart-page">
       <!-- Left: Cart Items + Quick Recommendations -->
       <div class="cart-left-col">
-      <div class="cart-panel">
-        <div class="cart-panel-header">
-          <div class="cart-panel-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-            Sản phẩm trong giỏ
-            <span class="cart-count-badge" id="itemCountBadge">0</span>
-          </div>
-          <button class="btn-clear-all" onclick="confirmClearAll()" id="btnClearAll" style="display:none;">
-            🗑️ Xóa tất cả
-          </button>
-        </div>
-
-        <!-- Loading -->
-        <div class="cart-loading" id="cartLoading">
-          <div class="spinner"></div>
-          Đang tải giỏ hàng...
-        </div>
-
-        <!-- Items List -->
-        <div class="cart-items-list" id="cartItemsList" style="display:none;"></div>
-
-        <!-- Empty State -->
-        <div class="cart-empty" id="cartEmpty">
-          <div class="cart-empty-icon" style="width:84px;height:84px;margin:0 auto 16px;border-radius:50%;background:linear-gradient(135deg,#fdf0ee,#fbf4dc);border:1px solid #efc4be;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 8px 20px rgba(201,42,34,0.10);">🛒</div>
-          <div class="cart-empty-title">Giỏ hàng của bạn đang trống</div>
-          <div class="cart-empty-desc">Hãy chọn sản phẩm từ bộ sưu tập gợi ý bên dưới hoặc nạp nhanh giỏ hàng mẫu để trải nghiệm thanh toán!</div>
-          <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:10px;">
-            <a href="products.html" class="btn-shop-now">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <div class="cart-panel">
+          <div class="cart-panel-header">
+            <div class="cart-panel-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
               </svg>
-              Khám Phá Sản Phẩm
-            </a>
-            <button type="button" onclick="loadSampleDemoCart()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;border:1px solid var(--primary);background:var(--primary-light);color:var(--primary);cursor:pointer;">
-              ✨ Nạp Giỏ Hàng Mẫu
+              Sản phẩm trong giỏ
+              <span class="cart-count-badge" id="itemCountBadge">0</span>
+            </div>
+            <button class="btn-clear-all" onclick="confirmClearAll()" id="btnClearAll" style="display:none;">
+              🗑️ Xóa tất cả
             </button>
           </div>
-        </div>
-      </div>
 
-      <!-- Recommended Quick-Add Panel -->
-      <div class="recommend-card-panel">
-        <div class="recommend-header">
-          <div class="recommend-title">🔥 Gợi Ý Sản Phẩm Nổi Bật — Thêm Nhanh Vào Giỏ</div>
-          <a href="products.html" style="font-size:12px;font-weight:700;color:var(--primary);">Xem tất cả →</a>
+          <!-- Loading -->
+          <div class="cart-loading" id="cartLoading">
+            <div class="spinner"></div>
+            Đang tải giỏ hàng...
+          </div>
+
+          <!-- Items List -->
+          <div class="cart-items-list" id="cartItemsList" style="display:none;"></div>
+
+          <!-- Empty State -->
+          <div class="cart-empty" id="cartEmpty">
+            <div class="cart-empty-icon"
+              style="width:84px;height:84px;margin:0 auto 16px;border-radius:50%;background:linear-gradient(135deg,#eff6ff,#fff1f2);border:1px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 8px 20px rgba(29,140,248,0.12);">
+              🛒</div>
+            <div class="cart-empty-title">Giỏ hàng của bạn đang trống</div>
+            <div class="cart-empty-desc">Hãy chọn sản phẩm từ bộ sưu tập gợi ý bên dưới hoặc nạp nhanh giỏ hàng mẫu để
+              trải nghiệm thanh toán!</div>
+            <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:10px;">
+              <a href="products.html" class="btn-shop-now">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Khám Phá Sản Phẩm
+              </a>
+              <button type="button" onclick="loadSampleDemoCart()"
+                style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;border:1px solid var(--primary);background:var(--primary-light);color:var(--primary);cursor:pointer;">
+                ✨ Nạp Giỏ Hàng Mẫu
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="recommend-grid-mini" id="cartRecommendGrid"></div>
-      </div>
+
+        <!-- Recommended Quick-Add Panel -->
+        <div class="recommend-card-panel">
+          <div class="recommend-header">
+            <div class="recommend-title">🔥 Gợi Ý Sản Phẩm Nổi Bật — Thêm Nhanh Vào Giỏ</div>
+            <a href="products.html" style="font-size:12px;font-weight:700;color:var(--primary);">Xem tất cả →</a>
+          </div>
+          <div class="recommend-grid-mini" id="cartRecommendGrid"></div>
+        </div>
       </div>
 
       <!-- Right: Summary -->
@@ -1304,32 +1338,25 @@
             <span>Mã Giảm Giá / Voucher</span>
           </div>
           <div class="voucher-input-group" id="voucherInputGroup">
-            <input
-              type="text"
-              id="voucherInput"
-              class="voucher-input"
-              placeholder="Mã ưu đãi (VD: JML50K)"
-              maxlength="30"
-              autocomplete="off"
-            />
-            <button
-              type="button"
-              id="btnApplyVoucher"
-              class="btn-apply-voucher"
-              onclick="handleApplyVoucher()"
-            >
+            <input type="text" id="voucherInput" class="voucher-input" placeholder="Mã ưu đãi (VD: JML50K)"
+              maxlength="30" autocomplete="off" />
+            <button type="button" id="btnApplyVoucher" class="btn-apply-voucher" onclick="handleApplyVoucher()">
               Áp Dụng
             </button>
           </div>
           <div class="voucher-quick-chips">
-            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('JML50K')">🎟️ JML50K (-50K)</button>
-            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('GIAM10')">🎟️ GIAM10 (-10%)</button>
-            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('FREESHIP')">🚚 FREESHIP</button>
+            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('JML50K')">🎟️ JML50K
+              (-50K)</button>
+            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('GIAM10')">🎟️ GIAM10
+              (-10%)</button>
+            <button type="button" class="voucher-chip-btn" onclick="quickSelectCartVoucher('FREESHIP')">🚚
+              FREESHIP</button>
           </div>
           <div class="voucher-msg" id="voucherMsg"></div>
           <div class="voucher-applied-tag" id="voucherAppliedTag">
             <span>🎉 Đã áp dụng mã: <strong id="voucherTagCode"></strong></span>
-            <button type="button" class="btn-remove-voucher" onclick="handleRemoveVoucher()" title="Hủy bỏ mã này">✕ Bỏ</button>
+            <button type="button" class="btn-remove-voucher" onclick="handleRemoveVoucher()" title="Hủy bỏ mã này">✕
+              Bỏ</button>
           </div>
         </div>
 
@@ -1450,7 +1477,7 @@
             }
           }
         }
-      } catch (e) {}
+      } catch (e) { }
 
       grid.innerHTML = recommendedPool.map((p, i) => `
         <div class="rec-mini-card">
@@ -1489,7 +1516,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: Number(currentUser.id), product_id: Number(p.id), quantity: 1 })
           });
-        } catch (e) {}
+        } catch (e) { }
       }
       showToast(`✓ Đã thêm "${p.title.substring(0, 26)}..." vào giỏ hàng!`);
     }

@@ -1,31 +1,31 @@
 /* ==============================================================================
    SHARED CSS - JML STORE MULTI-VENDOR MARKETPLACE
-   Đồng bộ chủ đề Cá Koi & Hồ Hoa Sen (Đỏ son Koi, Xanh lá sen trầm, Vàng kim 24K)
+   Đồng bộ chủ đề Midnight Sapphire & Coral Horizon theo trang Đăng nhập/Đăng ký mới
    ============================================================================== */
-@import url("./koi-lotus-theme.css");
+@import url("./jml-theme.css");
 
 :root {
-  --primary: #c92a22;
-  --primary-hover: #a61e18;
-  --primary-light: #fdf0ee;
-  --lotus-green: #39522a;
-  --lotus-green-soft: #edf3e7;
-  --koi-gold: #d49b1a;
-  --koi-gold-light: #fbf4dc;
-  --orange: #c92a22;
-  --orange-light: #fdf0ee;
-  --success: #39522a;
-  --success-light: #eaf3e5;
-  --danger: #c92a22;
-  --danger-light: #fceceb;
-  --warning: #c88a12;
-  --warning-light: #fbf4dc;
-  --neutral-900: #1a261a;
-  --neutral-700: #3d4938;
-  --neutral-500: #586552;
-  --neutral-200: #dce0d2;
-  --neutral-100: #eceee3;
-  --neutral-50: #f5f5ee;
+  --primary: #ff4267;
+  --primary-hover: #e11d48;
+  --primary-light: #fff1f2;
+  --jml-blue-core: #1d8cf8;
+  --jml-blue-mid: #0a55ab;
+  --jml-blue-deep: #042554;
+  --jml-amber: #ffb347;
+  --orange: #ff4267;
+  --orange-light: #fff1f2;
+  --success: #059669;
+  --success-light: #ecfdf5;
+  --danger: #e11d48;
+  --danger-light: #fef2f2;
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+  --neutral-900: #0f172a;
+  --neutral-700: #334155;
+  --neutral-500: #475569;
+  --neutral-200: #e2e8f0;
+  --neutral-100: #f1f5f9;
+  --neutral-50: #f8fafc;
 }
 
 /* Scrollbar chung cho các modal và bảng */
@@ -37,11 +37,11 @@
   background: var(--neutral-100);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #b7c2a8;
+  background: #cbd5e1;
   border-radius: 99px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #8d9c7a;
+  background: #94a3b8;
 }
 
 /* Base Toast Container */
@@ -60,7 +60,7 @@
   background: #ffffff;
   border-radius: 12px;
   padding: 12px 16px;
-  box-shadow: 0 10px 25px -5px rgba(26, 38, 26, 0.14), 0 8px 10px -6px rgba(26, 38, 26, 0.08);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.14), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
   border: 1px solid var(--neutral-200);
   color: var(--neutral-900);
   display: flex;
