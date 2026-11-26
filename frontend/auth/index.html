@@ -4191,6 +4191,7 @@
       if (redirectParam === 'admin' && r === 'admin') return '../admin/index.html';
       if (redirectParam === 'seller' && (r === 'seller' || r === 'admin')) return '../seller/index.html';
       if (redirectParam === 'profile') return '../user/profile.html';
+      if (redirectParam === 'cart') return '../buyer/cart.html';
       if (r === 'admin') return '../admin/index.html';
       if (r === 'seller') return '../seller/index.html';
       return '../buyer/index.html';
@@ -4230,6 +4231,9 @@
 
     function checkUrlAuthParams() {
       const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'register') {
+        switchTab('register');
+      }
       const err = params.get('error');
       const msg = params.get('message');
       if (err === 'unauthorized') {

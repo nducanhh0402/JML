@@ -2374,9 +2374,17 @@ function syncCustomerAuthHeader() {
 }
 
 function handleUserLogout() {
-  localStorage.removeItem("JML_CUSTOMER_USER");
-  localStorage.removeItem("JML_AUTH_USER");
-  localStorage.removeItem(CART_STORAGE_KEY);
+  if (typeof Auth !== "undefined" && typeof Auth.logout === "function") {
+    localStorage.removeItem(CART_STORAGE_KEY);
+    Auth.logout();
+  } else {
+    localStorage.removeItem("JML_CUSTOMER_USER");
+    localStorage.removeItem("JML_AUTH_USER");
+    localStorage.removeItem("JML_ACCESS_TOKEN");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+    localStorage.removeItem(CART_STORAGE_KEY);
+  }
   cartItems = [];
   updateCartDisplay();
   syncCustomerAuthHeader();
@@ -2385,10 +2393,9 @@ function handleUserLogout() {
 }
 
 function openCustomerAuthModal(mode = "login") {
-  const modal = document.getElementById("customerAuthModal");
-  if (!modal) return;
-  modal.style.display = "flex";
-  switchCustAuthMode(mode);
+  closeAllDropdowns();
+  window.location.href =
+    mode === "register" ? "../auth/index.html?tab=register" : "../auth/index.html";
 }
 
 function closeCustomerAuthModal() {
