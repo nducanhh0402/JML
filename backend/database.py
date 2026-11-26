@@ -486,7 +486,7 @@ def init_db(seed=False):
     except Exception:
         pass
 
-    # 11. Bảng VOUCHERS (Mã giảm giá khuyến mãi) - TF17167
+    # 11. Bảng VOUCHERS (Mã giảm giá khuyến mãi) - TF1728C / TF17167
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS vouchers (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -504,7 +504,8 @@ def init_db(seed=False):
         is_active TINYINT(1) NOT NULL DEFAULT 1,
         created_by INT DEFAULT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
@@ -517,7 +518,40 @@ def init_db(seed=False):
     except Exception:
         pass
 
-    # 12. Bảng REVIEWS (Đánh giá & chấm sao 1-5 cho từng sản phẩm) - TF174F6
+    # 12. Bảng VOUCHER_USAGES (Lịch sử sử dụng mã giảm giá) - TF1728C
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS voucher_usages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        voucher_id INT NOT NULL,
+        user_id INT NOT NULL,
+        order_key VARCHAR(50) DEFAULT NULL,
+        discount_amount BIGINT NOT NULL DEFAULT 0,
+        order_subtotal BIGINT NOT NULL DEFAULT 0,
+        final_total BIGINT NOT NULL DEFAULT 0,
+        used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (voucher_id) REFERENCES vouchers (id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
+    try:
+        cursor.execute("CREATE INDEX idx_usages_voucher ON voucher_usages (voucher_id);")
+    except Exception:
+        pass
+    try:
+        cursor.execute("CREATE INDEX idx_usages_user ON voucher_usages (user_id);")
+    except Exception:
+        pass
+    try:
+        cursor.execute("CREATE INDEX idx_usages_order ON voucher_usages (order_key);")
+    except Exception:
+        pass
+    try:
+        cursor.execute("CREATE INDEX idx_usages_user_voucher ON voucher_usages (user_id, voucher_id);")
+    except Exception:
+        pass
+
+    # 13. Bảng REVIEWS (Đánh giá & chấm sao 1-5 cho từng sản phẩm) - TF174F6
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reviews (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -534,7 +568,7 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
-    # 13. Bảng SEARCH_HISTORY (Lưu từ khóa tìm kiếm gần đây của người dùng) - TF16EF3
+    # 14. Bảng SEARCH_HISTORY (Lưu từ khóa tìm kiếm gần đây của người dùng) - TF16EF3
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS search_history (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -761,17 +795,28 @@ def seed_initial_data(conn):
         )
         conn.commit()
 
-    # Seed vouchers mặc định nếu chưa có
+    # Nạp dữ liệu mẫu ban đầu cho vouchers và voucher_usages (TF1728C)
     try:
         cursor.execute("SELECT COUNT(*) FROM vouchers;")
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
-                INSERT INTO vouchers (code, name, description, discount_type, discount_value, max_discount_amount, min_order_value, usage_limit, used_count, start_date, end_date, is_active)
+                INSERT INTO vouchers (id, code, name, description, discount_type, discount_value, max_discount_amount, min_order_value, usage_limit, used_count, start_date, end_date, is_active)
                 VALUES
-                    ('FREESHIP', 'Freeship Toàn Quốc', 'Miễn phí 100% tiền vận chuyển', 'shipping', 15000, 30000, 0, 1000, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
-                    ('JML50K', 'Giảm 50K đơn từ 100K', 'Giảm ngay 50.000 ₫ cho đơn từ 100.000 ₫', 'fixed', 50000, NULL, 100000, 500, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
-                    ('GIAM10', 'Giảm 10% tối đa 100K', 'Giảm 10% (tối đa 100.000 ₫)', 'percent', 10, 100000, 0, 200, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
-                    ('VIP100K', 'Vip 100K đơn từ 1M', 'Giảm ngay 100.000 ₫ cho đơn từ 1.000.000 ₫', 'fixed', 100000, NULL, 1000000, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1);
+                    (1, 'FREESHIP', 'Freeship Toàn Quốc', 'Miễn phí 100% tiền vận chuyển', 'shipping', 15000, 30000, 0, 1000, 15, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    (2, 'JML50K', 'Giảm 50K đơn từ 200K', 'Giảm ngay 50.000 ₫ cho đơn từ 200.000 ₫', 'fixed', 50000, NULL, 200000, 500, 8, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    (3, 'GIAM10', 'Giảm 10% tối đa 100K', 'Giảm 10% (tối đa 100.000 ₫)', 'percent', 10, 100000, 100000, 300, 12, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    (4, 'VIP100K', 'Vip 100K đơn từ 1M', 'Giảm ngay 100.000 ₫ cho đơn từ 1.000.000 ₫', 'fixed', 100000, NULL, 1000000, 100, 3, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    (5, 'CHAOXUAN2026', 'Mừng Xuân 2026 Giảm 20%', 'Khuyến mãi năm mới giảm 20% tối đa 200.000 ₫', 'percent', 20, 200000, 300000, 200, 0, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH), 1),
+                    (6, 'TRIAN50', 'Tri Ân Khách Hàng', 'Mã tri ân giảm 50.000 ₫ cho đơn từ 150.000 ₫', 'fixed', 50000, NULL, 150000, 250, 5, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH), 1);
+            """)
+            conn.commit()
+
+            # Seed voucher usages mẫu
+            cursor.execute("""
+                INSERT INTO voucher_usages (voucher_id, user_id, order_key, discount_amount, order_subtotal, final_total, used_at)
+                VALUES
+                    (1, 1, 'ORD-202611-001', 15000, 185000, 170000, NOW()),
+                    (2, 1, 'ORD-202611-002', 50000, 350000, 300000, NOW());
             """)
             conn.commit()
     except Exception:
