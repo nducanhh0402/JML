@@ -10,6 +10,7 @@
 
       body {
         overscroll-behavior-y: none;
+        overflow-x: hidden;
       }
 
       .material-symbols-outlined {
@@ -50,15 +51,21 @@
 
       body {
         font-family:
-          "Plus Jakarta Sans",
+          "Be Vietnam Pro",
+          "Segoe UI",
+          Roboto,
           -apple-system,
           BlinkMacSystemFont,
           sans-serif;
         background-color: var(--background);
         color: var(--text-main);
         line-height: 1.5;
-        overflow-x: hidden;
+        overflow-x: clip;
         -webkit-font-smoothing: antialiased;
+      }
+
+      button, input, select, textarea {
+        font-family: inherit;
       }
 
       a {
@@ -125,11 +132,10 @@
         position: sticky;
         top: 0;
         z-index: 1000;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(12px);
+        background: #ffffff;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
         border-bottom: 1px solid var(--border);
-        transition: var(--transition);
+        transform: translateZ(0);
       }
 
       .header-container {
@@ -2248,4 +2254,569 @@
     align-items: center;
   }
   .cv-item-img { width: 68px; height: 68px; }
+}
+
+/* ==========================================================================
+   TRANG CHI TIẾT SẢN PHẨM NÂNG CAO (GALLERY ARROWS, LIGHTBOX, STOCK STATUS)
+   ========================================================================== */
+.gallery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 6;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-nav-btn:hover {
+  background: var(--primary);
+}
+
+.gallery-nav-prev { left: 12px; }
+.gallery-nav-next { right: 12px; }
+
+.gallery-zoom-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(17, 24, 39, 0.72);
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 99px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.main-image-viewport img {
+  cursor: zoom-in;
+}
+
+.brand-pill {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.stock-badge.stock-in {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.stock-badge.stock-low {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.stock-badge.stock-out {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.qty-picker button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+.qty-picker input::-webkit-outer-spin-button,
+.qty-picker input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.btn-detail-add-cart:disabled,
+.btn-detail-buy-now:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.detail-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(6px);
+  z-index: 9998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.detail-lightbox-overlay.active {
+  display: flex;
+}
+
+.detail-lightbox-box {
+  position: relative;
+  max-width: 820px;
+  width: 100%;
+  background: #0f172a;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.detail-lightbox-box img {
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  display: block;
+  background: #020617;
+}
+
+.detail-lightbox-caption {
+  padding: 12px 18px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-lightbox-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  color: #ffffff;
+  font-size: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  z-index: 3;
+}
+
+/* ==========================================================================
+   TF17554: DANH SÁCH ĐÁNH GIÁ, FORM GỬI ĐÁNH GIÁ & SẢN PHẨM CÙNG DANH MỤC
+   ========================================================================== */
+.reviews-summary-box {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.reviews-score-col {
+  text-align: center;
+  border-right: 1px solid var(--border);
+  padding-right: 20px;
+}
+
+.reviews-avg-number {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--secondary);
+  line-height: 1;
+}
+
+.reviews-avg-stars {
+  color: #f59e0b;
+  font-size: 18px;
+  margin: 6px 0 4px;
+}
+
+.reviews-bars-col {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rating-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.rating-bar-label {
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.rating-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.rating-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.rating-bar-count {
+  width: 34px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.review-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.review-filter-btn {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text-main);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.review-filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.review-filter-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.review-form-card {
+  background: #fffaf5;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  margin-bottom: 24px;
+}
+
+.review-form-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--secondary);
+  margin-bottom: 12px;
+}
+
+.star-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.star-picker-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #cbd5e1;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.star-picker-btn.active {
+  color: #f59e0b;
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+.star-picker-btn:hover {
+  transform: scale(1.06);
+}
+
+.review-form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.review-input,
+.review-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--text-main);
+  background: #ffffff;
+  outline: none;
+}
+
+.review-input:focus,
+.review-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+}
+
+.review-textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.review-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.review-submit-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+}
+
+.review-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.review-form-alert {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
+
+.review-form-alert.is-error {
+  display: block;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.review-form-alert.is-success {
+  display: block;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+@media (max-width: 768px) {
+  .reviews-summary-box {
+    grid-template-columns: 1fr;
+  }
+  .reviews-score-col {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 14px;
+  }
+}
+
+/* ==========================================================================
+   TF17588: SỬA LỖI HIỂN THỊ DESKTOP & MOBILE (TRANG CHỦ + CHI TIẾT SẢN PHẨM)
+   ========================================================================== */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+img {
+  max-width: 100%;
+}
+
+.section-title-wrap {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.price-row {
+  flex-wrap: wrap;
+}
+
+.detail-meta-row,
+.detail-mall-badge,
+.price-header {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.breadcrumb-trail {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 14px;
+  }
+
+  .header-container {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .header-actions {
+    gap: 10px;
+  }
+
+  .search-input {
+    font-size: 16px;
+  }
+
+  .search-keywords {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-left: 6px;
+  }
+
+  /* Sửa BUG-02: Dropdown không bị đẩy tràn ra khỏi mép phải màn hình */
+  .cart-dropdown {
+    width: min(340px, calc(100vw - 24px));
+    right: 0;
+  }
+
+  /* Sửa BUG-01: Banner slider & 2 side banners hiển thị gọn trên điện thoại */
+  .main-slider {
+    height: 300px;
+  }
+
+  .slide {
+    padding: 0 22px;
+  }
+
+  .slide-title {
+    font-size: 22px;
+  }
+
+  .slide-desc {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .slider-arrow-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .side-banners {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Sửa BUG-03: Flash sale & lưới sản phẩm 2 cột không tràn giá tiền */
+  .flash-sale-wrapper {
+    padding: 16px 14px;
+  }
+
+  .flash-products-grid,
+  .recommend-grid {
+    gap: 10px;
+  }
+
+  .current-price {
+    font-size: 15px;
+  }
+
+  /* Sửa BUG-04: Trang chi tiết trên điện thoại */
+  .breadcrumb-current {
+    max-width: 100%;
+  }
+
+  .detail-product-title {
+    font-size: 20px;
+  }
+
+  .detail-price-box {
+    padding: 16px;
+  }
+
+  .detail-current-price {
+    font-size: 24px;
+  }
+
+  .gallery-thumbs-row {
+    gap: 8px;
+  }
+
+  .detail-tabs-section {
+    padding: 18px 16px;
+  }
+
+  .detail-tab-nav {
+    gap: 16px;
+  }
+
+  .spec-table td {
+    padding: 10px 12px;
+  }
+
+  .spec-table td.spec-key {
+    width: 40%;
+  }
+}
+
+@media (max-width: 480px) {
+  .trust-features-grid {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .gallery-zoom-hint {
+    display: none;
+  }
+
+  .gallery-nav-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
 }

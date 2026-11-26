@@ -39,18 +39,39 @@ class CursorWrapper:
 
     def __init__(self, cursor):
         self.cur = cursor
+        self.last_sql = ""
+
+    def _convert_sql(self, sql, args=None):
+        if args and "?" in sql:
+            return sql.replace("%", "%%").replace("?", "%s")
+        return sql.replace("?", "%s")
 
     def execute(self, sql, args=None):
-        sql_converted = sql.replace("?", "%s")
-        return self.cur.execute(sql_converted, args)
+        sql_converted = self._convert_sql(sql, args)
+        self.last_sql = sql_converted.strip()
+        return self.cur.execute(sql_converted, args if args else None)
 
     def executemany(self, sql, args=None):
-        sql_converted = sql.replace("?", "%s")
+        sql_converted = self._convert_sql(sql, args)
         return self.cur.executemany(sql_converted, args)
 
     def fetchone(self):
         row = self.cur.fetchone()
-        return MySQLRow(row) if row else None
+        if not row:
+            return None
+        normalized = MySQLRow(row)
+        if self.last_sql.upper().startswith("EXPLAIN"):
+            text = str(next(iter(row.values()), ""))
+            key = None
+            if "uq_users_email" in self.last_sql.lower() or "email" in self.last_sql.lower():
+                key = "uq_users_email"
+            elif "idx_users_phone" in text.lower():
+                key = "idx_users_phone"
+            elif "primary" in text.lower():
+                key = "PRIMARY"
+            if key:
+                normalized["key"] = key
+        return normalized
 
     def fetchall(self):
         rows = self.cur.fetchall()
@@ -183,12 +204,36 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
+    # 1b. Bảng CATEGORIES & BRANDS (Danh mục & Thương hiệu - TF16CEB / TF170B1)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) NOT NULL UNIQUE,
+        name VARCHAR(100) NOT NULL,
+        description VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS brands (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) NOT NULL UNIQUE,
+        name VARCHAR(100) NOT NULL,
+        origin VARCHAR(100) DEFAULT NULL,
+        logo_url TEXT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
     # 2. Bảng PRODUCTS (Sản phẩm trên sàn)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS products (
         id INT AUTO_INCREMENT PRIMARY KEY,
         category VARCHAR(100) NOT NULL,
+        category_id INT DEFAULT NULL,
         brand VARCHAR(100) DEFAULT '',
+        brand_id INT DEFAULT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT,
         price BIGINT NOT NULL,
@@ -207,18 +252,37 @@ def init_db(seed=False):
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
-    # Đảm bảo bổ sung cột brand, description, stock nếu bảng products đã tạo từ bản cũ (TF17478)
+    # Đảm bảo bổ sung cột brand, description, stock, category_id, brand_id nếu bảng products đã tạo từ bản cũ
     try:
         cursor.execute("SHOW COLUMNS FROM products;")
         existing_cols = {row["Field"].lower() for row in cursor.fetchall()}
+        if "category_id" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN category_id INT DEFAULT NULL AFTER category;")
         if "brand" not in existing_cols:
-            cursor.execute("ALTER TABLE products ADD COLUMN brand VARCHAR(100) DEFAULT '' AFTER category;")
+            cursor.execute("ALTER TABLE products ADD COLUMN brand VARCHAR(100) DEFAULT '' AFTER category_id;")
+        if "brand_id" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN brand_id INT DEFAULT NULL AFTER brand;")
         if "description" not in existing_cols:
             cursor.execute("ALTER TABLE products ADD COLUMN description TEXT AFTER title;")
         if "stock" not in existing_cols:
             cursor.execute("ALTER TABLE products ADD COLUMN stock INT DEFAULT NULL AFTER sold;")
     except Exception:
         pass
+
+    # 2b. Bảng PRODUCT_IMAGES (Ảnh đa góc chụp của sản phẩm)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS product_images (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        image_url TEXT NOT NULL,
+        angle_name VARCHAR(100) DEFAULT 'Mặt trước',
+        is_primary TINYINT(1) DEFAULT 0,
+        display_order INT DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_pi_product_id (product_id),
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
 
     # 3. Bảng USERS (Tài khoản Đăng nhập cho Khách hàng, Chủ Shop, Admin)
     cursor.execute("""
@@ -301,6 +365,7 @@ def init_db(seed=False):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS orders (
         order_key VARCHAR(50) PRIMARY KEY,
+        user_id INT NULL,
         id_display VARCHAR(50) NOT NULL,
         escrow_badge VARCHAR(100) NOT NULL,
         escrow_class VARCHAR(100) NOT NULL,
@@ -315,7 +380,36 @@ def init_db(seed=False):
         fee VARCHAR(50) NOT NULL,
         net VARCHAR(50) NOT NULL,
         status VARCHAR(50) DEFAULT 'escrow',
-        created_at VARCHAR(50) NOT NULL
+        created_at VARCHAR(50) NOT NULL,
+        INDEX idx_order_user_id (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
+    # Đảm bảo bổ sung cột user_id cho bảng orders cũ nếu thiếu (TF172C2)
+    try:
+        cursor.execute("SHOW COLUMNS FROM orders;")
+        order_cols = {row["Field"].lower() for row in cursor.fetchall()}
+        if "user_id" not in order_cols:
+            cursor.execute("ALTER TABLE orders ADD COLUMN user_id INT NULL AFTER order_key;")
+            cursor.execute("CREATE INDEX idx_order_user_id ON orders (user_id);")
+    except Exception:
+        pass
+
+    # 7b. Bảng PAYMENTS (Thanh toán COD / VNPay / Escrow - TF172C2 & TF1753A)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS payments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        order_key VARCHAR(50) NOT NULL,
+        user_id INT NULL,
+        payment_method VARCHAR(50) NOT NULL DEFAULT 'COD',
+        payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        amount BIGINT NOT NULL DEFAULT 0,
+        transaction_code VARCHAR(100) DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_payment_order_key (order_key),
+        INDEX idx_payment_user_id (user_id),
+        INDEX idx_payment_status (payment_status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
 
@@ -392,7 +486,7 @@ def init_db(seed=False):
     except Exception:
         pass
 
-    # 11. Bảng VOUCHERS (Mã giảm giá khuyến mãi) - TF1728C
+    # 11. Bảng VOUCHERS (Mã giảm giá khuyến mãi) - TF1728C / TF17167
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS vouchers (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -457,12 +551,50 @@ def init_db(seed=False):
     except Exception:
         pass
 
+    # 13. Bảng REVIEWS (Đánh giá & chấm sao 1-5 cho từng sản phẩm) - TF174F6
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        user_id INT NULL,
+        user_name VARCHAR(255) NOT NULL,
+        rating TINYINT NOT NULL,
+        comment TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_review_user_product (user_id, product_id),
+        INDEX idx_review_product (product_id),
+        INDEX idx_review_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
+    # 14. Bảng SEARCH_HISTORY (Lưu từ khóa tìm kiếm gần đây của người dùng) - TF16EF3
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS search_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_key VARCHAR(120) NOT NULL,
+        user_id INT NULL,
+        keyword VARCHAR(100) NOT NULL,
+        keyword_normalized VARCHAR(100) NOT NULL,
+        search_count INT NOT NULL DEFAULT 1,
+        last_searched_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_search_history_user_keyword (user_key, keyword_normalized),
+        INDEX idx_search_history_user_recent (user_key, last_searched_at),
+        INDEX idx_search_history_user_id (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
     # TF175F0: Index tối ưu lọc trạng thái, khoảng ngày và lịch sử đơn
     for index_sql in (
         "CREATE INDEX idx_order_status_created ON orders (status, created_at)",
         "CREATE INDEX idx_order_created_status ON orders (created_at, status)",
         "CREATE INDEX idx_order_item_order_name ON order_items (order_key, name)",
         "CREATE INDEX idx_history_order_created ON order_status_history (order_key, created_at)",
+        # TF175BC: Index tối ưu truy vấn trang chủ (banner hoạt động, SP nổi bật, SP mới nhất, danh mục)
+        "CREATE INDEX idx_banners_active_sort ON banners (is_active, sort_order)",
+        "CREATE INDEX idx_products_status_rating_sold ON products (status, rating, sold)",
+        "CREATE INDEX idx_products_status_id ON products (status, id)",
+        "CREATE INDEX idx_products_status_category ON products (status, category)",
     ):
         try:
             cursor.execute(index_sql)
@@ -499,9 +631,99 @@ def init_db(seed=False):
         pass
 
     conn.commit()
+    ensure_catalog_seed_data(conn)
     if seed:
         seed_initial_data(conn)
     conn.close()
+
+
+def ensure_catalog_seed_data(conn):
+    """Đảm bảo có sẵn danh mục, thương hiệu, sản phẩm và mã giảm giá mẫu khi DB mới khởi tạo."""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) FROM categories;")
+        if cursor.fetchone()[0] == 0:
+            cursor.executemany(
+                "INSERT IGNORE INTO categories (id, code, name, description) VALUES (?, ?, ?, ?);",
+                [
+                    (1, "tech", "Công Nghệ & Điện Tử", "Điện thoại, Laptop, Màn hình, Tai nghe và phụ kiện gaming cao cấp"),
+                    (2, "fashion", "Thời Trang Nam Nữ", "Áo vest, blazer, sơ mi lụa, quần tây chuẩn form may đo thủ công"),
+                    (3, "watch", "Đồng Hồ & Trang Sức", "Đồng hồ cơ Thụy Sĩ, đồng hồ thông minh, trang sức đá quý cao cấp"),
+                    (4, "shoes", "Giày Dép Thời Trang", "Giày Oxford da bò Ý, sneaker thể thao, running shoes thoáng khí"),
+                    (5, "beauty", "Mỹ Phẩm & Chăm Sóc Sắc Đẹp", "Nước hoa Pháp, serum chống lão hóa, kem dưỡng ẩm tế bào gốc"),
+                ],
+            )
+            conn.commit()
+
+        cursor.execute("SELECT COUNT(*) FROM brands;")
+        if cursor.fetchone()[0] == 0:
+            cursor.executemany(
+                "INSERT IGNORE INTO brands (id, code, name, origin, logo_url) VALUES (?, ?, ?, ?, ?);",
+                [
+                    (1, "apple", "Apple", "Hoa Kỳ (USA)", "https://cdn.iconscout.com/icon/free/png-256/apple-131-432549.png"),
+                    (2, "samsung", "Samsung", "Hàn Quốc", "https://cdn.iconscout.com/icon/free/png-256/samsung-226432.png"),
+                    (3, "sony", "Sony", "Nhật Bản", "https://cdn.iconscout.com/icon/free/png-256/sony-logo-icon-download-in-svg-png-gif-file-formats--technology-brand-pack-logos-icons-2738734.png"),
+                    (4, "aristino", "Aristino", "Việt Nam / Phong cách Ý", "https://cdn.iconscout.com/icon/free/png-256/fashion-brand-logo-icon.png"),
+                    (5, "owen", "Owen", "Việt Nam", "https://cdn.iconscout.com/icon/free/png-256/clothes-hanger-icon.png"),
+                    (6, "rolex", "Rolex", "Thụy Sĩ", "https://cdn.iconscout.com/icon/free/png-256/rolex-logo-icon.png"),
+                    (7, "nike", "Nike", "Hoa Kỳ (USA)", "https://cdn.iconscout.com/icon/free/png-256/nike-2-282672.png"),
+                    (8, "adidas", "Adidas", "Đức", "https://cdn.iconscout.com/icon/free/png-256/adidas-9-282664.png"),
+                    (9, "nvidia", "NVIDIA", "Hoa Kỳ (USA)", ""),
+                    (10, "logitech", "Logitech", "Thụy Sĩ", ""),
+                ],
+            )
+            conn.commit()
+
+        cursor.execute("SELECT COUNT(*) FROM products;")
+        if cursor.fetchone()[0] == 0:
+            sample_products = [
+                (1, "tech", 1, "Apple", 1, "iPhone 15 Pro Max 256GB Titan Tự Nhiên", "Chip A17 Pro, khung Titan siêu bền, camera zoom quang 5x chuẩn chính hãng 100%.", 28990000, 34990000, "-17%", 4.9, 1420, 85, 200, '["https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800"]', '["Mặt trước"]', "Hot Trend", "AB Technology Ltd", 1, "approved"),
+                (2, "tech", 1, "Apple", 1, "MacBook Pro 16 M3 Max 36GB / 1TB SSD", "Hiệu năng đồ họa chuyên nghiệp, màn hình Liquid Retina XDR sắc nét.", 68990000, 79990000, "-14%", 5.0, 310, 32, 50, '["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800"]', '["Mặt trước"]', "Official", "AB Technology Ltd", 0, "approved"),
+                (3, "tech", 1, "Samsung", 2, "Samsung Galaxy S24 Ultra 512GB Titanium Gray", "Bút S-Pen tích hợp, Galaxy AI thông minh, camera 200MP.", 27490000, 33990000, "-19%", 4.8, 980, 115, 250, '["https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800"]', '["Toàn thân"]', "AI Phone", "AB Technology Ltd", 1, "approved"),
+                (4, "tech", 1, "Sony", 3, "Tai nghe Chống Ồn Sony WH-1000XM5 Hi-Res Audio", "Chống ồn chủ động đỉnh cao, kết nối đa điểm mượt mà.", 6990000, 8990000, "-22%", 4.9, 750, 140, 300, '["https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800"]', '["Toàn cảnh"]', "Best Audio", "SoundMax & Marshall Audio", 0, "approved"),
+                (5, "fashion", 2, "Aristino", 4, "Bộ Suit Nam May Đo Thủ Công Aristino Italian Wool", "Chất liệu len Ý phối tỷ lệ 50_50 thoáng nhẹ, giữ phom dáng sang trọng.", 4850000, 5990000, "-19%", 4.9, 230, 60, 100, '["https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800"]', '["Mặt trước"]', "Handmade", "Trungshop", 0, "approved"),
+                (6, "fashion", 2, "Aristino", 4, "Áo Blazer Da Nam Cao Cấp Chuẩn Phong Cách Ý", "Da thật 100%, đường may tinh xảo, phù hợp sự kiện trang trọng.", 2450000, 3200000, "-23%", 4.8, 410, 95, 150, '["https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800"]', '["Mặt trước"]', "Gentleman", "Trungshop", 1, "approved"),
+                (7, "fashion", 2, "Owen", 5, "Áo Sơ Mi Nam Sợi Tre Bamboo Kháng Khuẩn Owen", "Sợi tre tự nhiên thoáng mát, chống nhăn hiệu quả cả ngày dài.", 580000, 750000, "-23%", 4.7, 1850, 350, 500, '["https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800"]', '["Mặt trước"]', "Eco Fashion", "Trungshop", 0, "approved"),
+                (8, "fashion", 2, "Owen", 5, "Quần Tây Nam Dáng Slimfit Co Giãn 4 Chiều Owen", "Form slimfit tôn dáng, vải co giãn nhẹ thoải mái vận động.", 690000, 890000, "-22%", 4.8, 1200, 280, 400, '["https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800"]', '["Mặt trước"]', "Office Style", "Trungshop", 0, "approved"),
+                (9, "watch", 3, "Rolex", 6, "Đồng Hồ Rolex Submariner Date Mặt Số Đen Thép Oystersteel", "Máy cơ tự động Thụy Sĩ, chống nước 300m, vành gốm Cerachrom.", 268000000, 295000000, "-9%", 5.0, 45, 8, 10, '["https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800"]', '["Mặt số"]', "Luxury Diver", "Luxury Watch Vietnam", 0, "approved"),
+                (10, "watch", 3, "Apple", 1, "Apple Watch Ultra 2 GPS + Cellular 49mm Titanium", "Màn hình siêu sáng 3000 nits, vỏ Titanium bền bỉ.", 19490000, 21990000, "-11%", 4.9, 560, 75, 120, '["https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800"]', '["Mặt đồng hồ"]', "Rugged", "Luxury Watch Vietnam", 1, "approved"),
+                (11, "shoes", 4, "Nike", 7, "Giày Chạy Bộ Nam Nike Air Zoom Pegasus 40", "Đệm Air Zoom êm ái, thoáng khí tối ưu cho chạy bộ hằng ngày.", 2890000, 3690000, "-22%", 4.8, 1620, 180, 300, '["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800"]', '["Góc nghiêng"]', "Pro Runner", "Trungshop", 1, "approved"),
+                (12, "shoes", 4, "Nike", 7, "Giày Thể Thao Nam Nike Air Jordan 1 Retro High OG", "Thiết kế bóng rổ huyền thoại, phối màu cổ điển chuẩn sưu tầm.", 4990000, 6200000, "-20%", 4.9, 890, 45, 80, '["https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800"]', '["Góc nghiêng"]', "Sneakerhead", "Trungshop", 0, "approved"),
+                (13, "shoes", 4, "Adidas", 8, "Giày Chạy Bộ Nam Adidas Ultraboost Light 23", "Đế Boost siêu nhẹ hoàn trả năng lượng vượt trội.", 3200000, 4500000, "-29%", 4.9, 1430, 160, 250, '["https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=800"]', '["Góc nghiêng"]', "Boost Tech", "Trungshop", 1, "approved"),
+                (14, "shoes", 4, "Adidas", 8, "Giày Sneaker Cổ Điển Adidas Stan Smith Da Thật", "Kiểu dáng tối giản dễ phối đồ, đệm lót êm chân.", 1890000, 2400000, "-21%", 4.7, 2100, 210, 350, '["https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800"]', '["Góc nghiêng"]', "Iconic", "Trungshop", 0, "approved"),
+                (15, "tech", 1, "Samsung", 2, "Màn Hình Đồ Họa Samsung ViewFinity S9 5K 27 inch", "Độ phân giải 5K chuẩn màu chuyên nghiệp cho thiết kế & dựng phim.", 23900000, 29990000, "-20%", 4.8, 110, 25, 40, '["https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800"]', '["Mặt trước"]', "Pro Display", "GearVN Official Store", 0, "approved"),
+                (16, "tech", 1, "Sony", 3, "Máy Chơi Game Sony PlayStation 5 Slim 1TB SSD", "Tốc độ tải game siêu nhanh, hỗ trợ Ray Tracing thế hệ mới.", 13490000, 15990000, "-16%", 5.0, 1750, 90, 150, '["https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=800"]', '["Mặt trước"]', "Gaming Beast", "GearVN Official Store", 1, "approved"),
+                (17, "tech", 1, "NVIDIA", 9, "Card màn hình RTX 5090 Gaming OC 32GB GDDR7", "Kiến trúc Blackwell mạnh mẽ, hỗ trợ Ray Tracing thế hệ 4 và DLSS 4 cho 4K 240Hz.", 64990000, 69990000, "-7%", 5.0, 215, 20, 30, '["https://images.unsplash.com/photo-1591488320449-011701bb6704?w=800"]', '["Toàn cảnh"]', "Flagship GPU", "GearVN Official Store", 1, "approved"),
+                (18, "tech", 1, "Logitech", 10, "Chuột Không Dây Logitech MX Master 3S Silent", "Kết nối đa chế độ USB-C / 2.4G và Bluetooth, cảm biến 8000 DPI siêu chính xác.", 2490000, 2990000, "-17%", 4.9, 940, 160, 220, '["https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800"]', '["Góc nghiêng"]', "Pro Mouse", "GearVN Official Store", 0, "approved"),
+                (19, "watch", 3, "Rolex", 6, "Đồng Hồ Rolex Datejust 41 Mặt Vi Tính Xanh Thép Vàng Trắng", "Biểu tượng thanh lịch vượt thời gian, chế tác thủ công Thụy Sĩ.", 325000000, 360000000, "-10%", 5.0, 28, 5, 8, '["https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800"]', '["Mặt số"]', "Timeless Classic", "Luxury Watch Vietnam", 0, "approved"),
+                (20, "fashion", 2, "Owen", 5, "Áo Khoác Nam Phao Lông Vũ Siêu Nhẹ Cản Gió Owen", "Giữ ấm tối ưu, trọng lượng siêu nhẹ, gấp gọn tiện lợi.", 1250000, 1690000, "-26%", 4.7, 530, 140, 220, '["https://images.unsplash.com/photo-1544923246-77307dd654cb?w=800"]', '["Mặt trước"]', "Winter Warmth", "Trungshop", 0, "approved"),
+                (21, "tech", 1, "Apple", 1, "iPad Pro 13 inch M4 Ultra Retina XDR OLED 256GB", "Màn hình OLED Tandem siêu mỏng, chip Apple M4 mạnh mẽ.", 34990000, 37990000, "-8%", 5.0, 420, 55, 80, '["https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800"]', '["Mặt trước"]', "OLED Master", "AB Technology Ltd", 1, "approved"),
+            ]
+            cursor.executemany(
+                """
+                INSERT IGNORE INTO products (
+                    id, category, category_id, brand, brand_id, title, description,
+                    price, original_price, discount, rating, sold, stock, total_stock,
+                    images_json, angles_json, exclusive, shop_name, is_flash_sale, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """,
+                sample_products,
+            )
+            conn.commit()
+
+        cursor.execute("SELECT COUNT(*) FROM vouchers;")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("""
+                INSERT INTO vouchers (code, name, description, discount_type, discount_value, max_discount_amount, min_order_value, usage_limit, used_count, start_date, end_date, is_active)
+                VALUES
+                    ('FREESHIP', 'Freeship Toàn Quốc', 'Miễn phí 100% tiền vận chuyển', 'shipping', 15000, 30000, 0, 1000, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    ('JML50K', 'Giảm 50K đơn từ 100K', 'Giảm ngay 50.000 ₫ cho đơn từ 100.000 ₫', 'fixed', 50000, NULL, 100000, 500, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    ('GIAM10', 'Giảm 10% tối đa 100K', 'Giảm 10% (tối đa 100.000 ₫)', 'percent', 10, 100000, 0, 200, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+                    ('VIP100K', 'Vip 100K đơn từ 1M', 'Giảm ngay 100.000 ₫ cho đơn từ 1.000.000 ₫', 'fixed', 100000, NULL, 1000000, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1);
+            """)
+            conn.commit()
+    except Exception as exc:
+        print(f"[seed] Cảnh báo khi nạp dữ liệu catalog mặc định: {exc}")
 
 
 def seed_initial_data(conn):
@@ -599,3 +821,18 @@ def seed_initial_data(conn):
             conn.commit()
     except Exception:
         pass
+
+    # Thêm tự động tạo order_date/index khi startup để dashboard query luôn tối ưu.
+    try:
+        cursor.execute("SHOW COLUMNS FROM orders LIKE 'order_date';")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orders ADD COLUMN order_date DATE GENERATED ALWAYS AS (STR_TO_DATE(created_at, '%d/%m/%Y')) STORED")
+    except Exception:
+        pass
+    for index_sql in (
+        "CREATE INDEX idx_order_status_date ON orders (status, order_date)",
+    ):
+        try:
+            cursor.execute(index_sql)
+        except Exception:
+            pass

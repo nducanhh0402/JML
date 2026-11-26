@@ -8,7 +8,7 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -50,7 +50,7 @@
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Be Vietnam Pro', 'sans-serif'],
                     }
                 }
             }
@@ -59,6 +59,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="mobile-responsive.js" defer></script>
     <script src="../shared/js/koi-banner-ambient.js" defer></script>
   </head>
 <body data-theme-role="admin" class="h-full flex overflow-hidden text-neutral-900 text-sm antialiased">
@@ -99,6 +100,14 @@
                     <span class="truncate whitespace-nowrap">Danh mục & Thương hiệu</span>
                 </div>
                 <span id="sidebarCatTotalBadge" class="ml-2 px-2 py-0.5 text-[11px] font-bold bg-primary-200 text-primary-700 rounded-full whitespace-nowrap shrink-0">0</span>
+            </a>
+
+            <!-- Menu: Quản lý Sản phẩm -->
+            <a href="products.html" class="nav-item flex items-center justify-between px-3 py-2.5 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="package" class="w-4 h-4 shrink-0 text-neutral-500"></i>
+                    <span class="truncate whitespace-nowrap">Quản lý Sản phẩm</span>
+                </div>
             </a>
 
             <div class="pt-4 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Giao dịch & Tranh chấp</div>
@@ -351,9 +360,9 @@
          MODAL 1: FORM THÊM / SỬA DANH MỤC (CATEGORY MODAL)
          ========================================================================= -->
     <div id="categoryModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+        <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+            <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center font-bold">
                         <i data-lucide="folder-plus" class="w-4 h-4"></i>
@@ -369,7 +378,7 @@
             </div>
 
             <!-- Modal Form -->
-            <form id="categoryForm" onsubmit="handleSaveCategory(event)" class="p-6 space-y-4">
+            <form id="categoryForm" onsubmit="handleSaveCategory(event)" class="p-6 space-y-4 overflow-y-auto">
                 <input type="hidden" id="catEditId" value="">
 
                 <!-- Mã code & Icon -->
@@ -429,9 +438,9 @@
          MODAL 2: FORM THÊM / SỬA THƯƠNG HIỆU (BRAND MODAL)
          ========================================================================= -->
     <div id="brandModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+        <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-neutral-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+            <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
                         <i data-lucide="award" class="w-4 h-4"></i>
@@ -447,7 +456,7 @@
             </div>
 
             <!-- Modal Form -->
-            <form id="brandForm" onsubmit="handleSaveBrand(event)" class="p-6 space-y-4">
+            <form id="brandForm" onsubmit="handleSaveBrand(event)" class="p-6 space-y-4 overflow-y-auto">
                 <input type="hidden" id="brandEditId" value="">
 
                 <!-- Mã code & Tên nhãn hàng -->

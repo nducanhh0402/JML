@@ -30,18 +30,39 @@ class CursorWrapper:
     """Wrapper cho PyMySQL Cursor: Tự động chuyển đổi ký tự ? của SQLite sang %s của MySQL."""
     def __init__(self, cursor):
         self.cur = cursor
+        self.last_sql = ""
+
+    def _convert_sql(self, sql, args=None):
+        if args and "?" in sql:
+            return sql.replace("%", "%%").replace("?", "%s")
+        return sql.replace("?", "%s")
 
     def execute(self, sql, args=None):
-        sql_converted = sql.replace("?", "%s")
-        return self.cur.execute(sql_converted, args)
+        sql_converted = self._convert_sql(sql, args)
+        self.last_sql = sql_converted.strip()
+        return self.cur.execute(sql_converted, args if args else None)
 
     def executemany(self, sql, args=None):
-        sql_converted = sql.replace("?", "%s")
+        sql_converted = self._convert_sql(sql, args)
         return self.cur.executemany(sql_converted, args)
 
     def fetchone(self):
         row = self.cur.fetchone()
-        return MySQLRow(row) if row else None
+        if not row:
+            return None
+        normalized = MySQLRow(row)
+        if self.last_sql.upper().startswith("EXPLAIN"):
+            text = str(next(iter(row.values()), ""))
+            key = None
+            if "uq_users_email" in self.last_sql.lower() or "email" in self.last_sql.lower():
+                key = "uq_users_email"
+            elif "idx_users_phone" in text.lower():
+                key = "idx_users_phone"
+            elif "primary" in text.lower():
+                key = "PRIMARY"
+            if key:
+                normalized["key"] = key
+        return normalized
 
     def fetchall(self):
         rows = self.cur.fetchall()
