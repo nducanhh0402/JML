@@ -585,12 +585,9 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
         }
 
         function openSellerAuthModal(mode = 'login') {
-            const modal = document.getElementById('sellerAuthModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                switchSellerAuthMode(mode);
-                if (window.lucide) lucide.createIcons();
-            }
+            window.location.href = mode === 'register'
+                ? '../auth/index.html?tab=register'
+                : '../auth/index.html';
         }
 
         function closeSellerAuthModal() {

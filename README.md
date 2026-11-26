@@ -15,6 +15,7 @@
 6. [Hướng Dẫn Cài Đặt & Khởi Chạy](#6-hướng-dẫn-cài-đặt--khởi-chạy)
 7. [Kiểm Thử & Tài Liệu API (Swagger)](#7-kiểm-thử--tài-liệu-api-swagger)
 8. [Module Trang Chủ, Chi Tiết Sản Phẩm, Đánh Giá & Tối Ưu Hiệu Năng (Vũ Dũng - B25DTCN161)](#8-module-trang-chủ-chi-tiết-sản-phẩm-đánh-giá--tối-ưu-hiệu-năng-vũ-dũng---b25dtcn161)
+9. [Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)](#9-module-tìm-kiếm-bộ-lọc--tích-hợp-mua-hàng-tf16be9)
 
 ---
 
@@ -322,3 +323,68 @@ flowchart LR
 - [ ] Trình duyệt ở desktop 1280×900, sau đó chuyển sang mobile 390×844.
 - [ ] Tài khoản demo Admin/Buyer/Seller đã đăng nhập nếu cần chức năng tương ứng.
 - [ ] Terminal hiển thị kết quả test hoặc benchmark rõ ràng ở cuối video.
+
+---
+
+## 9. Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)
+
+> **Phụ trách:** Trịnh Quốc Trung (`B25DTCN263`)  
+> **Phạm vi:** Tìm kiếm sản phẩm, lưu từ khóa gần đây, bộ lọc/sắp xếp/phân trang API + URL, chip bộ lọc & Empty State, giao diện Mobile Responsive, và kiểm thử tích hợp luồng mua hàng E2E.
+
+### 9.1. Mô tả các chức năng đã xây dựng
+
+| Mã Task | Phân hệ | Chức năng & Tệp liên quan |
+| :--- | :--- | :--- |
+| **TF16E89** | Test & QA | Kiểm thử API tìm kiếm (`GET /api/products/search`) & lọc/phân trang (`GET /api/products/filter`): chống LIKE wildcard (`%`, `_`), SQL injection, từ khóa rỗng, phân trang & biên giá (`backend/tests/test_search_and_filter_api_tf16e89.py`, `TEST_CASES_SEARCH_FILTER_TF16E89.md`). |
+| **TF16E55** | Frontend + API | Nối bộ lọc danh mục, thương hiệu, khoảng giá, đánh giá, Flash Sale, Chính hãng, sắp xếp và phân trang trang `frontend/buyer/products.html` với `/api/products/filter` & `/api/products/facets`; đồng bộ trạng thái bộ lọc lên URL query params (`frontend/buyer/buyer-products.js`). |
+| **TF16EBF** | Frontend | Hiển thị các bộ lọc đang áp dụng dưới dạng **Chip** có nút `×` xóa từng bộ lọc, nút **Xóa tất cả**, và màn hình **Empty State** khi không có sản phẩm phù hợp (`frontend/buyer/products.html`, `frontend/buyer/buyer-products.js`). |
+| **TF16ED9** | Mobile UI & QA | Kiểm thử & tối ưu giao diện tìm kiếm/lọc trên điện thoại (`375px`): ô tìm kiếm không tràn/zoom (`font-size: 16px`), **Filter Drawer** trượt dùng `100dvh` + sticky footer, đóng drawer bằng `Esc`/resize, phân trang thu gọn (`...`), kèm test tự động `backend/tests/test_mobile_search_filter_tf16ed9.py`. |
+| **TF16EF3** | Backend + FE | Tạo bảng `search_history` (`backend/db/migrations/010_create_search_history_table.sql`) và API `GET/POST/DELETE /api/products/recent-searches`; tự động ghi nhận khi tìm trên `/api/products/search`, giới hạn 20 từ khóa/người dùng, khử trùng lặp, hỗ trợ tiền tố `prefix`, cô lập theo JWT `user_id` hoặc `session_id` khách; nối gợi ý "Tìm gần đây" trên `buyer-index.js` & `buyer-products.js`. |
+| **TF16B8B** | Tích hợp All | Ghép module tìm kiếm/lọc/gần đây lên nhánh tích hợp; sửa lỗi liên kết `user_id` & `product_id` khi đặt hàng ở `checkout.html` + `backend/src/modules/order/router.py`; sửa tương thích cột bảng `banners` ở `homepage/router.py`; sửa điều hướng `cart.html` & đồng bộ `/api/cart/items` ở `buyer-products.js`; kiểm thử luồng E2E từ Đăng nhập → Tìm kiếm/Gần đây → Lọc → Giỏ hàng → Đặt hàng → Admin xử lý → Đánh giá/Hủy đơn (`backend/tests/test_integration_e2e_tf16b8b.py`). |
+
+### 9.2. Luồng hoạt động Tìm kiếm, Lọc & Từ khóa gần đây
+
+```mermaid
+flowchart LR
+    U(["Người mua (Desktop / Mobile)"]) --> S["Nhập từ khóa / Chọn bộ lọc trên index.html hoặc products.html"]
+    S --> URL["Cập nhật URL query params & Chip bộ lọc"]
+    S --> API_F["GET /api/products/search hoặc /api/products/filter"]
+    API_F --> DB_P[("MySQL: products / brands / categories")]
+    S -->|"Khi nhấn Tìm"| API_R["POST /api/products/recent-searches (JWT hoặc session_id)"]
+    API_R --> DB_H[("MySQL: search_history (tối đa 20 từ khóa/user)")]
+    API_F -->|"total = 0"| ES["Hiển thị Empty State + nút Xóa tất cả bộ lọc"]
+    API_F -->|"total > 0"| GRID["Render lưới sản phẩm + Phân trang + Thêm vào giỏ (/api/cart/items)"]
+```
+
+### 9.3. Hướng dẫn chạy & kiểm thử nhanh phần module này
+
+1. **Chạy Migration bảng lịch sử tìm kiếm (nếu DB chưa tự khởi tạo):**
+   ```bash
+   mysql -u root -p123456 jml_marketplace < backend/db/migrations/010_create_search_history_table.sql
+   ```
+   *(Ngoài ra, Backend cũng tự động kiểm tra và tạo bảng `search_history` khi gọi endpoint `/api/products/recent-searches` hoặc khi khởi động `init_db()`).*
+
+2. **Khởi động Backend (cổng `8000`) & Frontend (cổng `5500`):**
+   ```bash
+   # Terminal 1 - Backend FastAPI
+   python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+
+   # Terminal 2 - Frontend tĩnh
+   python -m http.server 5500 --bind 127.0.0.1 --directory frontend
+   ```
+   Sau đó mở trình duyệt tại:
+   - Trang chủ tìm kiếm & gợi ý gần đây: `http://127.0.0.1:5500/buyer/index.html`
+   - Trang danh sách, lọc, chip & mobile drawer: `http://127.0.0.1:5500/buyer/products.html`
+
+3. **Chạy bộ test kiểm chứng module & tích hợp E2E:**
+   ```bash
+   python -m unittest backend.tests.test_integration_e2e_tf16b8b backend.tests.test_recent_searches_tf16ef3 backend.tests.test_product_search backend.tests.test_product_filter_sort_pagination backend.tests.test_mobile_search_filter_tf16ed9 -v
+   ```
+
+### 9.4. Video Demo & Minh chứng kiểm thử (TF16BE9)
+
+- **Video Demo màn hình thực tế (`Screen Recording 2026-11-23 211728.mp4`):** [`minh_chung_nop_bai/Screen Recording 2026-11-23 211728.mp4`](./minh_chung_nop_bai/Screen%20Recording%202026-11-23%20211728.mp4)
+- **Bảng Test Case & Ảnh chụp minh chứng trong kho mã nguồn:**
+  - Bảng Test Case API Tìm kiếm & Lọc: [`backend/tests/TEST_CASES_SEARCH_FILTER_TF16E89.md`](./backend/tests/TEST_CASES_SEARCH_FILTER_TF16E89.md)
+  - Bảng Test Case Giao diện Tìm kiếm & Lọc trên Mobile: [`backend/tests/TEST_CASES_MOBILE_SEARCH_FILTER_TF16ED9.md`](./backend/tests/TEST_CASES_MOBILE_SEARCH_FILTER_TF16ED9.md)
+  - Ảnh chụp minh chứng kiểm thử API & Mobile: [`backend/tests/MINH_CHUNG_TF16E89_BANG_TEST_CASE.png`](./backend/tests/MINH_CHUNG_TF16E89_BANG_TEST_CASE.png), [`backend/tests/MINH_CHUNG_TF16ED9_MOBILE_TIM_KIEM_LOC.png`](./backend/tests/MINH_CHUNG_TF16ED9_MOBILE_TIM_KIEM_LOC.png)
