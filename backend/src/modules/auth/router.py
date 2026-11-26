@@ -1,4 +1,5 @@
 import random
+import uuid
 import bcrypt
 import pymysql
 from datetime import datetime
@@ -160,7 +161,7 @@ def auth_register(payload: RegisterRequest):
 
     now_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     date_only = datetime.now().strftime("%d/%m/%Y")
-    cust_key = f"CUST-{random.randint(100, 999)}"
+    cust_key = f"CUST-{uuid.uuid4().hex[:8].upper()}"
 
     try:
         # Email rỗng được lưu là NULL để không vi phạm ràng buộc UNIQUE (uq_users_email)

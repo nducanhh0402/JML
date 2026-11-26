@@ -12,37 +12,39 @@
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <!-- Auth & Shared Helpers -->
+    <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css" />
     <script src="../shared/js/auth.js"></script>
+    <script src="../shared/js/koi-banner-ambient.js" defer></script>
     <style>
       /* ==========================================================================
-         1. RESET & CSS VARIABLES (ĐỒNG BỘ JML STORE DESIGN SYSTEM)
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ JML STORE DESIGN SYSTEM - KOI & LOTUS)
          ========================================================================== */
       :root {
-        --primary: #ea580c;
-        --primary-hover: #c2410c;
-        --primary-light: #ffedd5;
-        --secondary: #111827;
-        --secondary-light: #4b5563;
-        --accent: #f97316;
-        --success: #10b981;
-        --success-light: #d1fae5;
-        --warning: #f59e0b;
-        --warning-light: #fef3c7;
-        --danger: #ef4444;
+        --primary: #c92a22;
+        --primary-hover: #a61e18;
+        --primary-light: #fdf0ec;
+        --secondary: #222a19;
+        --secondary-light: #4a5540;
+        --accent: #d49b1a;
+        --success: #39522a;
+        --success-light: #ebf3e6;
+        --warning: #d49b1a;
+        --warning-light: #fdf5dc;
+        --danger: #c92a22;
         --danger-light: #fee2e2;
-        --info: #3b82f6;
-        --info-light: #dbeafe;
-        --background: #f8f9fa;
+        --info: #39522a;
+        --info-light: #ebf3e6;
+        --background: #f5f5ee;
         --surface: #ffffff;
-        --surface-dim: #f3f4f6;
-        --border: #e5e7eb;
-        --border-focus: #fdba74;
-        --text-main: #1f2937;
-        --text-muted: #6b7280;
+        --surface-dim: #efefe6;
+        --border: #dfe2d4;
+        --border-focus: #d49b1a;
+        --text-main: #222a19;
+        --text-muted: #5f6853;
         --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
         --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
         --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.16);
@@ -54,7 +56,7 @@
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif;
         background-color: var(--background);
         color: var(--text-main);
         line-height: 1.5;
@@ -682,9 +684,34 @@
 
       /* Responsive */
       @media (max-width: 640px) {
+        .topbar {
+          padding: 10px 14px;
+          flex-direction: column;
+          gap: 10px;
+          align-items: stretch;
+        }
+        .top-nav {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          white-space: nowrap;
+          padding-bottom: 4px;
+          -webkit-overflow-scrolling: touch;
+          font-size: 13px;
+        }
+        .page-header {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 14px;
+        }
+        .page-header button {
+          width: 100%;
+          justify-content: center;
+        }
         .address-card {
           flex-direction: column;
           align-items: stretch;
+          padding: 16px;
         }
         .address-actions {
           align-items: flex-start;
@@ -697,6 +724,18 @@
         .form-row {
           grid-template-columns: 1fr;
           gap: 16px;
+        }
+        .modal-container {
+          width: 95%;
+          max-height: 90vh;
+          padding: 20px 16px;
+        }
+        .toast {
+          left: 16px;
+          right: 16px;
+          bottom: 16px;
+          max-width: none;
+          justify-content: center;
         }
       }
     </style>

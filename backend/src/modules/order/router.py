@@ -38,6 +38,29 @@ def to_dict(obj: Any) -> Dict[str, Any]:
     return dict(obj)
 
 
+def _extract_optional_user_id_from_request(request: Optional[Request]) -> Optional[int]:
+    """Lấy user_id từ Authorization Bearer token nếu client không truyền user_id trong body."""
+    if request is None:
+        return None
+    if hasattr(request.state, "user") and isinstance(request.state.user, dict):
+        uid = request.state.user.get("user_id") or request.state.user.get("sub")
+        if uid is not None and str(uid).isdigit():
+            return int(uid)
+    auth_header = request.headers.get("Authorization") if hasattr(request, "headers") else None
+    if not auth_header:
+        return None
+    parts = auth_header.strip().split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+    payload = decode_access_token(parts[1])
+    if not payload:
+        return None
+    uid = payload.get("user_id") or payload.get("sub")
+    if uid is not None and str(uid).isdigit():
+        return int(uid)
+    return None
+
+
 def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Quy trình nghiệp vụ tạo đơn hàng chuẩn ACID Transaction:
@@ -83,6 +106,11 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
         )
 
     user_id = payload_data.get("user_id")
+    if not user_id and buyer_phone:
+        cursor.execute("SELECT id FROM users WHERE phone = ? LIMIT 1;", (buyer_phone,))
+        matched_user = cursor.fetchone()
+        if matched_user:
+            user_id = matched_user["id"]
     cart_id = payload_data.get("cart_id")
     items_input = payload_data.get("items")
     target_cart_id = cart_id
@@ -376,10 +404,12 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
                     p_status = "pending"
                     try:
                         from backend.src.utils.vnpay import build_payment_url
+                        req_bank_code = payload_data.get("bank_code")
                         vnpay_url, vnp_params = build_payment_url(
                             order_key=order_key,
                             amount=numeric_total,
-                            order_desc=f"Thanh toan don hang {order_key}"
+                            order_desc=f"Thanh toan don hang {order_key}",
+                            bank_code=req_bank_code
                         )
                         txn_code = vnp_params.get("vnp_TxnRef", txn_code)
                     except Exception:
@@ -497,7 +527,7 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
 
 
 @router.post("/api/orders/from-cart")
-def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreate]):
+def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreate], request: Request = None):
     """
     API Tạo đơn hàng từ giỏ hàng (TF1734A):
     - Kiểm tra khóa tài khoản người mua.
@@ -510,6 +540,10 @@ def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreat
     conn = get_db_connection()
     try:
         payload_data = to_dict(payload)
+        if not payload_data.get("user_id"):
+            token_uid = _extract_optional_user_id_from_request(request)
+            if token_uid:
+                payload_data["user_id"] = token_uid
         res = execute_order_creation_transaction(conn, payload_data)
         return res
     finally:
@@ -517,7 +551,7 @@ def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreat
 
 
 @router.post("/api/orders")
-def create_order(payload: OrderCreate):
+def create_order(payload: OrderCreate, request: Request = None):
     """
     Tạo đơn hàng từ giỏ hàng hoặc từ form thanh toán.
     Tự động chạy Transaction kiểm tra tồn kho, trừ kho, sinh mã và xóa giỏ.
@@ -525,6 +559,10 @@ def create_order(payload: OrderCreate):
     conn = get_db_connection()
     try:
         payload_data = to_dict(payload)
+        if not payload_data.get("user_id"):
+            token_uid = _extract_optional_user_id_from_request(request)
+            if token_uid:
+                payload_data["user_id"] = token_uid
         res = execute_order_creation_transaction(conn, payload_data)
         return res
     finally:
@@ -945,22 +983,22 @@ def get_order_detail(
             "success": True,
             "order": {
                 "order_key": order["order_key"],
-                "id_display": order["id_display"],
+                "id_display": order.get("id_display") or f"#{order['order_key']}",
                 "user_id": order.get("user_id"),
-                "buyer_name": order["buyer_name"],
-                "buyer_phone": order["buyer_phone"],
-                "buyer_address": order["buyer_address"],
-                "shop_name": order["shop_name"],
-                "shop_address": order["shop_address"],
-                "total": order["total"],
-                "numeric_total": order["numeric_total"],
-                "fee": order["fee"],
-                "net": order["net"],
-                "status": order["status"],
-                "escrow_badge": order["escrow_badge"],
-                "escrow_class": order["escrow_class"],
-                "time_info": order["time_info"],
-                "created_at": order["created_at"],
+                "buyer_name": order.get("buyer_name", ""),
+                "buyer_phone": order.get("buyer_phone", ""),
+                "buyer_address": order.get("buyer_address", ""),
+                "shop_name": order.get("shop_name", "Shop Đối Tác"),
+                "shop_address": order.get("shop_address", ""),
+                "total": order.get("total", "0 ₫"),
+                "numeric_total": order.get("numeric_total", 0),
+                "fee": order.get("fee", "0 ₫"),
+                "net": order.get("net", order.get("total", "0 ₫")),
+                "status": order.get("status", "preparing"),
+                "escrow_badge": order.get("escrow_badge", ""),
+                "escrow_class": order.get("escrow_class", ""),
+                "time_info": order.get("time_info", ""),
+                "created_at": str(order.get("created_at", "")),
                 "items": items,
                 "payments": payments,
                 "status_history": status_history,
@@ -972,7 +1010,6 @@ def get_order_detail(
 
 
 @router.put("/api/user/orders/{order_key}/receive")
-
 @router.put("/api/user/orders/{order_key}/confirm-received")
 def confirm_order_received(
     order_key: str,
@@ -987,10 +1024,6 @@ def confirm_order_received(
     - Ghi nhận lịch sử trạng thái vào order_status_history.
     """
     clean_key = order_key.replace("#", "").strip()
-
-def confirm_order_received(order_key: str):
-    """Khách hàng xác nhận đã nhận hàng và chuyển trạng thái đơn sang delivered."""
-    clean_key = order_key.replace("#", "")
 
     conn = get_db_connection()
     try:
@@ -1093,8 +1126,10 @@ def cancel_user_order(
         cursor.execute("SELECT * FROM order_items WHERE order_key = ?;", (order["order_key"],))
         items = cursor.fetchall()
 
-        conn.autocommit(False)
-        conn.begin()
+        if hasattr(conn, "autocommit"):
+            conn.autocommit(False)
+        if hasattr(conn, "begin"):
+            conn.begin()
         try:
             for it in items:
                 try:
@@ -1143,14 +1178,22 @@ def cancel_user_order(
             conn.commit()
 
         except HTTPException:
-            conn.rollback()
+            if hasattr(conn, "rollback"):
+                conn.rollback()
             raise
         except Exception as exc:
-            conn.rollback()
+            if hasattr(conn, "rollback"):
+                conn.rollback()
             raise HTTPException(
                 status_code=500,
                 detail=f"Lỗi khi hủy đơn hàng: {str(exc)}"
             )
+        finally:
+            if hasattr(conn, "autocommit"):
+                try:
+                    conn.autocommit(True)
+                except Exception:
+                    pass
 
         return {
             "success": True,
@@ -1161,32 +1204,4 @@ def cancel_user_order(
         }
     finally:
         conn.close()
-
-
-    cursor.execute("SELECT status FROM orders WHERE order_key = ?;", (clean_key,))
-    row = cursor.fetchone()
-    if not row:
-        conn.close()
-        raise HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
-
-    old_status = row["status"]
-    cursor.execute("""
-        UPDATE orders
-        SET status = 'delivered',
-            escrow_badge = '✓ Đã nhận được hàng',
-            escrow_class = 'bg-emerald-50 text-emerald-600 border-emerald-200'
-        WHERE order_key = ?;
-    """, (clean_key,))
-
-    cursor.execute("SHOW TABLES LIKE 'order_status_history';")
-    if cursor.fetchone():
-        cursor.execute("""
-            INSERT INTO order_status_history (order_key, old_status, new_status, changed_by, note)
-            VALUES (?, ?, 'delivered', NULL, 'Người mua xác nhận đã nhận hàng');
-        """, (clean_key, old_status))
-
-    conn.commit()
-    conn.close()
-
-    return {"message": f"Đơn hàng #{clean_key} đã được xác nhận hoàn toàn thành công!"}
 

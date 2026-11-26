@@ -50,6 +50,7 @@ class OrderCreate(BaseModel):
     discount_code: Optional[str] = ""
     discount_amount: Optional[int] = 0
     payment_method: Optional[str] = "cod"
+    bank_code: Optional[str] = None
     clear_cart: Optional[bool] = True
 
 
@@ -170,13 +171,14 @@ class RegisterRequest(BaseModel):
         if len(v) > 191 or not _EMAIL_RE.match(v):
             raise ValueError("Email không hợp lệ!")
         return v.lower()
-    shop_badge: str = "TIÊU CHUẨN"
 
 
 class ShopUpdateRequest(BaseModel):
     shop_key: str
     name: str
     badge: str = "TIÊU CHUẨN"
+    owner_name: str = ""
+    phone: str = ""
     address: str = ""
 
 
@@ -198,9 +200,8 @@ class VNPayPaymentResponse(BaseModel):
     payment_url: str
 
 
-=======
 class OrderStatusUpdate(BaseModel):
-    status: Literal["preparing", "shipping", "delivered", "released", "dispute", "cancelled"]
+    status: str
     note: str = Field(default="", max_length=255)
 
 
@@ -239,6 +240,13 @@ class AdminOrderResponse(BaseModel):
     status: str
     createdAt: str = ""
     items: List[AdminOrderItemResponse] = []
+
+
+class RecentSearchCreate(BaseModel):
+    keyword: str = Field(..., max_length=200)
+    session_id: Optional[str] = Field(default=None, max_length=100)
+    user_id: Optional[int] = Field(default=None, ge=1)
+
 
 
 

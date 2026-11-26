@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <!-- Auth & RBAC Controller (TF16DCF) -->
@@ -49,11 +49,15 @@
       }
 
       body {
-        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: "Be Vietnam Pro", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
         background-color: var(--background);
         color: var(--text-main);
         line-height: 1.5;
-        overflow-x: hidden;
+        overflow-x: clip;
+      }
+
+      button, input, select, textarea {
+        font-family: inherit;
       }
 
       a {
@@ -1096,7 +1100,7 @@
 
         <!-- Header Actions -->
         <div class="header-actions">
-          <button class="btn-action" onclick="window.location.href='index.html#cart'" title="Giỏ hàng">
+          <button class="btn-action" onclick="goToCart()" title="Giỏ hàng">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="9" cy="21" r="1"></circle>
               <circle cx="20" cy="21" r="1"></circle>
