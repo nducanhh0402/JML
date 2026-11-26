@@ -14,7 +14,8 @@
 5. [Các Phân Hệ Giao Diện & Tài Khoản Mẫu](#5-các-phân-hệ-giao-diện--tài-khoản-mẫu)
 6. [Hướng Dẫn Cài Đặt & Khởi Chạy](#6-hướng-dẫn-cài-đặt--khởi-chạy)
 7. [Kiểm Thử & Tài Liệu API (Swagger)](#7-kiểm-thử--tài-liệu-api-swagger)
-8. [Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)](#8-module-tìm-kiếm-bộ-lọc--tích-hợp-mua-hàng-tf16be9)
+8. [Module Trang Chủ, Chi Tiết Sản Phẩm, Đánh Giá & Tối Ưu Hiệu Năng (Vũ Dũng - B25DTCN161)](#8-module-trang-chủ-chi-tiết-sản-phẩm-đánh-giá--tối-ưu-hiệu-năng-vũ-dũng---b25dtcn161)
+9. [Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)](#9-module-tìm-kiếm-bộ-lọc--tích-hợp-mua-hàng-tf16be9)
 
 ---
 
@@ -131,6 +132,7 @@ JML/
 │   │       ├── auth/router.py                          # Đăng ký, Đăng nhập đa vai trò
 │   │       ├── cart/router.py                          # Kiểm tra giỏ hàng & tồn kho
 │   │       ├── category/router.py                      # Danh mục ngành hàng & Thương hiệu
+│   │       ├── homepage/router.py                      # API Trang chủ tối ưu (Banner, Nổi bật, Mới nhất, Danh mục - UNION ALL)
 │   │       ├── order/router.py                         # Tạo đơn, theo dõi, cập nhật trạng thái đơn
 │   │       ├── payment/router.py                       # Phương thức thanh toán (COD / Ví Escrow)
 │   │       ├── product/router.py                       # Danh sách, tìm kiếm, lọc, chi tiết sản phẩm
@@ -144,7 +146,12 @@ JML/
 │   │   │   ├── 001_create_orders_tables.sql            # Bảng orders, order_items, payments, order_status_history
 │   │   │   ├── 002_create_carts_tables.sql             # Bảng carts, cart_items
 │   │   │   ├── 003_create_users_and_roles_schema.sql   # Bảng roles, users_v2 & tài khoản mẫu
-│   │   │   └── 004_create_catalog_tables_and_seed.sql  # Bảng categories, brands, product_images & 21 SP mẫu
+│   │   │   ├── 004_create_catalog_tables_and_seed.sql  # Bảng categories, brands, product_images & 21 SP mẫu
+│   │   │   ├── 005_add_order_query_indexes.sql         # Index tối ưu truy vấn đơn hàng
+│   │   │   ├── 006_users_email_unique_index.sql        # Ràng buộc unique email cho bảng users
+│   │   │   ├── 007_create_user_addresses_table.sql     # Bảng sổ địa chỉ nhận hàng
+│   │   │   ├── 008_create_vouchers_table.sql           # Bảng mã giảm giá
+│   │   │   └── 009_optimize_homepage_indexes.sql       # 4 composite index tối ưu trang chủ (TF175BC)
 │   │   └── seeds/
 │   │       └── seed.sql                                # Dữ liệu mẫu Shop và Tài khoản (Admin, Seller, Buyer)
 │   ├── tests/
@@ -241,12 +248,90 @@ python -m unittest backend/tests/test_api.py -v
 
 ---
 
-## 8. Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)
+## 8. Module Trang Chủ, Chi Tiết Sản Phẩm, Đánh Giá & Tối Ưu Hiệu Năng (Vũ Dũng - B25DTCN161)
+
+### 8.1. Tổng quan chức năng đã triển khai
+
+| Nhóm / Task | Phạm vi | Thành phần chính & Mô tả |
+| :--- | :--- | :--- |
+| **Trang chủ Buyer & API** (`TF17398`, `TF17330`, `TF1745E`) | BE + FE | - **Backend** ([`backend/src/modules/homepage/router.py`](./backend/src/modules/homepage/router.py)): cung cấp `GET /api/homepage`, `/banners`, `/featured-products`, `/latest-products`, `/categories`.<br>- **Frontend** ([`frontend/buyer/index.html`](./frontend/buyer/index.html), [`buyer-index.js`](./frontend/buyer/buyer-index.js), [`index.css`](./frontend/buyer/index.css)): hero slider banner, danh mục ngành hàng, Flash Sale, Gợi ý hôm nay, Sản phẩm mới nhất kèm trạng thái **Loading (Skeleton) / Empty / Error (Retry)**. |
+| **Chi tiết sản phẩm** (`TF17478`, `TF174A4`) | BE + FE | - **Backend** ([`backend/src/modules/product/router.py`](./backend/src/modules/product/router.py)): `GET /api/products/{product_id}` trả đầy đủ thư viện ảnh đa góc, mô tả, thương hiệu, giá/giảm giá, trạng thái tồn kho (`in_stock`, `low_stock`, `out_of_stock`) và danh sách sản phẩm liên quan.<br>- **Frontend** ([`frontend/buyer/product-detail.html`](./frontend/buyer/product-detail.html), [`product-detail.js`](./frontend/buyer/product-detail.js)): thư viện ảnh + lightbox phóng to, bộ chọn số lượng theo tồn kho, thêm vào giỏ hàng & mua ngay. |
+| **Đánh giá & Gợi ý SP** (`TF174F6`, `TF17554`) | BE + FE | - API đánh giá `POST /api/reviews` và `GET /api/reviews/{product_id}` (chấm 1–5 sao, nhận xét, tính điểm trung bình, lọc sao, chặn mỗi người tối đa 1 đánh giá/sản phẩm trả `409 Conflict`).<br>- Giao diện khu vực đánh giá, form gửi nhận xét & lưới 4 sản phẩm gợi ý cùng danh mục trên trang chi tiết. |
+| **Tối ưu truy vấn trang chủ** (`TF175BC`) | BE + DB | - Thêm 4 composite index ([`009_optimize_homepage_indexes.sql`](./backend/db/migrations/009_optimize_homepage_indexes.sql), [`backend/database.py`](./backend/database.py)): `idx_banners_active_sort`, `idx_products_status_rating_sold`, `idx_products_status_id`, `idx_products_status_category`.<br>- Gom 4 câu `SELECT` + 1 DDL trong `get_homepage()` thành **1 câu SQL `UNION ALL` duy nhất** và bỏ cột `description` TEXT nặng khỏi payload đọc DB. |
+| **Kiểm thử API & Responsive** (`TF17520`, `TF17588`) | QA | - Bộ test API trang chủ, chi tiết sản phẩm, đánh giá ([`test_api_tf17520.py`](./backend/tests/test_api_tf17520.py), [`TEST_CASES_API_TF17520.md`](./backend/tests/TEST_CASES_API_TF17520.md)).<br>- Bộ test & báo cáo benchmark trước/sau tối ưu ([`test_homepage_optimization_tf175bc.py`](./backend/tests/test_homepage_optimization_tf175bc.py), [`benchmark_homepage_tf175bc.py`](./backend/tests/benchmark_homepage_tf175bc.py), [`BENCHMARK_HOMEPAGE_TF175BC.md`](./backend/tests/BENCHMARK_HOMEPAGE_TF175BC.md)). |
+
+### 8.2. Luồng hoạt động chính
+
+```mermaid
+flowchart LR
+    U["Người dùng (Desktop / Mobile)"] --> HP["Trang chủ<br/>/frontend/buyer/index.html"]
+    HP -->|"1 request gộp (UNION ALL + 4 index)"| API_HP["GET /api/homepage"]
+    HP -->|"Click sản phẩm"| PD["Trang chi tiết sản phẩm<br/>/frontend/buyer/product-detail.html?id={id}"]
+    PD --> API_PD["GET /api/products/{id}"]
+    PD --> API_RV_GET["GET /api/reviews/{id}"]
+    PD -->|"Gửi đánh giá 1-5 sao"| API_RV_POST["POST /api/reviews (1 đánh giá / người / SP)"]
+```
+
+### 8.3. Hướng dẫn chạy nhanh phân hệ Trang chủ, Chi tiết & Kiểm thử
+
+1. **Khởi chạy Backend API (cổng `8000`):**
+   ```bash
+   pip install -r backend/requirements.txt
+   python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+   ```
+2. **Mở Frontend bằng HTTP Server (hoặc Live Server cổng `5500`):**
+   ```bash
+   python -m http.server 5500
+   ```
+   - Trang chủ Buyer: `http://127.0.0.1:5500/frontend/buyer/index.html`
+   - Trang chi tiết sản phẩm: `http://127.0.0.1:5500/frontend/buyer/product-detail.html?id=1`
+3. **Chạy các bộ kiểm thử & benchmark không cần MySQL ngoài:**
+   ```bash
+   # Kiểm thử tối ưu truy vấn trang chủ (TF175BC) & API Trang chủ/Chi tiết (TF17520)
+   python -m unittest backend.tests.test_homepage_optimization_tf175bc backend.tests.test_product_detail -v
+
+   # Đo thời gian trước/sau tối ưu trang chủ trên 10.000 sản phẩm SQLite (TF175BC)
+   python -m backend.tests.benchmark_homepage_tf175bc
+   ```
+
+### 8.4. Kịch bản Demo & Minh chứng (`TF16BE7`)
+
+| Bước | Thời lượng | Nội dung trình diễn trong Video Demo | API / Màn hình minh họa |
+| :---: | :---: | :--- | :--- |
+| **1** | `0:00 – 0:25` | Mở Trang chủ Buyer trên Desktop (`1280×900`), giới thiệu Hero Slider, Danh mục, Flash Sale, Sản phẩm nổi bật & Mới nhất, trạng thái tải dữ liệu từ API. | `frontend/buyer/index.html` ← `GET /api/homepage` |
+| **2** | `0:25 – 0:50` | Thu hẹp trình duyệt sang khung Mobile (`390×844`) kiểm tra responsive lưới 2 cột, banner không tràn ngang, dropdown tìm kiếm gọn gàng. | `frontend/buyer/index.css` |
+| **3** | `0:50 – 1:25` | Click vào sản phẩm để mở Trang Chi tiết sản phẩm: đổi góc chụp thư viện ảnh, mở Lightbox phóng to, kiểm tra tồn kho/giá, chọn số lượng và bấm Thêm vào giỏ. | `frontend/buyer/product-detail.html` ← `GET /api/products/{id}` |
+| **4** | `1:25 – 1:55` | Cuộn xuống khu vực Đánh giá & Sản phẩm liên quan: lọc đánh giá theo số sao, gửi nhận xét mới 1–5 sao, thử gửi trùng để hiện cảnh báo `409`, click SP gợi ý cùng danh mục. | `GET/POST /api/reviews` |
+| **5** | `1:55 – 2:20` | Chạy nhanh `unittest` & `benchmark_homepage_tf175bc.py` trên terminal cho thấy giảm từ 5 xuống 1 câu SQL (`~15x` nhanh hơn) và toàn bộ test pass. | `backend/tests/benchmark_homepage_tf175bc.py` |
+
+> **Link Demo Web trực tiếp để quay video (không cần cài DB local):**
+> - Trang chủ Buyer: https://jml-teal.vercel.app/buyer/index.html
+> - Trang Chi tiết sản phẩm & Đánh giá: https://jml-teal.vercel.app/buyer/product-detail.html?id=101
+>
+> *(Ghi chú nộp bài `TF16BE7`: tự quay video màn hình ngắn ~2 phút theo 5 bước kịch bản trên bằng OBS / Xbox Game Bar `Win + G` / Loom, sau đó đính kèm link video hoặc file video cùng link nhánh/Pull Request này.)*
+
+### 8.5. Minh chứng nộp TF16BEF
+
+- **Kịch bản quay chi tiết:** [`backend/tests/DEMO_SCRIPT_TF16BEF.md`](./backend/tests/DEMO_SCRIPT_TF16BEF.md)
+- **Nhánh thực hiện:** [`feature/tf16bef-hoan-thien-readme-va-demo`](https://github.com/nducanhh0402/JML/tree/feature/tf16bef-hoan-thien-readme-va-demo)
+- **Video Demo:** đính kèm link YouTube/Loom hoặc file MP4 tại mục Pull Request khi hoàn tất quay màn hình.
+
+#### Checklist trước khi quay
+
+- [ ] Backend chạy tại `127.0.0.1:8000` và Swagger mở được.
+- [ ] Frontend chạy tại `127.0.0.1:5500` hoặc Vercel Live Demo.
+- [ ] Trình duyệt ở desktop 1280×900, sau đó chuyển sang mobile 390×844.
+- [ ] Tài khoản demo Admin/Buyer/Seller đã đăng nhập nếu cần chức năng tương ứng.
+- [ ] Terminal hiển thị kết quả test hoặc benchmark rõ ràng ở cuối video.
+
+---
+
+## 9. Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)
 
 > **Phụ trách:** Trịnh Quốc Trung (`B25DTCN263`)  
 > **Phạm vi:** Tìm kiếm sản phẩm, lưu từ khóa gần đây, bộ lọc/sắp xếp/phân trang API + URL, chip bộ lọc & Empty State, giao diện Mobile Responsive, và kiểm thử tích hợp luồng mua hàng E2E.
 
-### 8.1. Mô tả các chức năng đã xây dựng
+### 9.1. Mô tả các chức năng đã xây dựng
 
 | Mã Task | Phân hệ | Chức năng & Tệp liên quan |
 | :--- | :--- | :--- |
@@ -257,7 +342,7 @@ python -m unittest backend/tests/test_api.py -v
 | **TF16EF3** | Backend + FE | Tạo bảng `search_history` (`backend/db/migrations/010_create_search_history_table.sql`) và API `GET/POST/DELETE /api/products/recent-searches`; tự động ghi nhận khi tìm trên `/api/products/search`, giới hạn 20 từ khóa/người dùng, khử trùng lặp, hỗ trợ tiền tố `prefix`, cô lập theo JWT `user_id` hoặc `session_id` khách; nối gợi ý "Tìm gần đây" trên `buyer-index.js` & `buyer-products.js`. |
 | **TF16B8B** | Tích hợp All | Ghép module tìm kiếm/lọc/gần đây lên nhánh tích hợp; sửa lỗi liên kết `user_id` & `product_id` khi đặt hàng ở `checkout.html` + `backend/src/modules/order/router.py`; sửa tương thích cột bảng `banners` ở `homepage/router.py`; sửa điều hướng `cart.html` & đồng bộ `/api/cart/items` ở `buyer-products.js`; kiểm thử luồng E2E từ Đăng nhập → Tìm kiếm/Gần đây → Lọc → Giỏ hàng → Đặt hàng → Admin xử lý → Đánh giá/Hủy đơn (`backend/tests/test_integration_e2e_tf16b8b.py`). |
 
-### 8.2. Luồng hoạt động Tìm kiếm, Lọc & Từ khóa gần đây
+### 9.2. Luồng hoạt động Tìm kiếm, Lọc & Từ khóa gần đây
 
 ```mermaid
 flowchart LR
@@ -271,7 +356,7 @@ flowchart LR
     API_F -->|"total > 0"| GRID["Render lưới sản phẩm + Phân trang + Thêm vào giỏ (/api/cart/items)"]
 ```
 
-### 8.3. Hướng dẫn chạy & kiểm thử nhanh phần module này
+### 9.3. Hướng dẫn chạy & kiểm thử nhanh phần module này
 
 1. **Chạy Migration bảng lịch sử tìm kiếm (nếu DB chưa tự khởi tạo):**
    ```bash
@@ -296,12 +381,10 @@ flowchart LR
    python -m unittest backend.tests.test_integration_e2e_tf16b8b backend.tests.test_recent_searches_tf16ef3 backend.tests.test_product_search backend.tests.test_product_filter_sort_pagination backend.tests.test_mobile_search_filter_tf16ed9 -v
    ```
 
-### 8.4. Video Demo & Minh chứng kiểm thử (TF16BE9)
+### 9.4. Video Demo & Minh chứng kiểm thử (TF16BE9)
 
 - **Video Demo màn hình thực tế (`Screen Recording 2026-11-23 211728.mp4`):** [`minh_chung_nop_bai/Screen Recording 2026-11-23 211728.mp4`](./minh_chung_nop_bai/Screen%20Recording%202026-11-23%20211728.mp4)
 - **Bảng Test Case & Ảnh chụp minh chứng trong kho mã nguồn:**
   - Bảng Test Case API Tìm kiếm & Lọc: [`backend/tests/TEST_CASES_SEARCH_FILTER_TF16E89.md`](./backend/tests/TEST_CASES_SEARCH_FILTER_TF16E89.md)
   - Bảng Test Case Giao diện Tìm kiếm & Lọc trên Mobile: [`backend/tests/TEST_CASES_MOBILE_SEARCH_FILTER_TF16ED9.md`](./backend/tests/TEST_CASES_MOBILE_SEARCH_FILTER_TF16ED9.md)
   - Ảnh chụp minh chứng kiểm thử API & Mobile: [`backend/tests/MINH_CHUNG_TF16E89_BANG_TEST_CASE.png`](./backend/tests/MINH_CHUNG_TF16E89_BANG_TEST_CASE.png), [`backend/tests/MINH_CHUNG_TF16ED9_MOBILE_TIM_KIEM_LOC.png`](./backend/tests/MINH_CHUNG_TF16ED9_MOBILE_TIM_KIEM_LOC.png)
-
-

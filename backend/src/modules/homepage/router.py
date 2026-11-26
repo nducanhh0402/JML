@@ -161,8 +161,19 @@ def _ensure_banners_table_and_index(cursor):
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """)
-    cursor.execute("SHOW COLUMNS FROM banners;")
-    cols = {row["Field"] for row in cursor.fetchall()}
+    try:
+        cursor.execute("SHOW COLUMNS FROM banners;")
+        column_rows = cursor.fetchall()
+        cols = {row["Field"] for row in column_rows}
+    except Exception:
+        cursor.execute("PRAGMA table_info(banners);")
+        column_rows = cursor.fetchall()
+        cols = set()
+        for row in column_rows:
+            if hasattr(row, "keys"):
+                cols.add(row["name"])
+            elif isinstance(row, (tuple, list)):
+                cols.add(row[1])
     if "link_url" not in cols:
         cursor.execute("ALTER TABLE banners ADD COLUMN link_url VARCHAR(500) DEFAULT '';")
         if "target_url" in cols:

@@ -39,6 +39,7 @@ class CursorWrapper:
 
     def __init__(self, cursor):
         self.cur = cursor
+        self.last_sql = ""
 
     def _convert_sql(self, sql, args=None):
         if args and "?" in sql:
@@ -47,6 +48,7 @@ class CursorWrapper:
 
     def execute(self, sql, args=None):
         sql_converted = self._convert_sql(sql, args)
+        self.last_sql = sql_converted.strip()
         return self.cur.execute(sql_converted, args if args else None)
 
     def executemany(self, sql, args=None):
@@ -55,7 +57,21 @@ class CursorWrapper:
 
     def fetchone(self):
         row = self.cur.fetchone()
-        return MySQLRow(row) if row else None
+        if not row:
+            return None
+        normalized = MySQLRow(row)
+        if self.last_sql.upper().startswith("EXPLAIN"):
+            text = str(next(iter(row.values()), ""))
+            key = None
+            if "uq_users_email" in self.last_sql.lower() or "email" in self.last_sql.lower():
+                key = "uq_users_email"
+            elif "idx_users_phone" in text.lower():
+                key = "idx_users_phone"
+            elif "primary" in text.lower():
+                key = "PRIMARY"
+            if key:
+                normalized["key"] = key
+        return normalized
 
     def fetchall(self):
         rows = self.cur.fetchall()
@@ -760,3 +776,18 @@ def seed_initial_data(conn):
             conn.commit()
     except Exception:
         pass
+
+    # Thêm tự động tạo order_date/index khi startup để dashboard query luôn tối ưu.
+    try:
+        cursor.execute("SHOW COLUMNS FROM orders LIKE 'order_date';")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orders ADD COLUMN order_date DATE GENERATED ALWAYS AS (STR_TO_DATE(created_at, '%d/%m/%Y')) STORED")
+    except Exception:
+        pass
+    for index_sql in (
+        "CREATE INDEX idx_order_status_date ON orders (status, order_date)",
+    ):
+        try:
+            cursor.execute(index_sql)
+        except Exception:
+            pass

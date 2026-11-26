@@ -386,12 +386,21 @@ def get_admin_orders(
             where.append("status = ?")
             params.append(status)
 
+    cursor.execute("SHOW COLUMNS FROM orders LIKE 'order_date';")
+    has_order_date = cursor.fetchone() is not None
+
     if date_from:
-        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
+        if has_order_date:
+            where.append("order_date >= ?")
+        else:
+            where.append("STR_TO_DATE(created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
         params.append(date_from.isoformat())
 
     if date_to:
-        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
+        if has_order_date:
+            where.append("order_date <= ?")
+        else:
+            where.append("STR_TO_DATE(created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
         params.append(date_to.isoformat())
 
     clean_search = search.strip().replace("#", "")
@@ -684,12 +693,20 @@ def get_admin_revenue_report(
     conn = get_db_connection()
     cursor = conn.cursor()
     where = ["status IN ('preparing', 'shipping', 'delivered', 'released', 'dispute')"]
+    cursor.execute("SHOW COLUMNS FROM orders LIKE 'order_date';")
+    has_order_date = cursor.fetchone() is not None
     params = []
     if date_from:
-        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
+        if has_order_date:
+            where.append("order_date >= ?")
+        else:
+            where.append("STR_TO_DATE(created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
         params.append(date_from.isoformat())
     if date_to:
-        where.append("STR_TO_DATE(created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
+        if has_order_date:
+            where.append("order_date <= ?")
+        else:
+            where.append("STR_TO_DATE(created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
         params.append(date_to.isoformat())
 
     date_format = "%d/%m/%Y" if period == "day" else "%m/%Y"
@@ -729,12 +746,20 @@ def get_admin_top_products(
     conn = get_db_connection()
     cursor = conn.cursor()
     where = ["o.status IN ('preparing', 'shipping', 'delivered', 'released', 'dispute')"]
+    cursor.execute("SHOW COLUMNS FROM orders LIKE 'order_date';")
+    has_order_date = cursor.fetchone() is not None
     params = []
     if date_from:
-        where.append("STR_TO_DATE(o.created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
+        if has_order_date:
+            where.append("o.order_date >= ?")
+        else:
+            where.append("STR_TO_DATE(o.created_at, '%d/%m/%Y') >= STR_TO_DATE(?, '%Y-%m-%d')")
         params.append(date_from.isoformat())
     if date_to:
-        where.append("STR_TO_DATE(o.created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
+        if has_order_date:
+            where.append("o.order_date <= ?")
+        else:
+            where.append("STR_TO_DATE(o.created_at, '%d/%m/%Y') <= STR_TO_DATE(?, '%Y-%m-%d')")
         params.append(date_to.isoformat())
 
     cursor.execute(f"""

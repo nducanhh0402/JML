@@ -527,7 +527,7 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
 
 
 @router.post("/api/orders/from-cart")
-def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreate], request: Request):
+def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreate], request: Request = None):
     """
     API Tạo đơn hàng từ giỏ hàng (TF1734A):
     - Kiểm tra khóa tài khoản người mua.
@@ -551,7 +551,7 @@ def create_order_from_cart(payload: Union[CreateOrderFromCartRequest, OrderCreat
 
 
 @router.post("/api/orders")
-def create_order(payload: OrderCreate, request: Request):
+def create_order(payload: OrderCreate, request: Request = None):
     """
     Tạo đơn hàng từ giỏ hàng hoặc từ form thanh toán.
     Tự động chạy Transaction kiểm tra tồn kho, trừ kho, sinh mã và xóa giỏ.
