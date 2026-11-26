@@ -433,6 +433,29 @@ def execute_order_creation_transaction(conn, payload_data: Dict[str, Any]) -> Di
         except Exception:
             pass
 
+        # 10b. Ghi nhận sử dụng mã giảm giá vào `vouchers` & `voucher_usages` (TF16B8D)
+        if discount_code:
+            try:
+                clean_code = str(discount_code).strip().upper()
+                cursor.execute("SELECT id, usage_limit, used_count FROM vouchers WHERE code = ? LIMIT 1;", (clean_code,))
+                v_row = cursor.fetchone()
+                if v_row:
+                    cursor.execute(
+                        "UPDATE vouchers SET used_count = used_count + 1 WHERE id = ? AND used_count < usage_limit;",
+                        (v_row["id"],),
+                    )
+                    cursor.execute("SHOW TABLES LIKE 'voucher_usages';")
+                    if cursor.fetchone():
+                        cursor.execute(
+                            """
+                            INSERT INTO voucher_usages (voucher_id, user_id, order_key, discount_amount, order_subtotal, final_total)
+                            VALUES (?, ?, ?, ?, ?, ?);
+                            """,
+                            (v_row["id"], user_id, order_key, discount_amount, items_subtotal, numeric_total),
+                        )
+            except Exception:
+                pass
+
         # 11. Cập nhật hoặc thêm mới Khách hàng vào bảng `customers`
         cursor.execute("SELECT * FROM customers WHERE phone = ?;", (buyer_phone,))
         existing_cust = cursor.fetchone()
