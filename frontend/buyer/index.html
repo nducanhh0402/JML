@@ -11,11 +11,11 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&amp;display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css" />
+    <link rel="stylesheet" href="../shared/css/jml-theme.css" />
     <link rel="stylesheet" href="index.css" />
     <!-- Auth & RBAC Controller (TF16DCF) -->
     <script src="../shared/js/auth.js"></script>
-      <script src="../shared/js/koi-banner-ambient.js" defer></script>
+      <script src="../shared/js/jml-banner-ambient.js" defer></script>
   </head>
   <body>
     <!-- Top Utilities Bar -->
@@ -33,7 +33,7 @@
           >
         </div>
         <div class="top-links" id="topAuthLinks">
-          <a href="products.html" style="color: #e8c254; font-weight: 700"
+          <a href="products.html" style="color: #ffb347; font-weight: 700"
             >🛍️ Tất Cả Sản Phẩm (Bộ Lọc)</a
           >
           <a
@@ -75,7 +75,7 @@
           "
           title="Về Trang Chủ JML Store"
         >
-          <span class="logo-badge">JML</span>
+          <img src="../admin/jml-store-icon.svg" alt="JML Store" class="jml-brand-icon" />
           <span style="letter-spacing: -0.5px; font-weight: 800">STORE</span>
         </a>
 
@@ -709,9 +709,9 @@
                 align-items: center;
                 gap: 6px;
                 padding: 7px 14px;
-                background: #fff7ed;
-                border: 1px solid #fdba74;
-                color: #ea580c;
+                background: #fff1f2;
+                border: 1px solid #fecdd3;
+                color: #e11d48;
                 border-radius: 8px;
                 font-size: 13px;
                 font-weight: 700;
@@ -719,8 +719,8 @@
                 white-space: nowrap;
                 transition: all 0.2s;
               "
-              onmouseover="this.style.background = '#ffedd5'"
-              onmouseout="this.style.background = '#fff7ed'"
+              onmouseover="this.style.background = '#ffe4e6'"
+              onmouseout="this.style.background = '#fff1f2'"
             >
               Xem Bố Cục Lưới 2 Cột &amp; Bộ Lọc →
             </a>
@@ -868,22 +868,7 @@
                 margin-bottom: 16px;
               "
             >
-              <span
-                class="logo-badge"
-                style="
-                  background: linear-gradient(
-                    135deg,
-                    var(--primary),
-                    var(--accent)
-                  );
-                  color: #fff;
-                  padding: 4px 10px;
-                  border-radius: var(--radius-sm);
-                  font-size: 14px;
-                  font-weight: 800;
-                "
-                >JML</span
-              >
+              <img src="../admin/jml-store-icon.svg" alt="JML Store" class="jml-brand-icon" />
               <span
                 style="
                   font-size: 20px;
@@ -1160,7 +1145,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: linear-gradient(135deg, #0d6efd, #1e40af);
+            background: linear-gradient(135deg, #073f88 0%, #03193b 100%);
             color: #fff;
           "
         >
@@ -1806,7 +1791,7 @@
                   padding: 9px 16px;
                   border-radius: 8px;
                   border: none;
-                  background: #ea580c;
+                  background: linear-gradient(135deg, #ff7058, #ff3b6b, #e11d48);
                   color: #fff;
                   font-size: 12px;
                   font-weight: 700;
@@ -1829,9 +1814,9 @@
                   padding: 3px 8px;
                   font-size: 11px;
                   font-weight: 600;
-                  background: #fff7ed;
-                  border: 1px dashed #ea580c;
-                  color: #ea580c;
+                  background: #fff1f2;
+                  border: 1px dashed #ff4267;
+                  color: #e11d48;
                   border-radius: 6px;
                   cursor: pointer;
                 "
@@ -1935,7 +1920,7 @@
               style="
                 display: none;
                 justify-content: space-between;
-                color: #ea580c;
+                color: #e11d48;
                 font-weight: 600;
               "
             >
@@ -1955,7 +1940,7 @@
               "
             >
               <span>Tổng Tiền Thanh Toán:</span>
-              <span id="checkoutModalTotalSum" style="color: #2563eb">0 ₫</span>
+              <span id="checkoutModalTotalSum" style="color: #0a55ab">0 ₫</span>
             </div>
           </div>
 
@@ -2009,12 +1994,12 @@
                 padding: 9px 20px;
                 border-radius: 8px;
                 border: none;
-                background: #0d6efd;
+                background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
                 font-size: 13px;
                 font-weight: 700;
                 color: #fff;
                 cursor: pointer;
-                box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+                box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
               "
             >
               Xác Nhận Đặt Hàng
@@ -2072,12 +2057,12 @@
                 width: 36px;
                 height: 36px;
                 border-radius: 10px;
-                background: #fff7ed;
-                border: 1px solid #fed7aa;
+                background: #eff6ff;
+                border: 1px solid #bfdbfe;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #ea580c;
+                color: #0a55ab;
               "
             >
               <svg

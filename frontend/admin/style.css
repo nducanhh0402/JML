@@ -1,36 +1,36 @@
 /* ==========================================================================
-   JML Store Marketplace Admin Portal — Koi & Lotus Pond Theme
+   JML Store Marketplace Admin Portal — Midnight Sapphire & Coral Horizon Theme
    ========================================================================== */
-@import url("../shared/css/koi-lotus-theme.css");
+@import url("../shared/css/jml-theme.css");
 
 :root {
-    --primary-50: #edf3e7;
-    --primary-100: #dce8d2;
-    --primary-200: #c2d6b2;
-    --primary-500: #39522a;
-    --primary-600: #2c4120;
-    --primary-700: #203117;
+    --primary-50: #eff6ff;
+    --primary-100: #dbeafe;
+    --primary-200: #bfdbfe;
+    --primary-500: #0a55ab;
+    --primary-600: #073f88;
+    --primary-700: #042554;
 
     --neutral-0: #FFFFFF;
-    --neutral-50: #f4f5ee;
-    --neutral-100: #eceee3;
-    --neutral-200: #dce0d2;
-    --neutral-300: #c7cebc;
-    --neutral-400: #a4b098;
-    --neutral-500: #6d7967;
-    --neutral-600: #55614f;
-    --neutral-700: #3d4938;
-    --neutral-800: #293325;
-    --neutral-900: #1a261a;
+    --neutral-50: #f8fafc;
+    --neutral-100: #f1f5f9;
+    --neutral-200: #e2e8f0;
+    --neutral-300: #cbd5e1;
+    --neutral-400: #94a3b8;
+    --neutral-500: #64748b;
+    --neutral-600: #475569;
+    --neutral-700: #334155;
+    --neutral-800: #1e293b;
+    --neutral-900: #0f172a;
 
-    --success-50: #eaf3e5;
-    --success-500: #39522a;
+    --success-50: #ecfdf5;
+    --success-500: #059669;
 
-    --warning-50: #fbf4dc;
-    --warning-500: #d49b1a;
+    --warning-50: #fffbeb;
+    --warning-500: #f59e0b;
 
-    --danger-50: #fceceb;
-    --danger-500: #c92a22;
+    --danger-50: #fef2f2;
+    --danger-500: #e11d48;
 }
 
 body,

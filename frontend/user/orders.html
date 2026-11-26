@@ -17,36 +17,36 @@
     />
     <!-- Auth & RBAC Controller -->
     <script src="../shared/js/auth.js"></script>
-    <link rel="stylesheet" href="../shared/css/koi-lotus-theme.css" />
+    <link rel="stylesheet" href="../shared/css/jml-theme.css" />
     <style>
       /* ==========================================================================
-         1. RESET & CSS VARIABLES (ĐỒNG BỘ CHỦ ĐỀ CÁ KOI & HỒ HOA SEN)
+         1. RESET & CSS VARIABLES (ĐỒNG BỘ CHỦ ĐỀ JML STORE MỚI)
          ========================================================================== */
       :root {
-        --primary: #c92a22;
-        --primary-hover: #a61e18;
-        --primary-light: #fdf0ee;
-        --secondary: #222a19;
-        --secondary-light: #47543e;
-        --accent: #d49b1a;
-        --success: #39522a;
-        --success-light: #eaf3e5;
-        --warning: #c88a12;
-        --warning-light: #fbf4dc;
-        --danger: #c92a22;
-        --danger-light: #fceceb;
-        --info: #3a6868;
-        --info-light: #e6f2f1;
-        --background: #f5f5ee;
+        --primary: #ff4267;
+        --primary-hover: #e11d48;
+        --primary-light: #fff1f2;
+        --secondary: #0f172a;
+        --secondary-light: #334155;
+        --accent: #ffb347;
+        --success: #059669;
+        --success-light: #ecfdf5;
+        --warning: #d97706;
+        --warning-light: #fffbeb;
+        --danger: #e11d48;
+        --danger-light: #fef2f2;
+        --info: #0a55ab;
+        --info-light: #eff6ff;
+        --background: #f8fafc;
         --surface: #ffffff;
-        --surface-dim: #eceee3;
-        --border: #dce0d2;
-        --border-focus: #c92a22;
-        --text-main: #1a261a;
-        --text-muted: #586552;
-        --shadow-sm: 0 1px 3px rgba(26, 38, 26, 0.06);
-        --shadow-md: 0 4px 14px rgba(26, 38, 26, 0.08);
-        --shadow-lg: 0 16px 36px rgba(26, 38, 26, 0.15);
+        --surface-dim: #f1f5f9;
+        --border: #e2e8f0;
+        --border-focus: #ff4267;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+        --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+        --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.15);
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 20px;
@@ -308,7 +308,7 @@
       }
       .search-input:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(234,88,12,0.12);
+        box-shadow: 0 0 0 3px rgba(255,66,103,0.14);
       }
       .search-clear {
         position: absolute;
@@ -438,9 +438,9 @@
         border-color: #fecdd3;
       }
       .status-badge.dispute {
-        background: #fdf4f1;
-        color: #9a3412;
-        border-color: #fed7aa;
+        background: #fff1f2;
+        color: #e11d48;
+        border-color: #fecdd3;
       }
       .status-badge.escrow {
         background: #f5f3ff;
@@ -923,7 +923,7 @@
       .timeline-item.latest .timeline-dot {
         background: var(--primary);
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(234,88,12,0.2);
+        box-shadow: 0 0 0 3px rgba(255,66,103,0.2);
       }
       .timeline-status {
         font-size: 13px;
@@ -1169,7 +1169,7 @@
         to { transform: rotate(360deg); }
       }
     </style>
-      <script src="../shared/js/koi-banner-ambient.js" defer></script>
+      <script src="../shared/js/jml-banner-ambient.js" defer></script>
   </head>
   <body>
     <!-- ============================= TOPBAR ============================= -->
@@ -1290,7 +1290,7 @@
       <div class="container">
         <div class="footer-inner">
           <div class="footer-brand">
-            <span style="background:linear-gradient(135deg,#c92a22,#d49b1a);color:#fff;padding:3px 8px;border-radius:6px;font-size:12px;">JML</span>
+            <span style="background:linear-gradient(135deg,#0f172a,#3730a3);color:#fff;padding:3px 8px;border-radius:6px;font-size:12px;">JML</span>
             Store &copy; 2026
           </div>
           <div class="footer-links">
