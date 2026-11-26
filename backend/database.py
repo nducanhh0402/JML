@@ -517,6 +517,26 @@ def init_db(seed=False):
     except Exception:
         pass
 
+    # 11b. Bảng VOUCHER_USAGES (Lịch sử sử dụng mã giảm giá) - TF1728C / TF16B8D
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS voucher_usages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        voucher_id INT NOT NULL,
+        user_id INT NULL,
+        order_key VARCHAR(50) DEFAULT NULL,
+        discount_amount BIGINT NOT NULL DEFAULT 0,
+        order_subtotal BIGINT NOT NULL DEFAULT 0,
+        final_total BIGINT NOT NULL DEFAULT 0,
+        used_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_usages_voucher (voucher_id),
+        INDEX idx_usages_user (user_id),
+        INDEX idx_usages_order (order_key),
+        INDEX idx_usages_user_voucher (user_id, voucher_id),
+        FOREIGN KEY (voucher_id) REFERENCES vouchers (id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    """)
+
     # 12. Bảng REVIEWS (Đánh giá & chấm sao 1-5 cho từng sản phẩm) - TF174F6
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reviews (
