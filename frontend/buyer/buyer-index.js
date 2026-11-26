@@ -2014,7 +2014,7 @@ function checkUrlHash() {
     const id = hash.replace("#product/", "");
     if (id) openProductDetail(id);
   } else if (hash === "#cart") {
-    showCartView();
+    window.location.replace("cart.html");
   } else {
     showHomeView();
   }
@@ -3429,29 +3429,10 @@ function cvCloseConfirm() {
   if (el) el.classList.remove('show');
 }
 
-// ─── Chuyển sang view giỏ hàng ───
+// ─── Chuyển sang trang giỏ hàng thống nhất (cart.html) ───
 async function showCartView() {
-  const homeView   = document.getElementById('view-home');
-  const detailView = document.getElementById('view-product-detail');
-  const cartView   = document.getElementById('view-cart');
-  if (!cartView) return;
-
-  if (homeView)   homeView.classList.remove('active');
-  if (detailView) detailView.classList.remove('active');
-  cartView.classList.add('active');
-  window.location.hash = 'cart';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // Đóng dropdown giỏ hàng nếu đang mở
   closeAllDropdowns();
-
-  // Kiểm tra API
-  try {
-    const r = await fetch(`${API_BASE}/`, { signal: AbortSignal.timeout(1500) });
-    cvApiOnline = r.ok;
-  } catch { cvApiOnline = false; }
-
-  cvLoadAndRender();
+  window.location.href = 'cart.html';
 }
 
 // ─── Tải dữ liệu giỏ từ API hoặc localStorage ───

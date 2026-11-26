@@ -51,7 +51,9 @@
 
       body {
         font-family:
-          "Plus Jakarta Sans",
+          "Be Vietnam Pro",
+          "Segoe UI",
+          Roboto,
           -apple-system,
           BlinkMacSystemFont,
           sans-serif;
@@ -60,6 +62,10 @@
         line-height: 1.5;
         overflow-x: clip;
         -webkit-font-smoothing: antialiased;
+      }
+
+      button, input, select, textarea {
+        font-family: inherit;
       }
 
       a {
