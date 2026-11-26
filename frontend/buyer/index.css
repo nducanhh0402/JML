@@ -1,7 +1,7 @@
-@import url("../shared/css/koi-lotus-theme.css");
+@import url("../shared/css/jml-theme.css");
 
 /* ==========================================================================
-       0. EMBEDDED GLOBAL STYLES — KOI & LOTUS POND THEME
+       0. EMBEDDED GLOBAL STYLES — MIDNIGHT SAPPHIRE & CORAL HORIZON THEME
        ========================================================================== */
       html {
         scroll-behavior: smooth;
@@ -17,26 +17,26 @@
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
       /* ==========================================================================
-       1. CSS RESET & GLOBAL VARIABLES (ĐỒNG BỘ CHỦ ĐỀ CÁ KOI & HỒ HOA SEN)
+       1. CSS RESET & GLOBAL VARIABLES (ĐỒNG BỘ CHỦ ĐỀ JML STORE MỚI)
        ========================================================================== */
       :root {
-        --primary: #c92a22;
-        --primary-hover: #a61e18;
-        --primary-light: #fdf0ee;
-        --secondary: #222a19;
-        --secondary-light: #47543e;
-        --accent: #d49b1a;
-        --success: #39522a;
-        --background: #f5f5ee;
+        --primary: #ff4267;
+        --primary-hover: #e11d48;
+        --primary-light: #fff1f2;
+        --secondary: #0f172a;
+        --secondary-light: #334155;
+        --accent: #ffb347;
+        --success: #059669;
+        --background: #f8fafc;
         --surface: #ffffff;
-        --surface-dim: #eceee3;
-        --border: #dce0d2;
-        --border-focus: #c92a22;
-        --text-main: #1a261a;
-        --text-muted: #586552;
-        --shadow-sm: 0 1px 3px rgba(26, 38, 26, 0.06);
-        --shadow-md: 0 4px 14px rgba(26, 38, 26, 0.08);
-        --shadow-lg: 0 12px 28px rgba(26, 38, 26, 0.12);
+        --surface-dim: #f1f5f9;
+        --border: #e2e8f0;
+        --border-focus: #ff4267;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+        --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+        --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 20px;
@@ -185,7 +185,7 @@
       .search-box:focus-within {
         background: #ffffff;
         border-color: var(--primary);
-        box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.12);
+        box-shadow: 0 0 0 4px rgba(255, 66, 103, 0.14);
       }
       .search-input {
         flex: 1;
@@ -196,7 +196,7 @@
         color: var(--text-main);
       }
       .search-btn {
-        background: linear-gradient(135deg, var(--primary), var(--accent));
+        background: linear-gradient(135deg, #ff7058, #ff3b6b, #e11d48);
         color: #ffffff;
         padding: 8px 20px;
         border-radius: 99px;
@@ -209,7 +209,7 @@
       }
       .search-btn:hover {
         transform: scale(1.03);
-        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
       }
       .search-keywords {
         display: flex;
@@ -249,7 +249,7 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #c92a22, #a61e18);
+        background: linear-gradient(135deg, #0a55ab, #3730a3);
         color: #ffffff;
         display: flex;
         align-items: center;
@@ -286,7 +286,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.4);
+        box-shadow: 0 2px 6px rgba(225, 29, 72, 0.4);
         transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
       .cart-badge.bounce {
@@ -381,7 +381,7 @@
         border-radius: var(--radius-lg);
         overflow: hidden;
         box-shadow: var(--shadow-md);
-        background: #1e293b;
+        background: #03193b;
       }
       .slide {
         position: absolute;
@@ -405,8 +405,8 @@
         inset: 0;
         background: linear-gradient(
           90deg,
-          rgba(26, 36, 20, 0.90) 0%,
-          rgba(34, 42, 25, 0.38) 100%
+          rgba(3, 25, 59, 0.92) 0%,
+          rgba(7, 63, 136, 0.44) 100%
         );
         z-index: 1;
       }
@@ -431,7 +431,7 @@
         text-transform: uppercase;
         margin-bottom: 14px;
         letter-spacing: 1px;
-        color: #e5c878;
+        color: #ffb347;
       }
       .slide-title {
         font-size: 34px;
@@ -441,12 +441,12 @@
       }
       .slide-desc {
         font-size: 14px;
-        color: #edf1e6;
+        color: #dbeafe;
         margin-bottom: 22px;
         line-height: 1.5;
       }
       .btn-hero {
-        background: linear-gradient(135deg, var(--primary), var(--accent));
+        background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
         color: #fff;
         padding: 12px 28px;
         border-radius: 99px;
@@ -455,12 +455,12 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 6px 18px rgba(201, 42, 34, 0.36);
+        box-shadow: 0 10px 22px -6px rgba(225, 29, 72, 0.5);
         transition: var(--transition);
       }
       .btn-hero:hover {
         transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 10px 24px rgba(201, 42, 34, 0.46);
+        box-shadow: 0 12px 26px -6px rgba(225, 29, 72, 0.62);
       }
       .btn-hero:active {
         transform: translateY(1px) scale(0.98);
@@ -543,10 +543,12 @@
         box-shadow: var(--shadow-md);
       }
       .side-banner-1 {
-        background: linear-gradient(135deg, #1f3318 0%, #39522a 60%, #4e4b25 100%);
+        background:
+          radial-gradient(circle at 28% 50%, rgba(45, 166, 255, 0.40) 0%, rgba(16, 102, 204, 0.38) 38%, rgba(6, 52, 118, 0.88) 72%, #03193b 100%),
+          linear-gradient(135deg, #073f88 0%, #031a3e 100%);
       }
       .side-banner-2 {
-        background: linear-gradient(135deg, #213018 0%, #a61e18 72%, #c92a22 100%);
+        background: linear-gradient(135deg, #073f88 0%, #3730a3 48%, #e11d48 100%);
       }
       .side-banner-title {
         font-size: 18px;
@@ -555,13 +557,13 @@
       }
       .side-banner-sub {
         font-size: 13px;
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(255, 255, 255, 0.84);
         margin-bottom: 12px;
       }
       .side-banner-link {
         font-size: 13px;
         font-weight: 700;
-        color: #e5c878;
+        color: #ffb347;
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -649,8 +651,8 @@
        5. FLASH SALE SECTION
        ========================================================================== */
       .flash-sale-wrapper {
-        background: linear-gradient(180deg, #fdf4f1 0%, #ffffff 100%);
-        border: 1.5px solid #f6e2dc;
+        background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%);
+        border: 1.5px solid #fecdd3;
         border-radius: var(--radius-lg);
         padding: 24px;
         margin-bottom: 48px;
@@ -685,10 +687,10 @@
       @keyframes pulseGlow {
         0%,
         100% {
-          box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.4);
+          box-shadow: 0 0 0 0 rgba(255, 66, 103, 0.4);
         }
         50% {
-          box-shadow: 0 0 0 8px rgba(234, 88, 12, 0);
+          box-shadow: 0 0 0 8px rgba(255, 66, 103, 0);
         }
       }
 
@@ -701,7 +703,7 @@
         font-size: 14px;
       }
       .countdown-box {
-        background: #111827;
+        background: #03193b;
         color: #ffffff;
         padding: 6px 10px;
         border-radius: var(--radius-sm);
@@ -710,11 +712,11 @@
         font-size: 15px;
         font-family: monospace;
         font-weight: 700;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 5px rgba(3, 25, 59, 0.24);
       }
       .countdown-sep {
         font-weight: 800;
-        color: #111827;
+        color: #03193b;
       }
 
       .flash-products-grid {
@@ -740,7 +742,7 @@
       .product-card:hover {
         transform: translateY(-6px);
         box-shadow: var(--shadow-lg);
-        border-color: #e5c878;
+        border-color: #fda4af;
       }
 
       .product-img-wrapper {
@@ -816,7 +818,7 @@
       .product-mini-dot.active {
         width: 16px;
         background: #ffffff;
-        box-shadow: 0 1px 4px rgba(234, 88, 12, 0.6);
+        box-shadow: 0 1px 4px rgba(225, 29, 72, 0.6);
       }
 
       /* Angle label badge on hover */
@@ -849,7 +851,7 @@
         position: absolute;
         top: 10px;
         left: 10px;
-        background: rgba(234, 88, 12, 0.95);
+        background: rgba(225, 29, 72, 0.94);
         backdrop-filter: blur(4px);
         color: #ffffff;
         font-size: 11px;
@@ -943,7 +945,7 @@
       }
       .progress-bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, #f87171, #ef4444);
+        background: linear-gradient(90deg, #ff7058, #ff3b6b, #e11d48);
         border-radius: 99px;
         transition: width 1s ease-in-out;
       }
@@ -974,7 +976,7 @@
       .btn-add-cart:hover {
         background: var(--primary);
         color: #ffffff;
-        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.28);
       }
       .btn-add-cart:active {
         transform: scale(0.96);
@@ -1121,7 +1123,7 @@
         padding: 4px 10px;
         border-radius: var(--radius-sm);
         z-index: 5;
-        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+        box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);
       }
       .detail-exclusive-tag {
         position: absolute;
@@ -1173,7 +1175,7 @@
       }
       .gallery-thumb-item.active {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        box-shadow: 0 0 0 3px rgba(255, 66, 103, 0.16);
       }
       .gallery-thumb-item img {
         width: 100%;
@@ -1280,8 +1282,8 @@
 
       /* Price Box */
       .detail-price-box {
-        background: linear-gradient(135deg, #fdf4f1 0%, #f6e2dc 100%);
-        border: 1.5px solid #fed7aa;
+        background: linear-gradient(135deg, #fff1f2 0%, #eff6ff 100%);
+        border: 1.5px solid #fecdd3;
         border-radius: var(--radius-md);
         padding: 20px 24px;
       }
@@ -1295,11 +1297,11 @@
         font-size: 12px;
         font-weight: 700;
         text-transform: uppercase;
-        color: var(--primary);
+        color: var(--primary-hover);
         letter-spacing: 0.5px;
       }
       .deal-pill {
-        background: #c92a22;
+        background: linear-gradient(135deg, #ff7058, #e11d48);
         color: #ffffff;
         font-size: 10px;
         font-weight: 800;
@@ -1333,9 +1335,9 @@
       .price-voucher-notice {
         margin-top: 12px;
         padding-top: 10px;
-        border-top: 1px dashed #e5c878;
+        border-top: 1px dashed #fecdd3;
         font-size: 12px;
-        color: #9a3412;
+        color: #e11d48;
         font-weight: 600;
       }
 
@@ -1380,7 +1382,7 @@
         border-color: var(--primary);
         background: var(--primary-light);
         color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+        box-shadow: 0 0 0 2px rgba(255, 66, 103, 0.16);
       }
       .color-dot {
         width: 12px;
@@ -1473,17 +1475,17 @@
         gap: 10px;
         padding: 14px 24px;
         border-radius: var(--radius-md);
-        background: linear-gradient(135deg, var(--primary), var(--accent));
+        background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
         color: #ffffff;
         font-size: 15px;
         font-weight: 800;
         cursor: pointer;
-        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.35);
+        box-shadow: 0 10px 22px -6px rgba(225, 29, 72, 0.45);
         transition: var(--transition);
       }
       .btn-detail-buy-now:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 24px rgba(234, 88, 12, 0.45);
+        box-shadow: 0 12px 26px -6px rgba(225, 29, 72, 0.58);
       }
 
       /* Shipping Card */
@@ -1681,10 +1683,12 @@
        10. FOOTER
        ========================================================================== */
       footer {
-        background: #0f172a;
-        color: #94a3b8;
+        background:
+          radial-gradient(circle at 18% 20%, rgba(29, 140, 248, 0.22) 0%, transparent 45%),
+          linear-gradient(180deg, #042554 0%, #03193b 100%);
+        color: #cbd5e1;
         padding: 54px 0 24px;
-        border-top: 1px solid #1e293b;
+        border-top: 1px solid rgba(96, 195, 255, 0.26);
         font-size: 13px;
       }
       .footer-grid {
@@ -1705,10 +1709,10 @@
         gap: 10px;
       }
       .footer-links a:hover {
-        color: #e5c878;
+        color: #ffb347;
       }
       .footer-bottom {
-        border-top: 1px solid #1e293b;
+        border-top: 1px solid rgba(191, 219, 254, 0.16);
         padding-top: 24px;
         display: flex;
         justify-content: space-between;
@@ -1874,7 +1878,7 @@
         margin-top: 6px;
         padding: 9px 18px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #c92a22, #d49b1a);
+        background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
         color: #ffffff;
         font-size: 13px;
         font-weight: 700;
@@ -1883,14 +1887,14 @@
         gap: 6px;
         cursor: pointer;
         border: none;
-        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+        box-shadow: 0 6px 16px rgba(225, 29, 72, 0.28);
       }
 
       .spinner-ring {
         width: 32px;
         height: 32px;
         border: 3px solid rgba(255, 255, 255, 0.25);
-        border-top-color: #c92a22;
+        border-top-color: #ff4267;
         border-radius: 50%;
         animation: jmlSpin 0.8s linear infinite;
       }
@@ -2304,9 +2308,9 @@
 }
 
 .brand-pill {
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  color: #c2410c;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
   font-size: 11px;
   font-weight: 700;
   padding: 3px 9px;
@@ -2482,7 +2486,7 @@
 
 .rating-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f59e0b, #ea580c);
+  background: linear-gradient(90deg, #ff7058, #ff3b6b, #e11d48);
   border-radius: 99px;
   transition: width 0.3s ease;
 }
@@ -2524,8 +2528,8 @@
 }
 
 .review-form-card {
-  background: #fffaf5;
-  border: 1px solid #fed7aa;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
   border-radius: var(--radius-md);
   padding: 20px 22px;
   margin-bottom: 24px;
@@ -2593,7 +2597,7 @@
 .review-input:focus,
 .review-textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+  box-shadow: 0 0 0 3px rgba(255, 66, 103, 0.16);
 }
 
 .review-textarea {
@@ -2613,12 +2617,12 @@
   padding: 10px 22px;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: linear-gradient(135deg, #ff7058 0%, #ff3b6b 55%, #e11d48 100%);
   color: #ffffff;
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.28);
 }
 
 .review-submit-btn:disabled {

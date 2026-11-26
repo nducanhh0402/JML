@@ -296,7 +296,7 @@ function renderProductDetail(product, isOfflineDemo = false) {
     <div class="product-detail-wrapper">
       ${
         isOfflineDemo
-          ? `<div style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:600;margin-bottom:14px;">
+          ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#0a55ab;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:600;margin-bottom:14px;">
               ℹ️ Đang hiển thị dữ liệu mẫu offline do chưa kết nối tới FastAPI Backend (${escapeHtml(API_BASE_URL || "cổng 8000")}).
             </div>`
           : ""
@@ -1005,7 +1005,7 @@ function renderReviewsList(reviews, isOfflineMode = false) {
   if (!container) return;
 
   const offlineBanner = isOfflineMode
-    ? `<div style="font-size:12px;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:8px 12px;border-radius:8px;margin-bottom:12px;">
+    ? `<div style="font-size:12px;color:#0a55ab;background:#eff6ff;border:1px solid #bfdbfe;padding:8px 12px;border-radius:8px;margin-bottom:12px;">
          ℹ️ Backend chưa kết nối — đang hiển thị đánh giá lưu cục bộ (localStorage).
        </div>`
     : "";
