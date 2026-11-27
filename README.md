@@ -16,6 +16,7 @@
 7. [Kiểm Thử & Tài Liệu API (Swagger)](#7-kiểm-thử--tài-liệu-api-swagger)
 8. [Module Trang Chủ, Chi Tiết Sản Phẩm, Đánh Giá & Tối Ưu Hiệu Năng (Vũ Dũng - B25DTCN161)](#8-module-trang-chủ-chi-tiết-sản-phẩm-đánh-giá--tối-ưu-hiệu-năng-vũ-dũng---b25dtcn161)
 9. [Module Tìm Kiếm, Bộ Lọc & Tích Hợp Mua Hàng (TF16BE9)](#9-module-tìm-kiếm-bộ-lọc--tích-hợp-mua-hàng-tf16be9)
+10. [Module Xác Thực, Phân Quyền (Auth & RBAC), Hồ Sơ Cá Nhân, Tích Hợp & Demo Vercel (TF16BE3)](#10-module-xác-thực-phân-quyền-auth--rbac-hồ-sơ-cá-nhân-tích-hợp--demo-vercel-tf16be3)
 
 ---
 
@@ -388,3 +389,74 @@ flowchart LR
   - Bảng Test Case API Tìm kiếm & Lọc: [`backend/tests/TEST_CASES_SEARCH_FILTER_TF16E89.md`](./backend/tests/TEST_CASES_SEARCH_FILTER_TF16E89.md)
   - Bảng Test Case Giao diện Tìm kiếm & Lọc trên Mobile: [`backend/tests/TEST_CASES_MOBILE_SEARCH_FILTER_TF16ED9.md`](./backend/tests/TEST_CASES_MOBILE_SEARCH_FILTER_TF16ED9.md)
   - Ảnh chụp minh chứng kiểm thử API & Mobile: [`backend/tests/MINH_CHUNG_TF16E89_BANG_TEST_CASE.png`](./backend/tests/MINH_CHUNG_TF16E89_BANG_TEST_CASE.png), [`backend/tests/MINH_CHUNG_TF16ED9_MOBILE_TIM_KIEM_LOC.png`](./backend/tests/MINH_CHUNG_TF16ED9_MOBILE_TIM_KIEM_LOC.png)
+
+---
+
+## 10. Module Xác Thực, Phân Quyền (Auth & RBAC), Hồ Sơ Cá Nhân, Tích Hợp & Demo Vercel (TF16BE3)
+
+> **Phụ trách:** Nguyễn Đức Anh (`B25DTCN220`)  
+> **Phạm vi:** Dựng khung dự án Modular Monorepo, CSDL nền `users` & index/ràng buộc, Đăng ký/Đăng nhập JWT (`bcrypt`), Middleware & Frontend RBAC, Hồ sơ cá nhân & đổi mật khẩu, Kiểm thử tự động Auth/Validate/RBAC, Tích hợp E2E (`TF16B85`), Triển khai Vercel (`TF16FD3`) và Chế độ vận hành thực tế (`APP_ENV=production`).
+
+### 10.1. Danh sách chức năng & Task đã triển khai
+
+| Mã Task | Phân hệ | Chức năng & Tệp liên quan |
+| :--- | :--- | :--- |
+| **Khung dự án** | Backend + Git | Dựng cấu trúc Modular Monorepo (`backend/main.py`, `backend/database.py`, `backend/schemas.py`, `backend/src/config/database.py`), quy ước Git & Docker Compose. |
+| **CSDL Users & Index** | Database | Tạo bảng `users`, migration roles (`003_create_users_and_roles_schema.sql`), ràng buộc `UNIQUE` email (`006_users_email_unique_index.sql`), index SĐT và seed tài khoản `admin` (`backend/tests/test_users_constraints.py`). |
+| **Auth JWT & Form** | BE + FE | API `POST /api/auth/register` & `POST /api/auth/login` (`backend/src/modules/auth/router.py`), băm mật khẩu `bcrypt`, đăng nhập bằng Username/Email/SĐT, cấp JWT, giao diện hợp nhất tại `frontend/auth/index.html`. |
+| **RBAC Middleware & FE** | BE + FE | `RoleAuthMiddleware` & `SecurityHeadersMiddleware` (`backend/src/middlewares/auth_middleware.py`) bảo vệ `/api/admin/*` (`401`/`403`); `Auth.requireRole()` trong `frontend/shared/js/auth.js` chặn truy cập trái phép, ẩn hiện menu theo vai trò & đăng xuất. |
+| **Hồ sơ & Đổi mật khẩu** | BE + FE | API `GET/PUT /api/user/me` & `PUT /api/user/change-password` (`backend/src/modules/user/router.py`), trang `frontend/user/profile.html`, kèm `backend/tests/test_user_profile_password.py`. |
+| **Tích hợp E2E (`TF16B85`)** | Tích hợp All | Kiểm thử ghép luồng liên thông từ Đăng ký → Đăng nhập → Giỏ hàng → Đặt hàng → Admin xử lý (`backend/tests/test_integration_e2e_tf16b85.py`). |
+| **Vercel Demo (`TF16FD3`)** | Frontend | Cấu hình `vercel.json`, cổng tổng hợp `frontend/index.html`, kiểm tra 15 trang Desktop/Mobile (`backend/tests/test_vercel_demo_tf16fd3.py`). |
+| **Production Mode** | Bảo mật | Cấu hình `APP_ENV=production` (`backend/src/config/settings.py`, `.env.production.example`): chặn tự đăng ký `admin`, ép `JWT_SECRET_KEY` mạnh, giới hạn CORS, Rate Limiting (`429`) & ẩn thông tin nội bộ (`backend/tests/test_production_mode.py`). |
+
+### 10.2. Sơ đồ luồng Xác thực & Phân quyền (Auth & RBAC)
+
+```mermaid
+flowchart LR
+    U(["Người dùng (Buyer / Seller / Admin)"]) --> FE_AUTH["frontend/auth/index.html (Đăng nhập / Đăng ký)"]
+    FE_AUTH -->|"POST /api/auth/login hoặc /register"| RL["AuthRateLimitMiddleware (chống brute-force)"]
+    RL --> AUTH_API["auth/router.py (bcrypt + cấp JWT)"]
+    AUTH_API --> DB[("MySQL: users (UNIQUE email, idx_phone)")]
+    AUTH_API -->|"access_token + user"| AUTH_JS["frontend/shared/js/auth.js"]
+    AUTH_JS -->|"Kiểm tra Auth.requireRole()"| PAGES["Trang Buyer / Seller / Admin / Profile"]
+    PAGES -->|"Header Authorization: Bearer JWT"| RBAC["RoleAuthMiddleware"]
+    RBAC -->|"401/403 nếu thiếu token hoặc sai vai trò"| DENY(["Từ chối truy cập"])
+    RBAC -->|"Hợp lệ"| ROUTERS["/api/admin/* & /api/user/*"]
+```
+
+### 10.3. Hướng dẫn chạy & kiểm thử nhanh phần module này
+
+1. **Khởi động MySQL & chạy máy chủ Backend + Frontend:**
+   ```powershell
+   # Terminal 1 - Backend FastAPI (tự động init_db & seed admin nếu chưa có)
+   .\.venv\Scripts\python.exe -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+
+   # Terminal 2 - Frontend tĩnh
+   .\.venv\Scripts\python.exe -m http.server 5500 --bind 127.0.0.1 --directory frontend
+   ```
+   Mở các màn hình chính của module:
+   - Đăng nhập / Đăng ký: `http://127.0.0.1:5500/auth/index.html`
+   - Hồ sơ cá nhân & Đổi mật khẩu: `http://127.0.0.1:5500/user/profile.html`
+   - Quản trị Sàn (bị chặn nếu chưa có quyền Admin): `http://127.0.0.1:5500/admin/index.html`
+   - Tài liệu API Swagger: `http://127.0.0.1:8000/docs`
+
+2. **Chạy toàn bộ 155 bài test tự động của phân hệ Auth, RBAC, Hồ sơ, Tích hợp, Vercel & Production:**
+   ```powershell
+   .\.venv\Scripts\python.exe -m pytest backend/tests/test_auth_register_login.py backend/tests/test_auth_rbac.py backend/tests/test_fe_rbac_guards.py backend/tests/test_user_profile_password.py backend/tests/test_users_constraints.py backend/tests/test_auth_validation_pytest.py backend/tests/test_integration_e2e_tf16b85.py backend/tests/test_vercel_demo_tf16fd3.py backend/tests/test_production_mode.py backend/tests/test_readme_demo_tf16be3.py -v
+   ```
+
+### 10.4. Video Demo & Minh chứng kiểm thử (`TF16BE3`)
+
+| Bước | Thời lượng | Nội dung trình diễn trong Video Demo | Màn hình / API minh họa |
+| :---: | :---: | :--- | :--- |
+| **1** | `0:00 – 0:25` | Giới thiệu kiến trúc dự án & cổng Demo trên Desktop (`1280×900`) và Mobile (`390×844`). | `frontend/index.html`, `README.md` |
+| **2** | `0:25 – 0:55` | Demo Đăng ký (validate lỗi đầu vào + tạo tài khoản thành công) và Đăng nhập đa định danh (Username/Email/SĐT). | `frontend/auth/index.html` ← `/api/auth/*` |
+| **3** | `0:55 – 1:20` | Demo cập nhật Hồ sơ cá nhân và Đổi mật khẩu, kiểm tra đăng nhập lại bằng mật khẩu mới. | `frontend/user/profile.html` ← `/api/user/*` |
+| **4** | `1:20 – 1:50` | Demo RBAC: Buyer vào `/admin/index.html` bị chặn; Swagger test `/api/admin/*` trả `401`/`403` vs Admin `200`. | `auth.js`, `RoleAuthMiddleware` |
+| **5** | `1:50 – 2:10` | Trình bày cơ chế bảo mật khi vận hành thật `APP_ENV=production` & `/api/health`. | `backend/src/config/settings.py` |
+| **6** | `2:10 – 2:35` | Chạy `pytest` trên terminal chứng minh toàn bộ **155 test** của module PASS 100%. | `backend/tests/test_*` |
+
+- **Kịch bản quay Video Demo chi tiết:** [`backend/tests/DEMO_SCRIPT_TF16BE3.md`](./backend/tests/DEMO_SCRIPT_TF16BE3.md)
+- **Bảng tổng hợp 155 Test Case & Sơ đồ Sequence:** [`backend/tests/TEST_CASES_AUTH_RBAC_TF16BE3.md`](./backend/tests/TEST_CASES_AUTH_RBAC_TF16BE3.md)
+- **Video Demo màn hình (`TF16BE3`):** [Xem Video Demo trên Google Drive](https://drive.google.com/file/d/1t-XQzuHnHSxzVhezwbtGveCdZiSESl0S/view?usp=drive_link)
