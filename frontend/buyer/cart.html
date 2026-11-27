@@ -195,7 +195,7 @@
     /* ========== CART PAGE LAYOUT ========== */
     .cart-page {
       display: grid;
-      grid-template-columns: 1fr 385px;
+      grid-template-columns: 1fr 360px;
       gap: 24px;
       align-items: start;
       margin-bottom: 48px;
@@ -1415,7 +1415,7 @@
        Tính năng: tăng/giảm số lượng, xóa, tổng tiền tức thì
     ============================================================ */
 
-    const API_BASE = 'http://127.0.0.1:8000';
+    const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
     const CART_KEY = 'JML_CART_ITEMS';
 
     let cartItems = [];   // [{id, title, price, image, shopName, qty, originalPrice?}]

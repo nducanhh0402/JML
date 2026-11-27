@@ -2,10 +2,16 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
 
 from backend.database import init_db
+from backend.src.config.settings import (
+    get_app_env,
+    get_cors_origins,
+    is_docs_enabled,
+    validate_production_config,
+)
 from backend.src.middlewares.auth_middleware import (
+    AuthRateLimitMiddleware,
     SecurityHeadersMiddleware,
     RoleAuthMiddleware,
 )
@@ -25,18 +31,23 @@ from backend.src.modules.admin.router import router as admin_router
 from backend.src.modules.homepage.router import router as homepage_router
 from backend.src.modules.address.router import router as address_router, alias_router as address_alias_router
 
+docs_enabled = is_docs_enabled()
 app = FastAPI(
     title="JML Store Multi-Vendor Marketplace API",
     description="Hệ thống Backend FastAPI + MySQL kiến trúc Modular Monorepo quản lý Sàn TMĐT (Buyer, Seller, Admin, Escrow)",
     version="2.0.0",
+    docs_url="/docs" if docs_enabled else None,
+    redoc_url="/redoc" if docs_enabled else None,
+    openapi_url="/openapi.json" if docs_enabled else None,
 )
 
-# Cấu hình Middleware bảo mật, phân quyền RBAC và CORS
+# Cấu hình Middleware bảo mật, phân quyền RBAC, rate-limit và CORS
 app.add_middleware(RoleAuthMiddleware)
+app.add_middleware(AuthRateLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,6 +56,7 @@ app.add_middleware(
 # Tự động khởi tạo và kiểm tra database MySQL
 @app.on_event("startup")
 def on_startup():
+    validate_production_config()
     init_db()
 
 # Đăng ký các module nghiệp vụ (Routers)
@@ -67,6 +79,14 @@ app.include_router(address_alias_router)
 # Mount static files cho Frontend (UI người dùng, checkout, kết quả thanh toán VNPAY)
 if os.path.exists("frontend"):
     app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+
+@app.get("/api/health", tags=["System"])
+def health_check():
+    return {
+        "status": "ok",
+        "env": get_app_env(),
+        "version": "2.0.0",
+    }
 
 @app.get("/", include_in_schema=False)
 def root():

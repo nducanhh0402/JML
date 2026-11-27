@@ -1419,9 +1419,10 @@
       // =========================================================================
       // CẤU HÌNH API & TRẠNG THÁI KHỞI TẠO
       // =========================================================================
-      const API_BASE = window.location.origin.includes(":8000") 
-        ? window.location.origin 
-        : "http://127.0.0.1:8000";
+      const IS_LOCAL_HOST = ["127.0.0.1", "localhost", ""].includes(window.location.hostname);
+      const API_BASE = window.API_BASE_URL || (
+        window.location.origin.includes(":8000") ? window.location.origin : "http://127.0.0.1:8000"
+      );
 
       // Danh bạ địa chỉ lưu sẵn (mặc định mẫu của sinh viên Trần Gia Huy)
       const DEFAULT_ADDRESSES = [
@@ -1478,6 +1479,11 @@
       // KHỞI TẠO TRANG KHI TẢI
       // =========================================================================
       document.addEventListener("DOMContentLoaded", () => {
+        if (!IS_LOCAL_HOST) {
+          document.querySelectorAll(".vnpay-test-card").forEach((el) => {
+            el.style.display = "none";
+          });
+        }
         initSavedAddresses();
         initCheckoutCart();
         restoreAppliedVoucherFromCart();
@@ -2111,6 +2117,11 @@
               street,
               tag: `Giao đến: ${district}`
             });
+          }
+
+          if (!IS_LOCAL_HOST) {
+            showToast("❌ Không kết nối được máy chủ đặt hàng. Vui lòng thử lại sau.");
+            return;
           }
 
           if (paymentMethod === "VNPAY") {

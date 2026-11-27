@@ -3,7 +3,7 @@
  * Multi-vendor E-commerce Platform (Shopee / Lazada Model)
  */
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = window.API_BASE_URL || 'http://127.0.0.1:8000';
 
 // Toàn bộ cơ sở dữ liệu ban đầu để trống (0 dữ liệu, 0 chỉ số)
 let SHOPS_DATABASE = {};
@@ -363,10 +363,6 @@ async function resetAllMetricsToZero() {
     );
     if (!confirmed) return;
 
-    try {
-        await fetch(`${API_BASE_URL}/api/admin/reset-data`, { method: 'POST' });
-    } catch (e) {}
-
     localStorage.removeItem('JML_ORDERS');
     localStorage.removeItem('JML_RECOMMEND_PRODUCTS');
     localStorage.removeItem('JML_CUSTOMERS');
@@ -488,21 +484,8 @@ async function handleAdminLoginSubmit(e) {
         if (lockModal) lockModal.classList.add('hidden');
         await syncWithFastAPI();
     } catch (err) {
-        // Fallback dự phòng nếu mất kết nối
-        if (username === 'admin' && password === '123456') {
-            const fallbackAdmin = { username: 'admin', role: 'admin', full_name: 'Hoàng Nam (Super Admin)' };
-            if (window.Auth) {
-                Auth.setSession(fallbackAdmin, 'mock_token_admin');
-            } else {
-                localStorage.setItem('JML_ADMIN_USER', JSON.stringify(fallbackAdmin));
-            }
-            const lockModal = document.getElementById('adminLockModal');
-            if (lockModal) lockModal.classList.add('hidden');
-            await syncWithFastAPI();
-        } else {
-            alertEl.textContent = '❌ Lỗi kết nối FastAPI server!';
-            alertEl.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block';
-        }
+        alertEl.textContent = '❌ Không kết nối được FastAPI server!';
+        alertEl.className = 'mb-4 p-3 rounded-lg text-xs font-semibold bg-red-50 text-red-700 border border-red-200 block';
     }
 }
 
@@ -1597,7 +1580,11 @@ async function toggleCustomerBanDirect(arg1, arg2) {
     }
 
     try {
-        await fetch(`${API_BASE_URL}/api/admin/customers/${key}/toggle-ban`, { method: 'PUT' });
+        const action = isCurrentlyBanned ? 'unban' : 'ban';
+        await fetch(`${API_BASE_URL}/api/admin/customers/${encodeURIComponent(key)}/${action}`, {
+            method: 'PUT',
+            headers: getAdminAuthHeaders()
+        });
     } catch (e) {}
 
     let banned = JSON.parse(localStorage.getItem('JML_BANNED_CUSTOMERS') || '[]');
@@ -1650,7 +1637,10 @@ async function deleteCustomerDirect(arg1, arg2, arg3) {
     }
 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/admin/customers/${key}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE_URL}/api/admin/customers/${encodeURIComponent(key)}`, {
+            method: 'DELETE',
+            headers: getAdminAuthHeaders()
+        });
         if (res.ok) {
             delete CUSTOMERS_DATABASE[key];
             const localCust = JSON.parse(localStorage.getItem('JML_CUSTOMERS') || '{}');

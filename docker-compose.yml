@@ -29,8 +29,8 @@ services:
   # 2. Ứng dụng Backend FastAPI
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: jml_backend_api
     restart: always
     environment:

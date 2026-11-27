@@ -2185,12 +2185,37 @@ if (notifToggleBtn) {
   });
 }
 
+function getLoggedInHeaderUser() {
+  if (typeof Auth !== "undefined" && typeof Auth.isAuthenticated === "function" && Auth.isAuthenticated()) {
+    const authUser = Auth.getUser();
+    if (authUser && (authUser.full_name || authUser.username)) return authUser;
+  }
+  const rawCust =
+    localStorage.getItem("JML_CUSTOMER_USER") ||
+    localStorage.getItem("JML_AUTH_USER");
+  if (rawCust) {
+    try {
+      const parsed = JSON.parse(rawCust);
+      if (parsed && (parsed.full_name || parsed.username)) return parsed;
+    } catch (e) {}
+  }
+  return null;
+}
+
 if (userProfileBtn) {
   userProfileBtn.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (!getLoggedInHeaderUser()) {
+      closeAllDropdowns();
+      window.location.href = "../auth/index.html";
+      return;
+    }
     const isShown = userDropdown.style.display === "flex";
     closeAllDropdowns();
-    if (!isShown) userDropdown.style.display = "flex";
+    if (!isShown) {
+      userDropdown.hidden = false;
+      userDropdown.style.display = "flex";
+    }
   });
 }
 
@@ -2337,39 +2362,45 @@ function handleCheckout() {
 }
 
 function syncCustomerAuthHeader() {
-  const rawCust =
-    localStorage.getItem("JML_CUSTOMER_USER") ||
-    localStorage.getItem("JML_AUTH_USER");
+  const user = getLoggedInHeaderUser();
   const avatarEl = document.getElementById("headerUserAvatar");
   const nameEl = document.getElementById("headerUserName");
   const dropNameEl = document.getElementById("dropdownUserFullName");
+  const chevronEl = document.getElementById("headerUserChevron");
 
-  if (rawCust) {
-    try {
-      const user = JSON.parse(rawCust);
-      if (user && user.full_name) {
-        const words = user.full_name.trim().split(/\s+/);
-        const initials =
-          words.length >= 2
-            ? (words[0][0] + words[words.length - 1][0]).toUpperCase()
-            : user.full_name.slice(0, 2).toUpperCase();
-        if (avatarEl) avatarEl.textContent = initials;
-        if (nameEl) nameEl.textContent = user.full_name;
-        if (dropNameEl) {
-          const roleLabel =
-            user.role === "admin"
-              ? "Admin"
-              : user.role === "seller"
-                ? "Chủ Shop"
-                : user.rank || "Thành viên";
-          dropNameEl.textContent = `${user.full_name} (${roleLabel})`;
-        }
-        return;
-      }
-    } catch (e) {}
+  const authOnlyEls = document.querySelectorAll(".auth-only-action");
+
+  if (user) {
+    authOnlyEls.forEach((el) => { el.hidden = false; });
+    const displayName = user.full_name || user.username || "Thành viên";
+    const words = displayName.trim().split(/\s+/);
+    const initials =
+      words.length >= 2
+        ? (words[0][0] + words[words.length - 1][0]).toUpperCase()
+        : displayName.slice(0, 2).toUpperCase();
+    if (avatarEl) avatarEl.textContent = initials;
+    if (nameEl) nameEl.textContent = displayName;
+    if (chevronEl) chevronEl.style.display = "inline-block";
+    if (userDropdown) userDropdown.hidden = false;
+    if (dropNameEl) {
+      const roleLabel =
+        user.role === "admin"
+          ? "Admin"
+          : user.role === "seller"
+            ? "Chủ Shop"
+            : user.rank || "Thành viên";
+      dropNameEl.textContent = `${displayName} (${roleLabel})`;
+    }
+    return;
   }
   if (avatarEl) avatarEl.textContent = "KH";
-  if (nameEl) nameEl.textContent = "Đăng nhập";
+  if (nameEl) nameEl.textContent = "Đăng nhập / Đăng ký";
+  if (chevronEl) chevronEl.style.display = "none";
+  authOnlyEls.forEach((el) => { el.hidden = true; });
+  if (userDropdown) {
+    userDropdown.hidden = true;
+    userDropdown.style.display = "none";
+  }
   if (dropNameEl) dropNameEl.textContent = "Khách vãng lai (Chưa đăng nhập)";
 }
 
@@ -3233,7 +3264,7 @@ async function loadIndexRecentSearches() {
   if (!bar) {
     bar = document.createElement("span");
     bar.id = "indexRecentSearches";
-    bar.style.cssText = "display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;margin-right:8px;";
+    bar.style.cssText = "display:inline-flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-right:4px;flex-shrink:0;";
     keywordsWrap.insertBefore(bar, keywordsWrap.firstChild);
   }
   try {
@@ -3252,11 +3283,12 @@ async function loadIndexRecentSearches() {
       return;
     }
     bar.innerHTML =
-      `<span style="font-weight:600;color:var(--primary);">Gần đây:</span>` +
+      `<span style="font-weight:600;color:var(--primary);white-space:nowrap;">Gần đây:</span>` +
       items
+        .slice(0, 3)
         .map(
           (item) =>
-            `<a href="#" onclick="applyQuickSearch('${escapeSearchHtml(item.keyword)}'); return false;" style="background:rgba(255,66,103,0.10);border-radius:99px;padding:1px 8px;">${escapeSearchHtml(item.keyword)}</a>`,
+            `<a href="#" onclick="applyQuickSearch('${escapeSearchHtml(item.keyword)}'); return false;" style="background:rgba(255,66,103,0.10);border-radius:99px;padding:1px 8px;white-space:nowrap;">${escapeSearchHtml(item.keyword)}</a>`,
         )
         .join("");
   } catch (e) {
@@ -3399,7 +3431,7 @@ if (window.location.hash.startsWith("#product/") || window.location.hash === "#c
 
 // ─── Thêm vào cuối file buyer-index.js ───
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 let cvApiOnline = false;
 let cvPendingAction = null; // { type: 'remove'|'clear', idx? }
 

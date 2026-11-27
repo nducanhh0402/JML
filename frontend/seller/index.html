@@ -482,7 +482,7 @@ tailwind.config = {
                 <form id="sellerLoginForm" onsubmit="handleSellerLoginSubmit(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Tên đăng nhập / Số điện thoại Shop *</label>
-                        <input id="sellerLoginUser" type="text" required placeholder="VD: shop_tech hoặc 0908123456" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input id="sellerLoginUser" type="text" required placeholder="Nhập tên đăng nhập, email hoặc số điện thoại" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
 
                     <div>
@@ -1035,10 +1035,12 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
                 shop_key: shopKey,
                 name: document.getElementById('profileShopName').value.trim(),
                 badge: document.getElementById('profileShopBadge').value,
+                owner_name: (currentSellerUser && currentSellerUser.full_name) || '',
+                phone: (currentSellerUser && currentSellerUser.phone) || '',
                 address: document.getElementById('profileShopMeta').value.trim()
             };
             try {
-                const res = await fetch(`${API_BASE_URL}/api/seller/shop`, {
+                const res = await fetch(`${API_BASE_URL}/api/seller/profile`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
