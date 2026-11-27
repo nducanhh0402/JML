@@ -103,8 +103,14 @@ class ConnectionWrapper:
         return getattr(self.conn, name)
 
 
-def ensure_database_exists():
-    """Tự động tạo database MySQL 'jml_marketplace' nếu chưa có."""
+_DB_ENSURED = False
+
+
+def ensure_database_exists(force: bool = False):
+    """Tự động tạo database MySQL 'jml_marketplace' nếu chưa có (chỉ chạy 1 lần mỗi process)."""
+    global _DB_ENSURED
+    if _DB_ENSURED and not force:
+        return
     try:
         conn = pymysql.connect(
             host=MYSQL_CONFIG["host"],
@@ -117,6 +123,7 @@ def ensure_database_exists():
         with conn.cursor() as cur:
             cur.execute(f"CREATE DATABASE IF NOT EXISTS `{MYSQL_CONFIG['database']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
         conn.close()
+        _DB_ENSURED = True
     except Exception as e:
         print("Cảnh báo kiểm tra database:", e)
 

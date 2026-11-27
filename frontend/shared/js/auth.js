@@ -187,11 +187,13 @@ const Auth = {
 
         if (!isAuthenticated || !user) {
             // ================= TRƯỜNG HỢP: KHÁCH CHƯA ĐĂNG NHẬP =================
-            container.innerHTML = `
-                <span>Hotline: <strong style="color: #fff;">1900 8888</strong></span>
-                <span style="opacity: 0.3;">|</span>
-                <a href="${authPath}" style="color: #ffb347; font-weight: 700; text-decoration: none;">Đăng Nhập / Đăng Ký</a>
-            `;
+            if (!document.getElementById('userProfileBtn')) {
+                container.innerHTML = `
+                    <span>Hotline: <strong style="color: #fff;">1900 8888</strong></span>
+                    <span style="opacity: 0.3;">|</span>
+                    <a href="${authPath}" style="color: #ffb347; font-weight: 700; text-decoration: none;">Đăng Nhập / Đăng Ký</a>
+                `;
+            }
             this.updateAccountButtonAction('guest', authPath);
             return;
         }

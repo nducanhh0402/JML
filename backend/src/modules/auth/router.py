@@ -5,6 +5,7 @@ import pymysql
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from backend.src.config.database import get_db_connection
+from backend.src.config.settings import is_production
 from backend.schemas import LoginRequest, RegisterRequest
 from backend.src.middlewares.auth_middleware import create_access_token, get_current_user
 
@@ -63,13 +64,13 @@ def auth_login(payload: LoginRequest):
     stored_password = user_row["password"]
     password_valid = False
 
-    # Hỗ trợ cả mật khẩu đã băm (bcrypt) và mật khẩu cũ (plain text)
-    if stored_password.startswith("$2b$") or stored_password.startswith("$2a$"):
-        # Mật khẩu đã được băm bằng bcrypt
+    # Hỗ trợ cả mật khẩu đã băm (bcrypt) và mật khẩu cũ (plain text ở chế độ dev)
+    if stored_password.startswith(("$2b$", "$2a$", "$2y$")):
         password_valid = verify_password(payload.password.strip(), stored_password)
-    else:
-        # Mật khẩu cũ dạng plain text (tương thích ngược)
+    elif not is_production():
         password_valid = (payload.password.strip() == stored_password)
+    else:
+        password_valid = False
 
     if not password_valid:
         conn.close()
@@ -128,6 +129,12 @@ def auth_register(payload: RegisterRequest):
     - Mật khẩu được băm bằng bcrypt trước khi lưu vào database.
     - Tự động cấp JWT Access Token sau khi đăng ký thành công.
     """
+    if is_production() and payload.role == "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Không được phép tự đăng ký tài khoản Quản trị viên trên môi trường vận hành!",
+        )
+
     conn = get_db_connection()
     cursor = conn.cursor()
 

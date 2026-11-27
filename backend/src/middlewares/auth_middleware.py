@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List, Union
 
@@ -8,12 +9,20 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from backend.src.config.settings import (
+    DEFAULT_DEV_JWT_SECRET,
+    get_auth_rate_limit,
+    get_jwt_secret_key,
+    is_production,
+    is_rate_limit_enabled,
+)
+
 # ==============================================================================
 # CẤU HÌNH JWT & BẢO MẬT HỆ THỐNG
 # ==============================================================================
 JWT_SECRET_KEY = os.getenv(
     "JWT_SECRET_KEY",
-    os.getenv("SECRET_KEY", "jml_marketplace_secret_jwt_key_2026_super_secure")
+    os.getenv("SECRET_KEY", DEFAULT_DEV_JWT_SECRET)
 )
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60 * 24))  # 24 giờ
@@ -38,7 +47,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         "exp": expire,
         "iat": now,
     })
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, get_jwt_secret_key(), algorithm=JWT_ALGORITHM)
     return encoded_jwt
 
 
@@ -48,7 +57,7 @@ def decode_access_token(token: str) -> dict:
     Ném ra HTTPException 401 nếu token hết hạn hoặc không hợp lệ.
     """
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, get_jwt_secret_key(), algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -122,7 +131,7 @@ def require_role(allowed_roles: Union[List[str], str]):
 
     async def role_checker(current_user: dict = Depends(get_current_user)):
         user_role = str(current_user.get("role", "")).strip().lower()
-        if user_role not in roles_list and "admin" not in roles_list:
+        if user_role not in roles_list and user_role != "admin":
             raise HTTPException(
                 status_code=403,
                 detail=f"Truy cập bị từ chối! Yêu cầu một trong các vai trò: {allowed_roles}."
@@ -154,6 +163,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["X-XSS-Protection"] = "1; mode=block"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+            if is_production():
+                response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
             return response
         except HTTPException as exc:
             return JSONResponse(
@@ -161,105 +173,171 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 content={"detail": exc.detail, "status": "error"}
             )
         except Exception as exc:
-            return JSONResponse(
-                status_code=500,
-                content={"detail": "Lỗi máy chủ nội bộ", "error": str(exc), "status": "error"}
+            content = {"detail": "Lỗi máy chủ nội bộ", "status": "error"}
+            if not is_production():
+                content["error"] = str(exc)
+            return JSONResponse(status_code=500, content=content)
+
+
+class AuthRateLimitMiddleware(BaseHTTPMiddleware):
+    """Giới hạn tần suất gọi API đăng nhập/đăng ký để chống dò mật khẩu ở production."""
+
+    _hits: dict[str, list[float]] = {}
+    _AUTH_PATHS = ("/api/auth/login", "/api/auth/register")
+
+    @classmethod
+    def reset(cls):
+        """Xóa toàn bộ bộ đếm rate-limit (dùng cho test)."""
+        cls._hits.clear()
+
+    async def dispatch(self, request: Request, call_next):
+        if (
+            is_rate_limit_enabled()
+            and request.method == "POST"
+            and request.url.path.rstrip("/") in self._AUTH_PATHS
+        ):
+            max_reqs, window_sec = get_auth_rate_limit()
+            forwarded = request.headers.get("X-Forwarded-For", "")
+            client_ip = forwarded.split(",")[0].strip() if forwarded else (
+                request.client.host if request.client else "unknown"
             )
+            key = f"{client_ip}:{request.url.path.rstrip('/')}"
+            now = time.monotonic()
+            recent = [ts for ts in self._hits.get(key, []) if now - ts < window_sec]
+            if len(recent) >= max_reqs:
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "detail": "Quá nhiều yêu cầu xác thực. Vui lòng thử lại sau.",
+                        "status": "error",
+                    },
+                    headers={"Retry-After": str(window_sec)},
+                )
+            recent.append(now)
+            self._hits[key] = recent
+        return await call_next(request)
 
 
 class RoleAuthMiddleware(BaseHTTPMiddleware):
     """
     Middleware phân quyền Admin / Client cho toàn bộ ứng dụng:
     - Chặn và bảo vệ tất cả API quản trị có prefix '/api/admin'.
+    - Khi APP_ENV=production, tự động siết thêm JWT cho các API ghi/xóa nhạy cảm ngoài '/api/admin'.
     - Bỏ qua các request OPTIONS (CORS preflight).
-    - Trả mã lỗi 401 chuẩn khi: thiếu header Authorization, sai định dạng Bearer, token không hợp lệ hoặc hết hạn.
-    - Trả mã lỗi 403 chuẩn khi: token hợp lệ nhưng vai trò người dùng không phải Admin.
     - Giải mã và tự động lưu thông tin user vào `request.state.user`.
     """
     ADMIN_PREFIXES = ("/api/admin",)
+    MUTATING_METHODS = ("POST", "PUT", "PATCH", "DELETE")
+
+    @staticmethod
+    def _is_prod_admin_mutating(method: str, path: str) -> bool:
+        if method not in RoleAuthMiddleware.MUTATING_METHODS:
+            return False
+        if path == "/api/categories" or path.startswith("/api/categories/"):
+            return True
+        if path == "/api/brands" or path.startswith("/api/brands/"):
+            return True
+        if method == "DELETE" and path.startswith("/api/products/") and not path.startswith("/api/products/recent-searches"):
+            return True
+        if (path == "/api/vouchers" or path.startswith("/api/vouchers/")) and path not in ("/api/vouchers/apply", "/api/vouchers/use"):
+            return True
+        return False
+
+    @staticmethod
+    def _is_prod_user_mutating(method: str, path: str) -> bool:
+        if method not in RoleAuthMiddleware.MUTATING_METHODS:
+            return False
+        return (
+            path.startswith("/api/seller/")
+            or path == "/api/user/addresses"
+            or path.startswith("/api/user/addresses/")
+            or path == "/api/addresses"
+            or path.startswith("/api/addresses/")
+            or path.startswith("/api/user/orders/")
+            or path == "/api/reviews"
+            or path.startswith("/api/reviews/")
+        )
+
+    @staticmethod
+    def _authenticate_bearer(auth_header: Optional[str]):
+        if not auth_header:
+            return None, JSONResponse(
+                status_code=401,
+                content={
+                    "detail": "Không tìm thấy token xác thực! Vui lòng cung cấp header Authorization.",
+                    "status": "error"
+                },
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        parts = auth_header.strip().split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            return None, JSONResponse(
+                status_code=401,
+                content={
+                    "detail": "Định dạng token không hợp lệ! Yêu cầu định dạng 'Bearer <token>'.",
+                    "status": "error"
+                },
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+
+        try:
+            payload = jwt.decode(parts[1], get_jwt_secret_key(), algorithms=[JWT_ALGORITHM])
+            return payload, None
+        except jwt.ExpiredSignatureError:
+            return None, JSONResponse(
+                status_code=401,
+                content={
+                    "detail": "Token xác thực đã hết hạn! Vui lòng đăng nhập lại.",
+                    "status": "error"
+                },
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        except Exception:
+            return None, JSONResponse(
+                status_code=401,
+                content={
+                    "detail": "Token xác thực không hợp lệ!",
+                    "status": "error"
+                },
+                headers={"WWW-Authenticate": "Bearer"}
+            )
 
     async def dispatch(self, request: Request, call_next):
-        # 1. Bỏ qua các preflight request CORS OPTIONS
         if request.method == "OPTIONS":
             return await call_next(request)
 
         path = request.url.path.rstrip("/")
         is_admin_route = any(path == prefix or path.startswith(f"{prefix}/") for prefix in self.ADMIN_PREFIXES)
+        prod_mode = is_production()
+        requires_admin = is_admin_route or (prod_mode and self._is_prod_admin_mutating(request.method, path))
+        requires_auth = prod_mode and self._is_prod_user_mutating(request.method, path)
 
         auth_header = request.headers.get("Authorization")
 
-        # 2. Xử lý bảo vệ API Quản Trị (Admin Routes)
-        if is_admin_route:
-            # 2.1 Kiểm tra sự tồn tại của header Authorization
-            if not auth_header:
-                return JSONResponse(
-                    status_code=401,
-                    content={
-                        "detail": "Không tìm thấy token xác thực! Vui lòng cung cấp header Authorization.",
-                        "status": "error"
-                    },
-                    headers={"WWW-Authenticate": "Bearer"}
-                )
+        if requires_admin or requires_auth:
+            payload, err_resp = self._authenticate_bearer(auth_header)
+            if err_resp is not None:
+                return err_resp
 
-            # 2.2 Kiểm tra định dạng 'Bearer <token>'
-            parts = auth_header.strip().split()
-            if len(parts) != 2 or parts[0].lower() != "bearer":
-                return JSONResponse(
-                    status_code=401,
-                    content={
-                        "detail": "Định dạng token không hợp lệ! Yêu cầu định dạng 'Bearer <token>'.",
-                        "status": "error"
-                    },
-                    headers={"WWW-Authenticate": "Bearer"}
-                )
+            if requires_admin:
+                user_role = str(payload.get("role", "")).strip().lower()
+                if user_role != "admin":
+                    return JSONResponse(
+                        status_code=403,
+                        content={
+                            "detail": "Truy cập bị từ chối! Yêu cầu quyền Quản trị viên (Admin).",
+                            "status": "error"
+                        }
+                    )
 
-            token = parts[1]
-
-            # 2.3 Giải mã và xác thực tính hợp lệ của token
-            try:
-                payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-            except jwt.ExpiredSignatureError:
-                return JSONResponse(
-                    status_code=401,
-                    content={
-                        "detail": "Token xác thực đã hết hạn! Vui lòng đăng nhập lại.",
-                        "status": "error"
-                    },
-                    headers={"WWW-Authenticate": "Bearer"}
-                )
-            except Exception:
-                return JSONResponse(
-                    status_code=401,
-                    content={
-                        "detail": "Token xác thực không hợp lệ!",
-                        "status": "error"
-                    },
-                    headers={"WWW-Authenticate": "Bearer"}
-                )
-
-            # 2.4 Kiểm tra vai trò Admin (phân quyền Admin / Client)
-            user_role = str(payload.get("role", "")).strip().lower()
-            if user_role != "admin":
-                return JSONResponse(
-                    status_code=403,
-                    content={
-                        "detail": "Truy cập bị từ chối! Yêu cầu quyền Quản trị viên (Admin).",
-                        "status": "error"
-                    }
-                )
-
-            # 2.5 Đã xác thực thành công là Admin -> lưu thông tin user vào request.state
             request.state.user = payload
-
-        else:
-            # Đối với các route công khai hoặc nghiệp vụ khác, nếu có token thì giải mã sẵn
-            if auth_header:
-                parts = auth_header.strip().split()
-                if len(parts) == 2 and parts[0].lower() == "bearer":
-                    try:
-                        payload = jwt.decode(parts[1], JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-                        request.state.user = payload
-                    except Exception:
-                        request.state.user = None
+        elif auth_header:
+            parts = auth_header.strip().split()
+            if len(parts) == 2 and parts[0].lower() == "bearer":
+                try:
+                    request.state.user = jwt.decode(parts[1], get_jwt_secret_key(), algorithms=[JWT_ALGORITHM])
+                except Exception:
+                    request.state.user = None
 
         return await call_next(request)

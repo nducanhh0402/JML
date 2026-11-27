@@ -594,6 +594,21 @@ def create_customer(payload: CustomerCreate):
 
     return {"message": f"Đã thêm khách hàng #{cust_key} thành công!", "key": cust_key}
 
+@router.delete("/customers/{cust_key}")
+def delete_customer(cust_key: str):
+    """Admin xóa tài khoản khách hàng khỏi bảng customers."""
+    clean_key = cust_key.replace("#", "")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM customers WHERE cust_key = ?;", (clean_key,))
+    deleted = cursor.rowcount
+    conn.commit()
+    conn.close()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy khách hàng #{clean_key}!")
+    return {"message": f"Đã xóa khách hàng #{clean_key} thành công!"}
+
 @router.put("/orders/{order_key}/status")
 def update_admin_order_status(order_key: str, payload: OrderStatusUpdate, current_user: dict = Depends(require_admin)):
     """Admin chuyển trạng thái đơn và ghi lại old_status, new_status vào lịch sử."""

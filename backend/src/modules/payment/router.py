@@ -149,7 +149,7 @@ def create_payment_url(payload: VNPayCreateUrlRequest, request: Request):
 
 
 @router.get("/vnpay-return")
-@router.get("/vnpay_return")
+@router.get("/vnpay_return", include_in_schema=False)
 def vnpay_return_callback(request: Request):
     """
     Xử lý kết quả trả về từ Cổng thanh toán VNPay (Customer Return URL):
@@ -295,8 +295,8 @@ def vnpay_return_callback(request: Request):
 
 @router.get("/vnpay-ipn")
 @router.post("/vnpay-ipn")
-@router.get("/vnpay_ipn")
-@router.post("/vnpay_ipn")
+@router.get("/vnpay_ipn", include_in_schema=False)
+@router.post("/vnpay_ipn", include_in_schema=False)
 def vnpay_ipn_webhook(request: Request):
     """
     Webhook Instant Payment Notification (IPN) do máy chủ VNPay gọi tự động ngầm:

@@ -510,7 +510,6 @@
     .hero-cta:focus-visible,
     .tab-btn:focus-visible,
     .btn:focus-visible,
-    .demo-btn:focus-visible,
     .toggle-pw:focus-visible {
       outline: 2px solid #ffb347;
       outline-offset: 3px;
@@ -714,31 +713,6 @@
       border: 1px solid rgba(225, 29, 72, 0.35);
     }
     .btn-outline:hover { background: #fff1f2; transform: none; }
-
-    .demo-box {
-      margin-top: 16px;
-      padding-top: 13px;
-      border-top: 1px solid #e2e8f0;
-    }
-    .demo-label { font-size: 12px; color: var(--jml-muted); margin: 0 0 8px; text-align: center; }
-    .demo-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .demo-btn {
-      padding: 7px 8px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      background: #f8fafc;
-      color: #1e293b;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-    }
-    .demo-btn:hover {
-      border-color: var(--jml-coral);
-      color: var(--jml-coral-hover);
-      background: #fff1f2;
-    }
     .hidden { display: none !important; }
 
     @keyframes letterIn {
@@ -963,7 +937,7 @@
         <form id="form-login" novalidate>
           <div class="field">
             <label for="login-username">Tên đăng nhập, Email hoặc SĐT <span class="req">*</span></label>
-            <input id="login-username" type="text" placeholder="VD: buyer, email@gmail.com hoặc 0912345678" autocomplete="username">
+            <input id="login-username" type="text" placeholder="Nhập tên đăng nhập, email hoặc số điện thoại" autocomplete="username">
             <div id="login-username-err" class="field-err"></div>
           </div>
           <div class="field">
@@ -975,15 +949,6 @@
             <div id="login-password-err" class="field-err"></div>
           </div>
           <button type="submit" id="login-submit-btn" class="btn">Đăng nhập</button>
-
-          <div class="demo-box">
-            <p class="demo-label">Điền nhanh tài khoản mẫu (mật khẩu: <code>123456</code>)</p>
-            <div class="demo-btns">
-              <button type="button" class="demo-btn" data-demo="buyer">Khách hàng</button>
-              <button type="button" class="demo-btn" data-demo="trungshop">Người bán</button>
-              <button type="button" class="demo-btn" data-demo="admin">Admin</button>
-            </div>
-          </div>
         </form>
 
         <!-- FORM ĐĂNG KÝ -->
@@ -1308,15 +1273,6 @@
       }
     }
 
-    function fillDemoAccount(demoKey) {
-      switchTab('login');
-      $('login-username').value = demoKey;
-      $('login-password').value = '123456';
-      setErr('login-username', '');
-      setErr('login-password', '');
-      hideAlert('form-alert');
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       checkUrlAuthParams();
       renderActiveSession();
@@ -1341,10 +1297,6 @@
           input.type = show ? 'text' : 'password';
           btn.textContent = show ? 'Ẩn' : 'Hiện';
         });
-      });
-
-      document.querySelectorAll('[data-demo]').forEach((el) => {
-        el.addEventListener('click', () => fillDemoAccount(el.dataset.demo));
       });
 
       const urlParams = new URLSearchParams(window.location.search);
